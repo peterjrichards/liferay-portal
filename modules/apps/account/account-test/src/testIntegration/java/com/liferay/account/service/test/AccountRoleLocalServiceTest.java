@@ -50,6 +50,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
+import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.comparator.RoleNameComparator;
@@ -59,6 +60,7 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.junit.Assert;
@@ -361,14 +363,16 @@ public class AccountRoleLocalServiceTest {
 		BaseModelSearchResult<AccountRole> baseModelSearchResult =
 			AccountRoleLocalServiceUtil.searchAccountRoles(
 				_accountEntry1.getCompanyId(),
-				_accountEntry1.getAccountEntryId(), StringPool.BLANK,
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+				new long[] {_accountEntry1.getAccountEntryId()},
+				StringPool.BLANK, null, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				null);
 
 		Assert.assertEquals(2, baseModelSearchResult.getLength());
 
 		baseModelSearchResult = AccountRoleLocalServiceUtil.searchAccountRoles(
-			_accountEntry1.getCompanyId(), _accountEntry1.getAccountEntryId(),
-			keywords, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+			_accountEntry1.getCompanyId(),
+			new long[] {_accountEntry1.getAccountEntryId()}, keywords, null,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 		Assert.assertEquals(1, baseModelSearchResult.getLength());
 
@@ -390,8 +394,8 @@ public class AccountRoleLocalServiceTest {
 		BaseModelSearchResult<AccountRole> baseModelSearchResult =
 			_accountRoleLocalService.searchAccountRoles(
 				accountRole.getCompanyId(),
-				AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT, keyword,
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+				new long[] {AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT}, keyword,
+				null, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 		Assert.assertEquals(1, baseModelSearchResult.getLength());
 
@@ -413,8 +417,8 @@ public class AccountRoleLocalServiceTest {
 		BaseModelSearchResult<AccountRole> baseModelSearchResult =
 			_accountRoleLocalService.searchAccountRoles(
 				accountRole.getCompanyId(),
-				AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT, keyword,
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+				new long[] {AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT}, keyword,
+				null, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 		Assert.assertEquals(1, baseModelSearchResult.getLength());
 
@@ -445,8 +449,8 @@ public class AccountRoleLocalServiceTest {
 			BaseModelSearchResult<AccountRole> baseModelSearchResult =
 				_accountRoleLocalService.searchAccountRoles(
 					accountRole.getCompanyId(),
-					AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT, keyword,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+					new long[] {AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT},
+					keyword, null, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 			Assert.assertEquals(1, baseModelSearchResult.getLength());
 
@@ -472,7 +476,8 @@ public class AccountRoleLocalServiceTest {
 		BaseModelSearchResult<AccountRole> baseModelSearchResult =
 			AccountRoleLocalServiceUtil.searchAccountRoles(
 				_accountEntry1.getCompanyId(),
-				_accountEntry1.getAccountEntryId(), keywords, 0, 2, null);
+				new long[] {_accountEntry1.getAccountEntryId()}, keywords, null,
+				0, 2, null);
 
 		Assert.assertEquals(
 			expectedAccountRoles.toString(), 5,
@@ -484,8 +489,9 @@ public class AccountRoleLocalServiceTest {
 		Assert.assertEquals(expectedAccountRoles.subList(0, 2), accountRoles);
 
 		baseModelSearchResult = AccountRoleLocalServiceUtil.searchAccountRoles(
-			_accountEntry1.getCompanyId(), _accountEntry1.getAccountEntryId(),
-			keywords, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			_accountEntry1.getCompanyId(),
+			new long[] {_accountEntry1.getAccountEntryId()}, keywords, null,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS,
 			new RoleNameComparator(false));
 
 		expectedAccountRoles = ListUtil.sort(
@@ -493,6 +499,31 @@ public class AccountRoleLocalServiceTest {
 
 		Assert.assertEquals(
 			expectedAccountRoles, baseModelSearchResult.getBaseModels());
+	}
+
+	@Test
+	public void testSearchAccountRolesWithParams() throws Exception {
+		AccountRole accountRole1 = _accountRoleLocalService.addAccountRole(
+			TestPropsValues.getUserId(), _accountEntry1.getAccountEntryId(),
+			RandomTestUtil.randomString(), null, null);
+		AccountRole accountRole2 = _accountRoleLocalService.addAccountRole(
+			TestPropsValues.getUserId(), _accountEntry1.getAccountEntryId(),
+			RandomTestUtil.randomString(), null, null);
+
+		_testSearchAccountRolesWithParams(
+			accountRole1.getCompanyId(),
+			new long[] {accountRole1.getAccountEntryId()},
+			LinkedHashMapBuilder.<String, Object>put(
+				"excludedRoleNames", new String[] {accountRole1.getRoleName()}
+			).build(),
+			Collections.singletonList(accountRole2));
+		_testSearchAccountRolesWithParams(
+			accountRole1.getCompanyId(),
+			new long[] {accountRole1.getAccountEntryId()},
+			LinkedHashMapBuilder.<String, Object>put(
+				"excludedRoleIds", new Long[] {accountRole1.getRoleId()}
+			).build(),
+			Collections.singletonList(accountRole2));
 	}
 
 	private AccountRole _addAccountRole(long accountEntryId, String name)
@@ -560,6 +591,21 @@ public class AccountRoleLocalServiceTest {
 		Assert.assertFalse(
 			ArrayUtil.contains(
 				_getRoleIds(_users.get(0)), accountRole.getRoleId()));
+	}
+
+	private void _testSearchAccountRolesWithParams(
+		long companyId, long[] accountEntryIds,
+		LinkedHashMap<String, Object> params,
+		List<AccountRole> expectedAccountRoles) {
+
+		BaseModelSearchResult<AccountRole> accountRoleBaseModelSearchResult =
+			_accountRoleLocalService.searchAccountRoles(
+				companyId, accountEntryIds, null, params, QueryUtil.ALL_POS,
+				QueryUtil.ALL_POS, null);
+
+		Assert.assertEquals(
+			expectedAccountRoles,
+			accountRoleBaseModelSearchResult.getBaseModels());
 	}
 
 	private static Company _company;

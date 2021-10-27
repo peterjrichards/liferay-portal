@@ -32,7 +32,7 @@ public abstract class BaseWorkspace implements Workspace {
 
 	@Override
 	public JSONObject getJSONObject() {
-		return _jsonObject;
+		return jsonObject;
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public abstract class BaseWorkspace implements Workspace {
 
 		_workspaceGitRepositories = new HashMap<>();
 
-		String workspaceRepositoryDirNames = _jsonObject.getString(
+		String workspaceRepositoryDirNames = jsonObject.getString(
 			"workspace_repository_dir_names");
 
 		if (JenkinsResultsParserUtil.isNullOrEmpty(
@@ -94,6 +94,17 @@ public abstract class BaseWorkspace implements Workspace {
 	}
 
 	@Override
+	public WorkspaceGitRepository getWorkspaceGitRepository(
+		String repositoryDirName) {
+
+		if (_workspaceGitRepositories == null) {
+			getWorkspaceGitRepositories();
+		}
+
+		return _workspaceGitRepositories.get(repositoryDirName);
+	}
+
+	@Override
 	public void setUp() {
 		List<Callable<Object>> callables = new ArrayList<>();
 
@@ -105,8 +116,6 @@ public abstract class BaseWorkspace implements Workspace {
 				@Override
 				public Object call() {
 					workspaceGitRepository.setUp();
-
-					workspaceGitRepository.writePropertiesFiles();
 
 					return null;
 				}
@@ -123,7 +132,11 @@ public abstract class BaseWorkspace implements Workspace {
 	}
 
 	@Override
-	public void synchronizeToGitHubDev() {
+	public synchronized void startSynchronizeToGitHubDev() {
+		if (_parallelExecutor != null) {
+			return;
+		}
+
 		List<Callable<Object>> callables = new ArrayList<>();
 
 		for (final WorkspaceGitRepository workspaceGitRepository :
@@ -143,10 +156,17 @@ public abstract class BaseWorkspace implements Workspace {
 			callables.add(callable);
 		}
 
-		ParallelExecutor<Object> parallelExecutor = new ParallelExecutor<>(
+		_parallelExecutor = new ParallelExecutor<>(
 			callables, threadPoolExecutor);
 
-		parallelExecutor.execute();
+		_parallelExecutor.start();
+	}
+
+	@Override
+	public synchronized void synchronizeToGitHubDev() {
+		startSynchronizeToGitHubDev();
+
+		waitForSynchronizeToGitHubDev();
 	}
 
 	@Override
@@ -181,44 +201,62 @@ public abstract class BaseWorkspace implements Workspace {
 		parallelExecutor.execute();
 	}
 
+	@Override
+	public void waitForSynchronizeToGitHubDev() {
+		if (_parallelExecutor == null) {
+			throw new RuntimeException(
+				"Synchronize to GitHub dev did not start");
+		}
+
+		_parallelExecutor.waitFor();
+	}
+
 	protected BaseWorkspace(JSONObject jsonObject) {
-		_jsonObject = jsonObject;
+		this.jsonObject = jsonObject;
 
 		_validateKeys();
 
 		_primaryWorkspaceGitRepository =
 			GitRepositoryFactory.getWorkspaceGitRepository(
-				_jsonObject.getString("primary_repository_name"),
-				_jsonObject.getString("primary_upstream_branch_name"));
+				this.jsonObject.getString("primary_repository_name"),
+				this.jsonObject.getString("primary_upstream_branch_name"));
 	}
 
 	protected BaseWorkspace(
 		String primaryRepositoryName, String upstreamBranchName) {
 
+		this(primaryRepositoryName, upstreamBranchName, null);
+	}
+
+	protected BaseWorkspace(
+		String primaryRepositoryName, String upstreamBranchName,
+		String jobName) {
+
 		_primaryWorkspaceGitRepository =
 			GitRepositoryFactory.getWorkspaceGitRepository(
 				primaryRepositoryName, upstreamBranchName);
 
-		_jsonObject = new JSONObject();
+		jsonObject = new JSONObject();
 
-		_jsonObject.put(
+		jsonObject.put(
 			"primary_repository_dir_name",
 			_primaryWorkspaceGitRepository.getDirectoryName());
-		_jsonObject.put(
+		jsonObject.put(
 			"primary_repository_name",
 			_primaryWorkspaceGitRepository.getName());
-		_jsonObject.put(
+		jsonObject.put(
 			"primary_upstream_branch_name",
 			_primaryWorkspaceGitRepository.getUpstreamBranchName());
 
 		try {
-			_jsonObject.put(
+			jsonObject.put(
 				"workspace_repository_dir_names",
 				JenkinsResultsParserUtil.getProperty(
 					JenkinsResultsParserUtil.getBuildProperties(),
 					"workspace.repository.dir.names",
 					_primaryWorkspaceGitRepository.getName(),
-					_primaryWorkspaceGitRepository.getUpstreamBranchName()));
+					_primaryWorkspaceGitRepository.getUpstreamBranchName(),
+					jobName));
 		}
 		catch (IOException ioException) {
 			throw new RuntimeException(ioException);
@@ -227,22 +265,14 @@ public abstract class BaseWorkspace implements Workspace {
 		_validateKeys();
 	}
 
-	protected WorkspaceGitRepository getWorkspaceGitRepository(
-		String repositoryDirName) {
-
-		if (_workspaceGitRepositories == null) {
-			getWorkspaceGitRepositories();
-		}
-
-		return _workspaceGitRepositories.get(repositoryDirName);
-	}
-
 	protected static final ThreadPoolExecutor threadPoolExecutor =
 		JenkinsResultsParserUtil.getNewThreadPoolExecutor(16, true);
 
+	protected final JSONObject jsonObject;
+
 	private void _validateKeys() {
 		for (String requiredKey : _REQUIRED_KEYS) {
-			if (!_jsonObject.has(requiredKey)) {
+			if (!jsonObject.has(requiredKey)) {
 				throw new RuntimeException("Missing " + requiredKey);
 			}
 		}
@@ -253,7 +283,7 @@ public abstract class BaseWorkspace implements Workspace {
 		"primary_upstream_branch_name", "workspace_repository_dir_names"
 	};
 
-	private final JSONObject _jsonObject;
+	private ParallelExecutor<Object> _parallelExecutor;
 	private final WorkspaceGitRepository _primaryWorkspaceGitRepository;
 	private Map<String, WorkspaceGitRepository> _workspaceGitRepositories;
 

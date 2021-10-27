@@ -142,6 +142,12 @@ public class CTDisplayRendererRegistry {
 		throws PortalException {
 
 		if (ctCollection.getStatus() == WorkflowConstants.STATUS_APPROVED) {
+			if (ctEntry.getChangeType() ==
+					CTConstants.CT_CHANGE_TYPE_DELETION) {
+
+				return ctCollection.getCtCollectionId();
+			}
+
 			return _ctEntryLocalService.getCTRowCTCollectionId(ctEntry);
 		}
 		else if (ctEntry.getChangeType() ==
@@ -154,7 +160,7 @@ public class CTDisplayRendererRegistry {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends BaseModel<T>> CTDisplayRenderer<T> getCTDisplayRenderer(
+	public <T extends BaseModel<?>> CTDisplayRenderer<T> getCTDisplayRenderer(
 		long modelClassNameId) {
 
 		CTDisplayRenderer<T> ctDisplayRenderer =
@@ -212,7 +218,7 @@ public class CTDisplayRendererRegistry {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends BaseModel<T>> CTDisplayRenderer<T> getDefaultRenderer() {
+	public <T extends BaseModel<?>> CTDisplayRenderer<T> getDefaultRenderer() {
 		return (CTDisplayRenderer<T>)_defaultCTDisplayRenderer;
 	}
 

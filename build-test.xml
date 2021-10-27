@@ -284,6 +284,7 @@ module.framework.properties.osgi.console=11312</echo>
 
 					<gradle-execute dir="@{osgi.module.path}" forcedcacheenabled="false" task="deploy">
 						<arg value="clean" />
+						<arg value="-Pnodejs.node.env=development" />
 					</gradle-execute>
 
 					<move
@@ -1489,6 +1490,8 @@ jdbc.counter.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_T
 	</macrodef>
 
 	<macrodef name="get-testcase-property">
+		<attribute default="false" name="append" />
+		<attribute default="," name="delimiter" />
 		<attribute name="property.name" />
 
 		<sequential>
@@ -1534,7 +1537,10 @@ jdbc.counter.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_T
 
 							String propertyValue = project.getProperty(sb.toString());
 
-							if (propertyValue == null) {
+							if (@{append} && (propertyValue != null)) {
+								propertyValue = propertyValueDefault + "@{delimiter}" + propertyValue;
+							}
+							else if (propertyValue == null) {
 								sb = new StringBuilder();
 
 								sb.append(testNamespace);
@@ -2738,7 +2744,7 @@ include-and-override=portal-liferay-online-limit.properties</echo>
 
 	<macrodef name="prepare-portal-elasticsearch-osgi-configuration">
 		<sequential>
-			<echo file="${liferay.home}/osgi/configs/com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConfiguration.config">logExceptionsOnly=B"false"${line.separator}sidecarShutdownTimeout=L"20000"${line.separator}sidecarHttpPort="AUTO"${line.separator}sidecarJVMOptions=["-Xms256m","-Xmx512m"]</echo>
+			<echo file="${liferay.home}/osgi/configs/com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConfiguration.config">additionalConfigurations="http.host:\ _local_,_site_"${line.separator}logExceptionsOnly=B"false"${line.separator}sidecarShutdownTimeout=L"20000"${line.separator}sidecarHttpPort="AUTO"${line.separator}sidecarJVMOptions=["-Xms256m","-Xmx512m"]</echo>
 		</sequential>
 	</macrodef>
 
@@ -4213,7 +4219,10 @@ go</echo>
 					</then>
 				</elseif>
 				<elseif>
-					<equals arg1="@{liferay.portal.bundle}" arg2="7.0.10.16" />
+					<or>
+						<equals arg1="@{liferay.portal.bundle}" arg2="7.0.10.16" />
+						<equals arg1="@{liferay.portal.bundle}" arg2="7.0.10.17" />
+					</or>
 					<then>
 						<var name="app.server.tomcat.version" value="8.5.63" />
 					</then>
@@ -8678,6 +8687,8 @@ jdbc.counter.maxActive=5
 jdbc.counter.maxIdle=0
 jdbc.counter.minIdle=0
 
+enterprise.product.notification.enabled=false
+
 company.security.strangers.verify=false
 
 browser.launcher.url=
@@ -8748,22 +8759,11 @@ dl.store.impl=com.liferay.portal.store.s3.S3Store</echo>
 		</if>
 
 		<if>
-			<and>
-				<equals arg1="${build.profile}" arg2="dxp" />
-				<not>
-					<equals arg1="${commerce.enabled}" arg2="false" />
-				</not>
-				<or>
-					<equals arg1="${commerce.enabled}" arg2="true" />
-					<equals arg1="${env.CI_TEST_SUITE}" arg2="portal-fixpack-release" />
-					<equals arg1="${env.CI_TEST_SUITE}" arg2="portal-hotfix-release" />
-					<equals arg1="${env.CI_TEST_SUITE}" arg2="portal-release" />
-				</or>
-			</and>
+			<equals arg1="${commerce.enabled}" arg2="false" />
 			<then>
 				<echo append="true" file="portal-impl/src/portal-ext.properties">
 
-enterprise.product.commerce.enabled=true</echo>
+enterprise.product.commerce.enabled=false</echo>
 			</then>
 		</if>
 
@@ -9234,37 +9234,6 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 		</if>
 
 		<if>
-			<isset property="browser.chrome.bin.args" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					browser.chrome.bin.args=${browser.chrome.bin.args}
-				</echo>
-			</then>
-		</if>
-
-		<propertycopy from="browser.chrome.bin.file[${browser.chrome.version}]" name="browser.chrome.bin.file" silent="true" />
-
-		<if>
-			<isset property="browser.chrome.bin.file" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					browser.chrome.bin.file=${browser.chrome.bin.file}
-				</echo>
-			</then>
-		</if>
-
-		<propertycopy from="browser.firefox.bin.file[${browser.firefox.version}]" name="browser.firefox.bin.file" silent="true" />
-
-		<if>
-			<isset property="browser.firefox.bin.file" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					browser.firefox.bin.file=${browser.firefox.bin.file}
-				</echo>
-			</then>
-		</if>
-
-		<if>
 			<isset property="click.to.chat.chatwoot.password" />
 			<then>
 				<echo append="true" file="${test.ext.properties.file}">
@@ -9656,6 +9625,7 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 			<then>
 				<echo append="true" file="${test.ext.properties.file}">
 					default.portal.url=${test.url}
+					portal.hostname=${env.HOSTNAME}
 				</echo>
 			</then>
 			<elseif>
@@ -9665,12 +9635,14 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 
 					<echo append="true" file="${test.ext.properties.file}">
 						default.portal.url=${operating.system.host.alias}:8080
+						portal.hostname=${operating.system.host.alias}
 					</echo>
 				</then>
 			</elseif>
 			<else>
 				<echo append="true" file="${test.ext.properties.file}">
 					default.portal.url=http://localhost:8080
+					portal.hostname=localhost
 				</echo>
 			</else>
 		</if>
@@ -9901,6 +9873,9 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 
 	<target name="prepare-selenium-browser">
 		<get-testcase-property property.name="browser.type" />
+		<get-testcase-property property.name="browser.${browser.type}.version" />
+
+		<propertycopy from="browser.${browser.type}.version" name="browser.version" override="true" />
 
 		<echo append="true" file="${test.ext.properties.file}">
 			browser.type=${browser.type}
@@ -9910,6 +9885,28 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 		<if>
 			<equals arg1="${browser.type}" arg2="chrome" />
 			<then>
+				<get-testcase-property append="true" delimiter=" " property.name="browser.chrome.bin.args" />
+
+				<if>
+					<isset property="browser.chrome.bin.args" />
+					<then>
+						<echo append="true" file="${test.ext.properties.file}">
+							browser.chrome.bin.args=${browser.chrome.bin.args}
+						</echo>
+					</then>
+				</if>
+
+				<propertycopy from="browser.chrome.bin.file[${browser.chrome.version}]" name="browser.chrome.bin.file" silent="true" />
+
+				<if>
+					<isset property="browser.chrome.bin.file" />
+					<then>
+						<echo append="true" file="${test.ext.properties.file}">
+							browser.chrome.bin.file=${browser.chrome.bin.file}
+						</echo>
+					</then>
+				</if>
+
 				<prepare-chrome-driver />
 
 				<echo append="true" file="${test.ext.properties.file}">
@@ -9938,6 +9935,17 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 				<equals arg1="${browser.type}" arg2="firefox" />
 			</and>
 			<then>
+				<propertycopy from="browser.firefox.bin.file[${browser.firefox.version}]" name="browser.firefox.bin.file" silent="true" />
+
+				<if>
+					<isset property="browser.firefox.bin.file" />
+					<then>
+						<echo append="true" file="${test.ext.properties.file}">
+							browser.firefox.bin.file=${browser.firefox.bin.file}
+						</echo>
+					</then>
+				</if>
+
 				<prepare-gecko-driver />
 
 				<echo append="true" file="${test.ext.properties.file}">

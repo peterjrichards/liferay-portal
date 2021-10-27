@@ -74,14 +74,14 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
-		task ("Pause for 30 seconds") {
+		task ("Close Sessions") {
 			ACUtils.closeAllSessionsAndWait();
 		}
 

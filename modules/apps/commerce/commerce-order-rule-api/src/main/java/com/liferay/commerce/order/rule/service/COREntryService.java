@@ -65,6 +65,14 @@ public interface COREntryService extends BaseService {
 	public COREntry deleteCOREntry(long corEntryId) throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public COREntry fetchByExternalReferenceCode(
+			long companyId, String externalReferenceCode)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public COREntry fetchCOREntry(long corEntryId) throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<COREntry> getCOREntries(
 			long companyId, boolean active, int start, int end)
 		throws PortalException;
@@ -78,6 +86,9 @@ public interface COREntryService extends BaseService {
 	public List<COREntry> getCOREntries(
 			long companyId, String type, int start, int end)
 		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public COREntry getCOREntry(long corEntryId) throws PortalException;
 
 	/**
 	 * Returns the OSGi service identifier.
@@ -94,6 +105,10 @@ public interface COREntryService extends BaseService {
 			int expirationDateHour, int expirationDateMinute,
 			boolean neverExpire, String name, int priority, String typeSettings,
 			ServiceContext serviceContext)
+		throws PortalException;
+
+	public COREntry updateCOREntryExternalReferenceCode(
+			String externalReferenceCode, long corEntryId)
 		throws PortalException;
 
 }

@@ -120,11 +120,11 @@ definition {
 			userLoginEmailAddress = "ac@liferay.com",
 			userLoginFullName = "ac ac");
 
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePage(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title",
 			pageName = "AC Page",
 			siteName = "Site Name");
-
-		BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -175,11 +175,8 @@ definition {
 		}
 
 		task ("Sign in with the new user to visit the site pages") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "ac@liferay.com",
-				userLoginFullName = "ac ac");
-
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "ac@liferay.com",
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -207,8 +204,6 @@ definition {
 		task ("Delete the segment via Segment List") {
 			ACNavigation.goToSegments();
 
-			Pause(locator1 = "3000");
-
 			ACSegments.deleteSegmentViaSegmentListInlineButton(segmentName = "New Segment Test");
 		}
 
@@ -234,7 +229,7 @@ definition {
 			userLoginEmailAddress = "ac@liferay.com",
 			userLoginFullName = "ac ac");
 
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePage(
 			pageName = "AC Page",
 			siteName = "Site Name");
 
@@ -323,7 +318,7 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -430,7 +425,7 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}

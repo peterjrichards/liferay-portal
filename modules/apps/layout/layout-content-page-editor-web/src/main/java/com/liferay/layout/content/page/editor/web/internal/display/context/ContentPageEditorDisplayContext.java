@@ -334,9 +334,6 @@ public class ContentPageEditorDisplayContext {
 				getFragmentEntryActionURL(
 					"/layout_content_page_editor/edit_fragment_entry_link")
 			).put(
-				"fragmentsHidingEnabled",
-				_ffLayoutContentPageEditorConfiguration.fragmentsHidingEnabled()
-			).put(
 				"frontendTokens",
 				() -> {
 					LayoutSet layoutSet =
@@ -538,7 +535,9 @@ public class ContentPageEditorDisplayContext {
 				() -> {
 					Layout layout = themeDisplay.getLayout();
 
-					LayoutSet layoutSet = layout.getLayoutSet();
+					LayoutSet layoutSet =
+						LayoutSetLocalServiceUtil.fetchLayoutSet(
+							themeDisplay.getSiteGroupId(), false);
 
 					if (Validator.isNull(layout.getThemeId()) ||
 						Objects.equals(
@@ -560,6 +559,10 @@ public class ContentPageEditorDisplayContext {
 				"styleBooks", _getStyleBooks()
 			).put(
 				"themeColorsCssClasses", _getThemeColorsCssClasses()
+			).put(
+				"tokenOptimizationEnabled",
+				_ffLayoutContentPageEditorConfiguration.
+					tokenOptimizationEnabled()
 			).put(
 				"unmarkItemForDeletionURL",
 				getFragmentEntryActionURL(
@@ -1880,8 +1883,6 @@ public class ContentPageEditorDisplayContext {
 	}
 
 	private JSONObject _getMasterLayoutJSONObject() {
-		Layout layout = themeDisplay.getLayout();
-
 		return JSONUtil.put(
 			"masterLayoutData",
 			Optional.ofNullable(
@@ -1892,7 +1893,12 @@ public class ContentPageEditorDisplayContext {
 				null
 			)
 		).put(
-			"masterLayoutPlid", layout.getMasterLayoutPlid()
+			"masterLayoutPlid",
+			() -> {
+				Layout layout = themeDisplay.getLayout();
+
+				return String.valueOf(layout.getMasterLayoutPlid());
+			}
 		);
 	}
 

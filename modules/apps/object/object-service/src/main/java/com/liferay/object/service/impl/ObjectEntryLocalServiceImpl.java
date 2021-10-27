@@ -84,6 +84,7 @@ import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.search.document.Document;
@@ -143,7 +144,7 @@ public class ObjectEntryLocalServiceImpl
 
 		_validateGroupId(groupId, objectDefinition.getScope());
 
-		_validateListTypeEntryValue(objectDefinitionId, values);
+		_validateValues(objectDefinitionId, values);
 
 		long objectEntryId = counterLocalService.increment();
 
@@ -676,6 +677,8 @@ public class ObjectEntryLocalServiceImpl
 
 		ObjectEntry objectEntry = objectEntryPersistence.findByPrimaryKey(
 			objectEntryId);
+
+		_validateValues(objectEntry.getObjectDefinitionId(), values);
 
 		objectEntry.setTransientValues(objectEntry.getValues());
 
@@ -1495,48 +1498,40 @@ public class ObjectEntryLocalServiceImpl
 		}
 	}
 
-	private void _validateListTypeEntryValue(
-			long objectDefinitionId, Map<String, Serializable> values)
-		throws PortalException {
+	private void _validateListTypeEntriesValues(
+			Map<String, Serializable> values,
+			Map.Entry<String, Serializable> entry, ObjectField objectField)
+		throws ObjectEntryValuesException {
 
-		for (Map.Entry<String, Serializable> entry : values.entrySet()) {
-			ObjectField objectField = null;
+		List<ListTypeEntry> listTypeEntries =
+			_listTypeEntryLocalService.getListTypeEntries(
+				objectField.getListTypeDefinitionId());
 
-			try {
-				objectField = _objectFieldLocalService.getObjectField(
-					objectDefinitionId, entry.getKey());
-			}
-			catch (NoSuchObjectFieldException noSuchObjectFieldException) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						noSuchObjectFieldException, noSuchObjectFieldException);
-				}
+		Stream<ListTypeEntry> stream = listTypeEntries.stream();
 
-				continue;
-			}
+		String value = _getValue(String.valueOf(values.get(entry.getKey())));
 
-			if (objectField.getListTypeDefinitionId() == 0) {
-				continue;
-			}
+		if ((!value.isEmpty() || objectField.isRequired()) &&
+			!stream.anyMatch(
+				listTypeEntry -> Objects.equals(
+					listTypeEntry.getKey(), value))) {
 
-			List<ListTypeEntry> listTypeEntries =
-				_listTypeEntryLocalService.getListTypeEntries(
-					objectField.getListTypeDefinitionId());
+			throw new ObjectEntryValuesException(
+				"Object field name \"" + entry.getKey() +
+					"\" is not mapped to a valid list type entry");
+		}
+	}
 
-			Stream<ListTypeEntry> stream = listTypeEntries.stream();
+	private void _validateObjectFieldStringTypeLength(
+			Map.Entry<String, Serializable> entry)
+		throws ObjectEntryValuesException {
 
-			String value = _getValue(
-				String.valueOf(values.get(entry.getKey())));
+		String value = (String)entry.getValue();
 
-			if ((!value.isEmpty() || objectField.isRequired()) &&
-				!stream.anyMatch(
-					listTypeEntry -> Objects.equals(
-						listTypeEntry.getKey(), value))) {
-
-				throw new ObjectEntryValuesException(
-					"Object field name \"" + entry.getKey() +
-						"\" is not mapped to a valid list type entry");
-			}
+		if (value.length() > 280) {
+			throw new ObjectEntryValuesException(
+				"Object field \"" + entry.getKey() +
+					"\" value exceeds 280 characters.");
 		}
 	}
 
@@ -1616,6 +1611,36 @@ public class ObjectEntryLocalServiceImpl
 					"One to one constraint violation for ",
 					dynamicObjectDefinitionTable.getTableName(), ".",
 					dbColumnName, " with value ", dbColumnValue));
+		}
+	}
+
+	private void _validateValues(
+			long objectDefinitionId, Map<String, Serializable> values)
+		throws PortalException {
+
+		for (Map.Entry<String, Serializable> entry : values.entrySet()) {
+			ObjectField objectField = null;
+
+			try {
+				objectField = _objectFieldLocalService.getObjectField(
+					objectDefinitionId, entry.getKey());
+			}
+			catch (NoSuchObjectFieldException noSuchObjectFieldException) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(
+						noSuchObjectFieldException, noSuchObjectFieldException);
+				}
+
+				continue;
+			}
+
+			if (StringUtil.equals(objectField.getType(), "String")) {
+				_validateObjectFieldStringTypeLength(entry);
+			}
+
+			if (objectField.getListTypeDefinitionId() != 0) {
+				_validateListTypeEntriesValues(values, entry, objectField);
+			}
 		}
 	}
 

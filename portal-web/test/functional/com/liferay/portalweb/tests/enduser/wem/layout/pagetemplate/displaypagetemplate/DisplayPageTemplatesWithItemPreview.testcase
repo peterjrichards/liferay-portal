@@ -369,11 +369,10 @@ definition {
 				fragmentName = "Card",
 				id = "link");
 
-			AssertVisible(
+			ContentPages.viewFragmentImage(
+				fragmentName = "card",
 				id = "img",
-				key_image = "/images/",
-				key_imageDescription = "",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_IMAGE_PROPERTIES");
+				image = "/images/");
 		}
 
 		task ("Select the None via preview item selector") {
@@ -390,11 +389,10 @@ definition {
 		}
 
 		task ("View image placeholder shown in Card fragment") {
-			AssertVisible(
+			ContentPages.viewFragmentImage(
+				fragmentName = "card",
 				id = "img",
-				key_image = "data:image/png",
-				key_imageDescription = "",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_IMAGE_PROPERTIES");
+				image = "data:image/png");
 		}
 
 		task ("Open the Preview modal") {
@@ -411,17 +409,15 @@ definition {
 		task ("View mapped content shown in Card fragment") {
 			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-			AssertVisible(
+			ContentPages.viewFragmentText(
+				fragmentName = "card",
 				id = "link",
-				key_position = "1",
-				key_text = "Category Name",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_AT_VIEW_MODE");
+				text = "Category Name");
 
-			AssertVisible(
+			ContentPages.viewFragmentImage(
+				fragmentName = "card",
 				id = "img",
-				key_image = "/images/",
-				key_imageDescription = "",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_IMAGE_PROPERTIES");
+				image = "/images/");
 
 			SelectFrameTop();
 		}
@@ -436,19 +432,17 @@ definition {
 		task ("View Go Somewhere shown in Card fragment") {
 			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-			AssertVisible(
+			ContentPages.viewFragmentText(
+				fragmentName = "card",
 				id = "link",
-				key_position = "1",
-				key_text = "Go Somewhere",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_AT_VIEW_MODE");
+				text = "Go Somewhere");
 		}
 
 		task ("View image placeholder shown in Card fragment") {
-			AssertVisible(
+			ContentPages.viewFragmentImage(
+				fragmentName = "card",
 				id = "img",
-				key_image = "data:image/png",
-				key_imageDescription = "",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_IMAGE_PROPERTIES");
+				image = "data:image/png");
 		}
 
 		task ("Close the iframe") {
@@ -469,11 +463,10 @@ definition {
 		}
 
 		task ("View image placeholder shown in Card fragment") {
-			AssertVisible(
+			ContentPages.viewFragmentImage(
+				fragmentName = "card",
 				id = "img",
-				key_image = "data:image/png",
-				key_imageDescription = "",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_IMAGE_PROPERTIES");
+				image = "data:image/png");
 		}
 
 		task ("Select the None via preview item selector") {
@@ -490,11 +483,10 @@ definition {
 		}
 
 		task ("View image placeholder shown in Card fragment") {
-			AssertVisible(
+			ContentPages.viewFragmentImage(
+				fragmentName = "card",
 				id = "img",
-				key_image = "data:image/png",
-				key_imageDescription = "",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_IMAGE_PROPERTIES");
+				image = "data:image/png");
 		}
 
 		task ("Open the Preview modal") {
@@ -511,19 +503,17 @@ definition {
 		task ("View the subcategory name shown in Card fragment") {
 			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-			AssertVisible(
+			ContentPages.viewFragmentText(
+				fragmentName = "card",
 				id = "link",
-				key_position = "1",
-				key_text = "Subcategory Name",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_AT_VIEW_MODE");
+				text = "Subcategory Name");
 		}
 
 		task ("View image placeholder shown in Card fragment") {
-			AssertVisible(
+			ContentPages.viewFragmentImage(
+				fragmentName = "card",
 				id = "img",
-				key_image = "data:image/png",
-				key_imageDescription = "",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_IMAGE_PROPERTIES");
+				image = "data:image/png");
 
 			SelectFrameTop();
 		}
@@ -538,19 +528,17 @@ definition {
 		task ("View the subcategory name shown in Card fragment") {
 			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-			AssertVisible(
+			ContentPages.viewFragmentText(
+				fragmentName = "card",
 				id = "link",
-				key_position = "1",
-				key_text = "Go Somewhere",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_AT_VIEW_MODE");
+				text = "Go Somewhere");
 		}
 
 		task ("View image placeholder shown in Card fragment") {
-			AssertVisible(
+			ContentPages.viewFragmentImage(
+				fragmentName = "card",
 				id = "img",
-				key_image = "data:image/png",
-				key_imageDescription = "",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_IMAGE_PROPERTIES");
+				image = "data:image/png");
 		}
 	}
 
@@ -620,10 +608,9 @@ definition {
 		}
 
 		task ("View the no items message is shown in Collection Display") {
-			AssertVisible(
-				key_fragmentName = "Collection Display",
-				key_message = "There are no items to display.",
-				locator1 = "Fragment#NOT_COLLECTION_SELECTED_MESSAGE");
+			PageEditor.viewFragmentMessageInfo(
+				fragmentName = "Collection Display",
+				messageInfo = "There are no items to display.");
 		}
 
 		task ("Select the category via preview item selector") {
@@ -653,10 +640,9 @@ definition {
 		}
 
 		task ("View the no items message is shown in Collection Display") {
-			AssertVisible(
-				key_fragmentName = "Collection Display",
-				key_message = "There are no items to display.",
-				locator1 = "Fragment#NOT_COLLECTION_SELECTED_MESSAGE");
+			PageEditor.viewFragmentMessageInfo(
+				fragmentName = "Collection Display",
+				messageInfo = "There are no items to display.");
 		}
 
 		task ("Open the Preview modal") {
@@ -700,8 +686,8 @@ definition {
 
 			AssertElementNotPresent(
 				key_fragmentName = "Collection Display",
-				key_message = "There are no items to display.",
-				locator1 = "Fragment#NOT_COLLECTION_SELECTED_MESSAGE");
+				key_messageInfo = "There are no items to display.",
+				locator1 = "Fragment#NO_COLLECTION_SELECTED_MESSAGE");
 		}
 	}
 
@@ -797,10 +783,10 @@ definition {
 		task ("View title of web content shown in Heading fragment") {
 			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-			AssertTextEquals(
-				key_fragmentName = "heading",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Web Content Title");
+			ContentPages.viewFragmentText(
+				fragmentName = "heading",
+				id = "element-text",
+				text = "Web Content Title");
 
 			SelectFrameTop();
 		}
@@ -815,10 +801,10 @@ definition {
 		task ("View Heading Example shown in Heading fragment") {
 			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-			AssertTextEquals(
-				key_fragmentName = "heading",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Heading Example");
+			ContentPages.viewFragmentText(
+				fragmentName = "heading",
+				id = "element-text",
+				text = "Heading Example");
 		}
 
 		task ("Add the second display page template for Blogs Entry") {
@@ -885,10 +871,10 @@ definition {
 		task ("View title of blogs entry shown in Button fragment") {
 			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-			AssertTextEquals(
-				key_fragmentName = "button",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Blogs Entry Title");
+			ContentPages.viewFragmentText(
+				fragmentName = "button",
+				id = "link",
+				text = "Blogs Entry Title");
 
 			SelectFrameTop();
 		}
@@ -903,10 +889,10 @@ definition {
 		task ("View Go Somewhere shown in Button fragment") {
 			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-			AssertTextEquals(
-				key_fragmentName = "button",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Go Somewhere");
+			ContentPages.viewFragmentText(
+				fragmentName = "button",
+				id = "link",
+				text = "Go Somewhere");
 		}
 
 		task ("Add the third display page template for Document") {
@@ -1231,7 +1217,7 @@ definition {
 					key_entryContent = "${categoryName}",
 					key_fragmentName = "Collection Display",
 					key_rowPosition = "${n}",
-					locator1 = "Fragment#CONTENT_DISPLAY_FRAGMENT_BODY");
+					locator1 = "Fragment#CONTENT_DISPLAY_FRAGMENT_CONTENT");
 
 				var n = ${n} + 1;
 			}
@@ -1244,10 +1230,7 @@ definition {
 		}
 
 		task ("View the default info shown in Content Display") {
-			AssertVisible(
-				key_fragmentName = "Content Display",
-				key_messageIfo = "The selected content will be shown here.",
-				locator1 = "Fragment#MESSAGE_INFO");
+			PageEditor.viewFragmentMessageInfo(fragmentName = "Content Display");
 		}
 
 		task ("Open the Preview modal") {
@@ -1356,7 +1339,7 @@ definition {
 					key_entryContent = "${categoryName}",
 					key_fragmentName = "Collection Display",
 					key_rowPosition = "${n}",
-					locator1 = "Fragment#CONTENT_DISPLAY_FRAGMENT_BODY");
+					locator1 = "Fragment#CONTENT_DISPLAY_FRAGMENT_CONTENT");
 
 				var n = ${n} + 1;
 			}
@@ -1369,10 +1352,7 @@ definition {
 		}
 
 		task ("View the default info shown in Content Display") {
-			AssertVisible(
-				key_fragmentName = "Content Display",
-				key_messageIfo = "The selected content will be shown here.",
-				locator1 = "Fragment#MESSAGE_INFO");
+			PageEditor.viewFragmentMessageInfo(fragmentName = "Content Display");
 		}
 
 		task ("Open the Preview modal") {
@@ -1482,7 +1462,7 @@ definition {
 					key_entryContent = "${categoryName}",
 					key_fragmentName = "Collection Display",
 					key_rowPosition = "${n}",
-					locator1 = "Fragment#CONTENT_DISPLAY_FRAGMENT_BODY");
+					locator1 = "Fragment#CONTENT_DISPLAY_FRAGMENT_CONTENT");
 
 				var n = ${n} + 1;
 			}
@@ -1495,10 +1475,7 @@ definition {
 		}
 
 		task ("View the default info shown in Content Display") {
-			AssertVisible(
-				key_fragmentName = "Content Display",
-				key_messageIfo = "The selected content will be shown here.",
-				locator1 = "Fragment#MESSAGE_INFO");
+			PageEditor.viewFragmentMessageInfo(fragmentName = "Content Display");
 		}
 
 		task ("Open the Preview modal") {

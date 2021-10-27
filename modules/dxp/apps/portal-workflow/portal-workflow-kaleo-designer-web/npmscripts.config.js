@@ -12,7 +12,10 @@
 module.exports = {
 	build: {
 		bundler: {
-			ignore: ['**/*'],
+			exclude: {
+				lodash: false,
+			},
+			ignore: ['**/designer/js/legacy/*.js'],
 		},
 	},
 };

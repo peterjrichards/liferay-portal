@@ -16,6 +16,7 @@ package com.liferay.search.experiences.rest.client.serdes.v1_0;
 
 import com.liferay.search.experiences.rest.client.dto.v1_0.Clause;
 import com.liferay.search.experiences.rest.client.dto.v1_0.QueryEntry;
+import com.liferay.search.experiences.rest.client.dto.v1_0.Rescore;
 import com.liferay.search.experiences.rest.client.json.BaseJSONParser;
 
 import java.util.Iterator;
@@ -75,6 +76,16 @@ public class QueryEntrySerDes {
 			sb.append("]");
 		}
 
+		if (queryEntry.getCondition() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"condition\": ");
+
+			sb.append(String.valueOf(queryEntry.getCondition()));
+		}
+
 		if (queryEntry.getEnabled() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -83,6 +94,46 @@ public class QueryEntrySerDes {
 			sb.append("\"enabled\": ");
 
 			sb.append(queryEntry.getEnabled());
+		}
+
+		if (queryEntry.getPostFilterClauses() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"postFilterClauses\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < queryEntry.getPostFilterClauses().length; i++) {
+				sb.append(String.valueOf(queryEntry.getPostFilterClauses()[i]));
+
+				if ((i + 1) < queryEntry.getPostFilterClauses().length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
+		if (queryEntry.getRescores() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"rescores\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < queryEntry.getRescores().length; i++) {
+				sb.append(String.valueOf(queryEntry.getRescores()[i]));
+
+				if ((i + 1) < queryEntry.getRescores().length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
 		}
 
 		sb.append("}");
@@ -110,11 +161,34 @@ public class QueryEntrySerDes {
 			map.put("clauses", String.valueOf(queryEntry.getClauses()));
 		}
 
+		if (queryEntry.getCondition() == null) {
+			map.put("condition", null);
+		}
+		else {
+			map.put("condition", String.valueOf(queryEntry.getCondition()));
+		}
+
 		if (queryEntry.getEnabled() == null) {
 			map.put("enabled", null);
 		}
 		else {
 			map.put("enabled", String.valueOf(queryEntry.getEnabled()));
+		}
+
+		if (queryEntry.getPostFilterClauses() == null) {
+			map.put("postFilterClauses", null);
+		}
+		else {
+			map.put(
+				"postFilterClauses",
+				String.valueOf(queryEntry.getPostFilterClauses()));
+		}
+
+		if (queryEntry.getRescores() == null) {
+			map.put("rescores", null);
+		}
+		else {
+			map.put("rescores", String.valueOf(queryEntry.getRescores()));
 		}
 
 		return map;
@@ -150,9 +224,39 @@ public class QueryEntrySerDes {
 						));
 				}
 			}
+			else if (Objects.equals(jsonParserFieldName, "condition")) {
+				if (jsonParserFieldValue != null) {
+					queryEntry.setCondition(
+						ConditionSerDes.toDTO((String)jsonParserFieldValue));
+				}
+			}
 			else if (Objects.equals(jsonParserFieldName, "enabled")) {
 				if (jsonParserFieldValue != null) {
 					queryEntry.setEnabled((Boolean)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "postFilterClauses")) {
+				if (jsonParserFieldValue != null) {
+					queryEntry.setPostFilterClauses(
+						Stream.of(
+							toStrings((Object[])jsonParserFieldValue)
+						).map(
+							object -> ClauseSerDes.toDTO((String)object)
+						).toArray(
+							size -> new Clause[size]
+						));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "rescores")) {
+				if (jsonParserFieldValue != null) {
+					queryEntry.setRescores(
+						Stream.of(
+							toStrings((Object[])jsonParserFieldValue)
+						).map(
+							object -> RescoreSerDes.toDTO((String)object)
+						).toArray(
+							size -> new Rescore[size]
+						));
 				}
 			}
 		}

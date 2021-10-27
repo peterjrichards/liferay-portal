@@ -87,12 +87,14 @@ public class EditImportBatchPlannerPlanMVCActionCommand
 	private void _addBatchPlannerPlan(ActionRequest actionRequest)
 		throws Exception {
 
-		String name = ParamUtil.getString(actionRequest, "name");
 		boolean export = ParamUtil.getBoolean(actionRequest, "export");
 		String externalType = ParamUtil.getString(
 			actionRequest, "externalType");
 		String internalClassName = ParamUtil.getString(
 			actionRequest, "internalClassName");
+		String name = ParamUtil.getString(actionRequest, "name");
+		String taskItemDelegateName = ParamUtil.getString(
+			actionRequest, "taskItemDelegateName");
 
 		UploadPortletRequest uploadPortletRequest =
 			_portal.getUploadPortletRequest(actionRequest);
@@ -106,11 +108,11 @@ public class EditImportBatchPlannerPlanMVCActionCommand
 			BatchPlannerPlan batchPlannerPlan =
 				_batchPlannerPlanService.addBatchPlannerPlan(
 					export, externalType, importFileURI.toString(),
-					internalClassName, name, false);
+					internalClassName, name, taskItemDelegateName, false);
 
 			_batchPlannerPolicyService.addBatchPlannerPolicy(
 				batchPlannerPlan.getBatchPlannerPlanId(), "containsHeaders",
-				_getValue(actionRequest));
+				_getCheckboxValue(actionRequest, "containsHeaders"));
 
 			List<BatchPlannerMapping> batchPlannerMappings =
 				_getBatchPlannerMappings(actionRequest);
@@ -183,8 +185,8 @@ public class EditImportBatchPlannerPlanMVCActionCommand
 		return batchPlannerMappings;
 	}
 
-	private String _getValue(ActionRequest actionRequest) {
-		String value = actionRequest.getParameter("containsHeaders");
+	private String _getCheckboxValue(ActionRequest actionRequest, String name) {
+		String value = actionRequest.getParameter(name);
 
 		if (value == null) {
 			return Boolean.FALSE.toString();

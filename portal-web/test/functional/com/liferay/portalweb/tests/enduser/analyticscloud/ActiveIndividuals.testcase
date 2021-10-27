@@ -65,15 +65,11 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			for (var n : list "1,2,3,4") {
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				DMNavigator.gotoDocumentCP(dmDocumentTitle = "DM AC Title");
-
-				Pause(locator1 = "5000");
-			}
+			ACUtils.navigateToSitePage(
+				actionType = "View DM",
+				documentTitleList = "DM AC Title,DM AC Title,DM AC Title",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close all sessions") {
@@ -113,11 +109,10 @@ definition {
 
 		task ("Assert chart popover date formatted") {
 			var formattedDate = ACIndividualsDashboard.getChartPopoverDate();
-			var formattedDate = StringUtil.extractFirst("${formattedDate}",",");
 
 			ACUtils.assertDatePattern(
 				date = "${formattedDate}",
-				format = "MMM d");
+				format = "yyyy MMM dd");
 		}
 	}
 
@@ -145,13 +140,11 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			for (var n : list "1,2,3,4") {
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				DMNavigator.gotoDocumentCP(dmDocumentTitle = "DM AC Title");
-			}
+			ACUtils.navigateToSitePage(
+				actionType = "View DM",
+				documentTitleList = "DM AC Title,DM AC Title,DM AC Title",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close all sessions") {
@@ -243,11 +236,11 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View DM",
+				documentTitleList = "DM AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			DMNavigator.gotoDocumentCP(dmDocumentTitle = "DM AC Title");
 		}
 
 		task ("Close all sessions") {
@@ -292,10 +285,6 @@ definition {
 
 		ACDXPSettings.syncNewContactData();
 
-		Navigator.openURL();
-
-		Pause(locator1 = "5000");
-
 		User.logoutAndLoginPG(
 			userLoginEmailAddress = "userea@liferay.com",
 			userLoginFullName = "userfn userln");
@@ -332,15 +321,11 @@ definition {
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var n : list "1,2,3") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			DMNavigator.gotoDocumentCP(dmDocumentTitle = "DM AC Title");
-
-			Pause(locator1 = "5000");
-		}
+		ACUtils.navigateToSitePage(
+			actionType = "View DM",
+			documentTitleList = "DM AC Title,DM AC Title,DM AC Title,DM AC Title",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -374,13 +359,11 @@ definition {
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var n : list "1,2,3,4") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			DMNavigator.gotoDocumentCP(dmDocumentTitle = "DM AC Title");
-		}
+		ACUtils.navigateToSitePage(
+			actionType = "View DM",
+			documentTitleList = "DM AC Title,DM AC Title,DM AC Title,DM AC Title",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -422,13 +405,11 @@ definition {
 			userLoginEmailAddress = "ac@liferay.com",
 			userLoginFullName = "ac ac");
 
-		for (var n : list "1,2,3,4") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			DMNavigator.gotoDocumentCP(dmDocumentTitle = "DM AC Title");
-		}
+		ACUtils.navigateToSitePage(
+			actionType = "View DM",
+			documentTitleList = "DM AC Title,DM AC Title,DM AC Title,DM AC Title",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 

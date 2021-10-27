@@ -1,13 +1,13 @@
 {
 	"dependencies": {
-		"@clayui/alert": "3.32.0",
-		"@clayui/button": "3.32.0",
-		"@clayui/drop-down": "3.36.0",
-		"@clayui/form": "3.36.0",
-		"@clayui/icon": "3.32.0",
-		"@clayui/layout": "3.32.0",
-		"@clayui/link": "3.32.0",
-		"@clayui/loading-indicator": "3.32.0",
+		"@clayui/alert": "3.38.0",
+		"@clayui/button": "3.38.0",
+		"@clayui/drop-down": "3.38.0",
+		"@clayui/form": "3.38.0",
+		"@clayui/icon": "3.38.0",
+		"@clayui/layout": "3.38.0",
+		"@clayui/link": "3.38.0",
+		"@clayui/loading-indicator": "3.38.0",
 		"frontend-editor-ckeditor-web": "*",
 		"frontend-js-web": "*",
 		"prop-types": "15.7.2",
@@ -20,5 +20,5 @@
 		"format": "liferay-npm-scripts fix",
 		"test": "liferay-npm-scripts test"
 	},
-	"version": "2.0.18"
+	"version": "2.0.21"
 }

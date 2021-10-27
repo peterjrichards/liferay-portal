@@ -63,18 +63,22 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8483 | Test Summary: Add members from different pages"
 	@priority = "3"
 	test CanAddMembersFromDifferentPages {
+		var usernameList = "user1,user2,user3,user4,user5";
+
+		var emailList = "userea@liferay.com,user1@liferay.com,user2@liferay.com,user3@liferay.com,user4@liferay.com,user5@liferay.com";
+
 		task ("Add 5 more new users") {
-			for (var n : list "1,2,3,4,5") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "user${n}@liferay.com",
-					userFirstName = "user${n}",
-					userLastName = "user${n}",
-					userScreenName = "user${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 
 				JSONUser.setFirstPassword(
 					agreeToTermsAndAnswerReminderQuery = "true",
 					requireReset = "false",
-					userEmailAddress = "user${n}@liferay.com");
+					userEmailAddress = "${name}@liferay.com");
 			}
 		}
 
@@ -87,25 +91,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "userea,user1,user2,user3,user4,user5") {
-				if ("${username}" == "userea") {
-					var fullName = "userfn userln";
-				}
-
-				else {
-					var fullName = "${username} ${username}";
-				}
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "3000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -185,7 +174,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -241,7 +230,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 
@@ -311,25 +300,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "userea,user1") {
-				if ("${username}" == "userea") {
-					var fullName = "userfn userln";
-				}
-
-				else {
-					var fullName = "${username} ${username}";
-				}
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "3000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "userea@liferay.com,user1@liferay.com",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions and wait for 30 seconds") {
@@ -396,6 +370,8 @@ definition {
 	test CanCreateDynamicSegmentWithIndividualCriteriaUsesBooleanAndDoesNotContain {
 		var usernameList = "user1,user2,user3";
 
+		var emailList = "user1@liferay.com,user2@liferay.com,user3@liferay.com";
+
 		task ("Add three more new users") {
 			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
@@ -420,19 +396,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "${usernameList}") {
-				var fullName = "${username} ${username}";
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "3000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions and wait for 30 seconds") {
@@ -521,6 +488,8 @@ definition {
 	test CanCreateDynamicSegmentWithIndividualCriteriaUsesIsKnownAndIsNot {
 		var usernameList = "user1,user2,user3";
 
+		var emailList = "user1@liferay.com,user2@liferay.com,user3@liferay.com";
+
 		var membershipList = "user1 user1,user3 user3";
 
 		task ("Add three more new users") {
@@ -547,19 +516,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "${usernameList}") {
-				var fullName = "${username} ${username}";
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "3000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions and wait for 30 seconds") {
@@ -656,7 +616,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -710,7 +670,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -757,6 +717,8 @@ definition {
 	test CanCreateNestedCriteria {
 		var usernameList = "userea,user1,test";
 
+		var emailList = "userea@liferay.com,user1@liferay.com,test@liferay.com";
+
 		var fullNameList = "userfn userln,Test Test,user1 user1";
 
 		task ("Add one more user with a given birth date") {
@@ -784,29 +746,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "${usernameList}") {
-				if ("${username}" == "userea") {
-					var fullName = "userfn userln";
-				}
-
-				else if ("${username}" == "test") {
-					var fullName = "Test Test";
-				}
-
-				else {
-					var fullName = "${username} ${username}";
-				}
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "3000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions and wait for 30 seconds") {
@@ -924,12 +867,11 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-7962 | Test Summary: Create a segment that contains anonymous individuals"
 	@priority = "5"
 	test CanCreateSegmentWithAnonymousIndividuals {
-		property portal.upstream = "quarantine";
-
-		// AC Refactor: data doesn't appear on time
-		// AC Refactor ticket: LRAC-9363
-
 		var usernameList = "ac,liferay,dxp";
+
+		var emailList = "ac@liferay.com,liferay@liferay.com,dxp@liferay.com";
+
+		var nameList = "ac ac,liferay liferay,dxp dxp";
 
 		task ("Get site assigned property name") {
 			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
@@ -951,17 +893,10 @@ definition {
 		}
 
 		task ("Login with users and view the site page") {
-			for (var username : list "${usernameList}") {
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${username} ${username}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -1004,18 +939,14 @@ definition {
 			ACSegments.accessSegment(segmentName = "Dynamic Segment Test");
 		}
 
-		task ("View segment membership numbers") {
-
-			// AC Refactor: data doesn't appear on time
-
-			ACSegments.viewSegmentMembershipLegendNumbers(
-				anonymousNumber = "3",
-				knownNumber = "0",
-				totalNumber = "3");
-		}
-
 		task ("View include anonymous label") {
 			ACSegments.viewIncludeAnonymousLabel();
+		}
+
+		task ("Switch tab to membership and check the membership list") {
+			ACNavigation.switchTab(tabName = "Membership");
+
+			ACUtils.viewNameList(nameList = "${nameList}");
 		}
 	}
 
@@ -1023,6 +954,8 @@ definition {
 	@priority = "4"
 	test CanCreateSegmentWithNumberProperty {
 		var usernameList = "user1,user2,user3";
+
+		var emailList = "user1@liferay.com,user2@liferay.com,user3@liferay.com";
 
 		var membershipList = "user1 user1,user3 user3";
 
@@ -1050,19 +983,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "${usernameList}") {
-				var fullName = "${username} ${username}";
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "3000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions and wait for 30 seconds") {
@@ -1149,7 +1073,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -1260,20 +1184,24 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8471 | Test Summary: Paginate Segment Profile in Membership List"
 	@priority = "3"
 	test CanPaginateSegmentProfileInMembershipList {
-		var usernameList = "userfn userln,user1 user1,user2 user2,user3 user3,user4 user4";
+		var usernameList = "user1,user2,user3,user4,user5";
+
+		var emailList = "userea@liferay.com,user1@liferay.com,user2@liferay.com,user3@liferay.com,user4@liferay.com,user5@liferay.com";
+
+		var nameList = "userfn userln,user1 user1,user2 user2,user3 user3,user4 user4";
 
 		task ("Add 5 more new users") {
-			for (var n : list "1,2,3,4,5") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "user${n}@liferay.com",
-					userFirstName = "user${n}",
-					userLastName = "user${n}",
-					userScreenName = "user${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 
 				JSONUser.setFirstPassword(
 					agreeToTermsAndAnswerReminderQuery = "true",
 					requireReset = "false",
-					userEmailAddress = "user${n}@liferay.com");
+					userEmailAddress = "${name}@liferay.com");
 			}
 		}
 
@@ -1286,25 +1214,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "userea,user1,user2,user3,user4,user5") {
-				if ("${username}" == "userea") {
-					var fullName = "userfn userln";
-				}
-
-				else {
-					var fullName = "${username} ${username}";
-				}
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -1352,7 +1265,7 @@ definition {
 		ScrollWebElementIntoView(locator1 = "ACSegments#SEGMENT_MEMBERS_TABLE");
 
 		task ("View only 5 users are shown in page 1") {
-			ACUtils.viewNameList(nameList = "${usernameList}");
+			ACUtils.viewNameList(nameList = "${nameList}");
 
 			AssertElementNotPresent(
 				key_nameList = "user5 user5",
@@ -1371,18 +1284,22 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8472 | Test Summary: Paginate static segment 'Add Members' creation model"
 	@priority = "3"
 	test CanPaginateStaticSegmentAddMembers {
+		var usernameList = "user1,user2,user3,user4,user5";
+
+		var emailList = "userea@liferay.com,user1@liferay.com,user2@liferay.com,user3@liferay.com,user4@liferay.com,user5@liferay.com";
+
 		task ("Add 5 more new users") {
-			for (var n : list "1,2,3,4,5") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "user${n}@liferay.com",
-					userFirstName = "user${n}",
-					userLastName = "user${n}",
-					userScreenName = "user${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 
 				JSONUser.setFirstPassword(
 					agreeToTermsAndAnswerReminderQuery = "true",
 					requireReset = "false",
-					userEmailAddress = "user${n}@liferay.com");
+					userEmailAddress = "${name}@liferay.com");
 			}
 		}
 
@@ -1395,25 +1312,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "userea,user1,user2,user3,user4,user5") {
-				if ("${username}" == "userea") {
-					var fullName = "userfn userln";
-				}
-
-				else {
-					var fullName = "${username} ${username}";
-				}
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "3000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -1436,9 +1338,7 @@ definition {
 
 		task ("View all users are shown in current page") {
 			for (var username : list "user1 user1,user2 user2,user3 user3,user4 user4,user5 user5,userfn userln") {
-				AssertVisible(
-					key_TableMember = "${username}",
-					locator1 = "ACSegments#TABLE_CHECKBOX");
+				ACUtils.viewNameList(nameList = "${username}");
 			}
 		}
 
@@ -1448,9 +1348,7 @@ definition {
 
 		task ("View only 5 users are shown in current page") {
 			for (var username : list "user1 user1,user2 user2,user3 user3,user4 user4,user5 user5") {
-				AssertVisible(
-					key_TableMember = "${username}",
-					locator1 = "ACSegments#TABLE_CHECKBOX");
+				ACUtils.viewNameList(nameList = "${username}");
 			}
 
 			AssertElementNotPresent(
@@ -1463,20 +1361,14 @@ definition {
 		}
 
 		task ("View the userfn userln is shown in modal") {
-			AssertVisible(
-				key_TableMember = "userfn userln",
-				locator1 = "ACSegments#TABLE_CHECKBOX");
+			ACUtils.viewNameList(nameList = "userfn userln");
 		}
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8475 | Test Summary: Dynamic segment members preview in real time"
 	@priority = "3"
 	test CanPreviewDynamicSegmentMembers {
-		property portal.upstream = "quarantine";
-
-		// AC Refactor: A button to reload appears when users are searched because of a bug.
-		// AC Bug ticket: LRAC-9412
-		// AC Refactor ticket: LRAC-9429
+		var emailList = "userea@liferay.com,user1@liferay.com";
 
 		var usernameList = "userfn userln,user1 user1";
 
@@ -1503,25 +1395,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "userea,user1") {
-				if ("${username}" == "userea") {
-					var fullName = "userfn userln";
-				}
-
-				else {
-					var fullName = "${username} ${username}";
-				}
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -1580,6 +1457,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8473 | Test Summary: Filter the Segment 'Add Members' Modal"
 	@priority = "3"
 	test CanSearchUserInAddMembersModal {
+		var emailList = "userea@liferay.com,user1@liferay.com";
+
 		task ("Add one more user with a given birth date") {
 			JSONUser.addUser(
 				userEmailAddress = "user1@liferay.com",
@@ -1597,25 +1476,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "userea,user1") {
-				if ("${username}" == "userea") {
-					var fullName = "userfn userln";
-				}
-
-				else {
-					var fullName = "${username} ${username}";
-				}
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -1675,7 +1539,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -1728,7 +1592,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}

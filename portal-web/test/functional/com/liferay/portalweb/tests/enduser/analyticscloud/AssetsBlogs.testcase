@@ -32,6 +32,8 @@ definition {
 			JSONGroup.deleteGroupByName(groupName = "Site Name");
 		}
 
+		JSONUser.tearDownNonAdminUsers();
+
 		ACUtils.tearDownAC();
 	}
 
@@ -46,11 +48,11 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("View the blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
 		task ("Close sessions") {
@@ -102,17 +104,15 @@ definition {
 		}
 
 		task ("View the blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
 		task ("Close DXP, launch AC and switch the propety") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 
 			ACUtils.launchAC();
 
@@ -150,9 +150,11 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8374 | Test Summary: Blogs audience card shows expected amount of know and anonymous individuals"
 	@priority = "5"
 	test AudienceCardShowsExpectedAmountKnowAndAnonymousIndividualsInBlogs {
-		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+		var usernameList = "ac,liferay";
 
-		for (var name : list "ac,liferay") {
+		var emailList = "ac@liferay.com,liferay@liferay.com";
+
+		for (var name : list "${usernameList}") {
 			JSONUser.addUser(
 				userEmailAddress = "${name}@liferay.com",
 				userFirstName = "${name}",
@@ -160,31 +162,22 @@ definition {
 				userScreenName = "${name}");
 		}
 
-		ACDXPSettings.syncNewContactData();
+		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var name : list "ac,liferay") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "${name}@liferay.com",
-				userLoginFullName = "${name} ${name}");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
-
-			Pause(locator1 = "5000");
-		}
-
-		User.logoutPG();
-
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePageWithUser(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title",
+			emailList = "${emailList}",
 			pageName = "AC Page",
 			siteName = "Site Name");
 
-		BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
+		User.logoutPG();
 
-		Pause(locator1 = "5000");
+		ACUtils.navigateToSitePage(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -214,9 +207,11 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8375 | Test Summary: Blogs audience card shows expected amount of segmented and unsegmented individuals"
 	@priority = "5"
 	test AudienceCardShowsExpectedAmountSegmentedAndUnsegmentedInBlogs {
-		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+		var usernameList = "ac,liferay";
 
-		for (var name : list "ac,liferay") {
+		var emailList = "ac@liferay.com,liferay@liferay.com";
+
+		for (var name : list "${usernameList}") {
 			JSONUser.addUser(
 				userEmailAddress = "${name}@liferay.com",
 				userFirstName = "${name}",
@@ -224,31 +219,22 @@ definition {
 				userScreenName = "${name}");
 		}
 
-		ACDXPSettings.syncNewContactData();
+		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var name : list "ac,liferay") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "${name}@liferay.com",
-				userLoginFullName = "${name} ${name}");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
-
-			Pause(locator1 = "5000");
-		}
-
-		User.logoutPG();
-
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePageWithUser(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title",
+			emailList = "${emailList}",
 			pageName = "AC Page",
 			siteName = "Site Name");
 
-		BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
+		User.logoutPG();
 
-		Pause(locator1 = "5000");
+		ACUtils.navigateToSitePage(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -268,11 +254,11 @@ definition {
 
 		ACUtils.launchDXP(userEmailAddress = "ac@liferay.com");
 
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePage(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title",
 			pageName = "AC Page",
 			siteName = "Site Name");
-
-		BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -307,11 +293,11 @@ definition {
 		}
 
 		task ("View the blogs entry") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
 		task ("Get the ip country") {
@@ -368,11 +354,11 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("View the blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
 		task ("Close sessions") {
@@ -418,13 +404,11 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("View the blog") {
-			for (var n : list "1,2") {
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
-			}
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title,Blogs AC Title",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions") {
@@ -465,17 +449,11 @@ definition {
 
 		ACUtils.createBlogsAndAddToPage(entryTitle = "Test 2");
 
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePage(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title,Test 2",
 			pageName = "AC Page",
 			siteName = "Site Name");
-
-		BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
-
-		Navigator.gotoSitePage(
-			pageName = "AC Page",
-			siteName = "Site Name");
-
-		BlogsNavigator.gotoPG(entryTitle = "Test 2");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -521,13 +499,11 @@ definition {
 			userLoginEmailAddress = "ac@liferay.com",
 			userLoginFullName = "ac ac");
 
-		for (var n : list "1,2,3,4") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
-		}
+		ACUtils.navigateToSitePage(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title,Blogs AC Title,Blogs AC Title,Blogs AC Title",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -571,17 +547,15 @@ definition {
 		}
 
 		task ("View the blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
 		task ("Close DXP, launch AC and switch the propety") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 
 			ACUtils.launchAC();
 
@@ -623,9 +597,15 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8114 | Test Summary: Blogs known individuals list shows individuals who have viewed the blog"
 	@priority = "5"
 	test KnownIndividualsListShowsIndividualsWhoHaveViewedBlog {
+		var usernameList = "ac,dxp,liferay";
+
+		var emailList = "ac@liferay.com,dxp@liferay.com,liferay@liferay.com";
+
+		var nameList = "ac ac,liferay liferay,dxp dxp";
+
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var name : list "ac,liferay,dxp") {
+		for (var name : list "${usernameList}") {
 			JSONUser.addUser(
 				userEmailAddress = "${name}@liferay.com",
 				userFirstName = "${name}",
@@ -635,19 +615,12 @@ definition {
 
 		ACDXPSettings.syncNewContactData();
 
-		for (var name : list "ac,liferay,dxp") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "${name}@liferay.com",
-				userLoginFullName = "${name} ${name}");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
-
-			Pause(locator1 = "5000");
-		}
+		ACUtils.navigateToSitePageWithUser(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title",
+			emailList = "${emailList}",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		JSONUser.addUser(
 			userEmailAddress = "userac@liferay.com",
@@ -655,17 +628,12 @@ definition {
 			userLastName = "userac",
 			userScreenName = "userac");
 
-		User.logoutAndLoginPG(
-			userEmailAddress = "userac@liferay.com",
-			userFirstName = "userac",
-			userLastName = "userac",
-			userScreenName = "userac");
-
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePageWithUser(
+			actionType = "View Blog",
+			documentTitle = "Blogs AC Title",
+			emailList = "userac@liferay.com",
 			pageName = "AC Page",
 			siteName = "Site Name");
-
-		BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -691,15 +659,11 @@ definition {
 
 		ACTimeFilter.setLast24Hours();
 
-		for (var name : list "ac,liferay,dxp") {
-			AssertElementPresent(
-				key_userName = "${name} ${name}",
-				locator1 = "ACSegments#SEGMENT_MEMBERS");
-		}
+		ACUtils.viewNameList(nameList = "${nameList}");
 
 		AssertElementNotPresent(
 			key_userName = "userac userac",
-			locator1 = "ACSegments#SEGMENT_MEMBERS");
+			locator1 = "ACUtils#NAME_LIST");
 	}
 
 	@description = "View all blogs in the property in assets"
@@ -709,19 +673,11 @@ definition {
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var n : list "1,2") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Test 2");
-		}
+		ACUtils.navigateToSitePage(
+			actionType = "View Blog",
+			documentTitleList = "Blogs AC Title,Test 2",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 

@@ -14,28 +14,51 @@
 
 package com.liferay.search.experiences.internal.blueprint.condition;
 
-import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.search.experiences.blueprint.parameter.SXPParameter;
 import com.liferay.search.experiences.internal.blueprint.parameter.SXPParameterData;
+import com.liferay.search.experiences.rest.dto.v1_0.Condition;
+import com.liferay.search.experiences.rest.dto.v1_0.Contains;
+import com.liferay.search.experiences.rest.dto.v1_0.Equals;
+import com.liferay.search.experiences.rest.dto.v1_0.Exists;
+import com.liferay.search.experiences.rest.dto.v1_0.In;
+import com.liferay.search.experiences.rest.dto.v1_0.Range;
 
 /**
  * @author Petteri Karttunen
  */
 public class SXPConditionEvaluator {
 
-	public static boolean evaluate(
-		JSONObject jsonObject, SXPParameterData sxpParameterData) {
+	public SXPConditionEvaluator(SXPParameterData sxpParameterData) {
+		_sxpParameterData = sxpParameterData;
+	}
 
-		if (jsonObject == null) {
+	public boolean evaluate(Condition condition) {
+		if (condition == null) {
 			return true;
 		}
 
-		// TODO any_of and all_of
+		if (!_evaluateAllConditions(condition.getAllConditions()) ||
+			!_evaluateAnyConditions(condition.getAnyConditions()) ||
+			!_evaluateContains(condition.getContains()) ||
+			!_evaluateEquals(condition.getEquals()) ||
+			!_evaluateExists(condition.getExists()) ||
+			!_evaluateIn(condition.getIn()) ||
+			!_evaluateNot(condition.getNot()) ||
+			!_evaluateRange(condition.getRange())) {
 
-		for (String key : jsonObject.keySet()) {
-			if (!_evaluate(
-					jsonObject.getJSONObject(key), key, sxpParameterData)) {
+			return false;
+		}
 
+		return true;
+	}
+
+	private boolean _evaluateAllConditions(Condition[] conditions) {
+		if (conditions == null) {
+			return true;
+		}
+
+		for (Condition condition : conditions) {
+			if (!evaluate(condition)) {
 				return false;
 			}
 		}
@@ -43,82 +66,105 @@ public class SXPConditionEvaluator {
 		return true;
 	}
 
-	private static boolean _evaluate(
-		JSONObject jsonObject, String key, SXPParameterData sxpParameterData) {
+	private boolean _evaluateAnyConditions(Condition[] conditions) {
+		if (conditions == null) {
+			return true;
+		}
 
-		SXPParameter sxpParameter =
-			sxpParameterData.getSXPParameterByTemplateVariable(
-				jsonObject.getString("parameter_name"));
-
-		if (key.equals("exists")) {
-			if (sxpParameter != null) {
+		for (Condition condition : conditions) {
+			if (evaluate(condition)) {
 				return true;
 			}
-
-			return false;
-		}
-		else if (key.equals("not_exists")) {
-			if (sxpParameter == null) {
-				return true;
-			}
-
-			return false;
 		}
 
-		if (sxpParameter == null) {
-			return false;
-		}
-
-		JSONObject valueJSONObject = jsonObject.getJSONObject("value");
-
-		if (valueJSONObject == null) {
-			return false;
-		}
-
-		if (key.equals("contains")) {
-			return sxpParameter.evaluateContains(valueJSONObject);
-		}
-		else if (key.equals("equals")) {
-			return sxpParameter.evaluateEquals(valueJSONObject);
-		}
-		else if (key.equals("in")) {
-			return sxpParameter.evaluateIn(valueJSONObject);
-		}
-		else if (key.equals("in_range")) {
-			return sxpParameter.evaluateInRange(valueJSONObject);
-		}
-		else if (key.equals("greater_than")) {
-			return sxpParameter.evaluateGreaterThan(false, valueJSONObject);
-		}
-		else if (key.equals("greater_than_equals")) {
-			return sxpParameter.evaluateGreaterThan(true, valueJSONObject);
-		}
-		else if (key.equals("lower_than")) {
-
-			// TODO Rename to less_than
-
-			return !sxpParameter.evaluateGreaterThan(true, valueJSONObject);
-		}
-		else if (key.equals("lower_than_equals")) {
-
-			// TODO Rename to less_than_equals
-
-			return !sxpParameter.evaluateGreaterThan(false, valueJSONObject);
-		}
-		else if (key.equals("not_contains")) {
-			return !sxpParameter.evaluateContains(valueJSONObject);
-		}
-		else if (key.equals("not_equals")) {
-			return !sxpParameter.evaluateEquals(valueJSONObject);
-		}
-		else if (key.equals("not_in")) {
-			return !sxpParameter.evaluateIn(valueJSONObject);
-		}
-		else if (key.equals("not_in_range")) {
-			return !sxpParameter.evaluateInRange(valueJSONObject);
-		}
-
-		throw new IllegalArgumentException("Unknown condition " + key);
+		return false;
 	}
+
+	private boolean _evaluateContains(Contains contains) {
+		if (contains == null) {
+			return true;
+		}
+
+		SXPParameter sxpParameter = _getSXPParameter(
+			contains.getParameterName());
+
+		return sxpParameter.evaluateContains(
+			contains.getValue(), contains.getValues());
+	}
+
+	private boolean _evaluateEquals(Equals equals) {
+		if (equals == null) {
+			return true;
+		}
+
+		SXPParameter sxpParameter = _getSXPParameter(equals.getParameterName());
+
+		if (equals.getFormat() != null) {
+			return sxpParameter.evaluateEquals(
+				equals.getFormat(), equals.getValue());
+		}
+
+		return sxpParameter.evaluateEquals(equals.getValue());
+	}
+
+	private boolean _evaluateExists(Exists exists) {
+		if (exists == null) {
+			return true;
+		}
+
+		SXPParameter sxpParameter = _getSXPParameter(exists.getParameterName());
+
+		if (sxpParameter != null) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean _evaluateIn(In in) {
+		if (in == null) {
+			return true;
+		}
+
+		SXPParameter sxpParameter = _getSXPParameter(in.getParameterName());
+
+		return sxpParameter.evaluateIn(in.getValues());
+	}
+
+	private boolean _evaluateNot(Condition condition) {
+		if (condition == null) {
+			return true;
+		}
+
+		if (evaluate(condition)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private boolean _evaluateRange(Range range) {
+		if (range == null) {
+			return true;
+		}
+
+		SXPParameter sxpParameter = _getSXPParameter(range.getParameterName());
+
+		if (range.getFormat() != null) {
+			return sxpParameter.evaluateRange(
+				range.getFormat(), range.getGt(), range.getGte(), range.getLt(),
+				range.getLte());
+		}
+
+		return sxpParameter.evaluateRange(
+			range.getGt(), range.getGte(), range.getLt(), range.getLte());
+	}
+
+	private SXPParameter _getSXPParameter(String templateVariable) {
+		return _sxpParameterData.getSXPParameterByTemplateVariable(
+			templateVariable);
+	}
+
+	private final SXPParameterData _sxpParameterData;
 
 }

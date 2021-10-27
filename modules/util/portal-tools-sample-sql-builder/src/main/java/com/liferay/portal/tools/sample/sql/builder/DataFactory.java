@@ -272,8 +272,8 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TextFormatter;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.version.Version;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.impl.AddressModelImpl;
 import com.liferay.portal.model.impl.ClassNameModelImpl;
@@ -402,9 +402,6 @@ public class DataFactory {
 		models.add(NavItem.class.getName());
 		models.add(PortletDisplayTemplate.class.getName());
 		models.add(UserPersonalSite.class.getName());
-
-		models.add(_getMBDiscussionCombinedClassName(BlogsEntry.class));
-		models.add(_getMBDiscussionCombinedClassName(WikiPage.class));
 
 		for (String model : models) {
 			ClassNameModel classNameModel = new ClassNameModelImpl();
@@ -1874,12 +1871,13 @@ public class DataFactory {
 		List<PortletPreferencesModel> portletPreferencesModels =
 			new ArrayList<>();
 
-		UnicodeProperties typeSettingsUnicodeProperties = new UnicodeProperties(
-			true);
-
-		typeSettingsUnicodeProperties.load(
-			StringUtil.replace(
-				layoutModel.getTypeSettings(), "\\n", StringPool.NEW_LINE));
+		UnicodeProperties typeSettingsUnicodeProperties =
+			UnicodePropertiesBuilder.create(
+				true
+			).load(
+				StringUtil.replace(
+					layoutModel.getTypeSettings(), "\\n", StringPool.NEW_LINE)
+			).build();
 
 		Set<String> typeSettingPropertiesKeys =
 			typeSettingsUnicodeProperties.keySet();
@@ -4471,32 +4469,6 @@ public class DataFactory {
 		return mbCategoryModels;
 	}
 
-	public AssetEntryModel newMBDiscussionAssetEntryModel(
-		BlogsEntryModel blogsEntryModel) {
-
-		ClassNameModel classNameModel = _classNameModels.get(
-			_getMBDiscussionCombinedClassName(BlogsEntry.class));
-
-		return newAssetEntryModel(
-			blogsEntryModel.getGroupId(), blogsEntryModel.getCreateDate(),
-			blogsEntryModel.getModifiedDate(), classNameModel.getClassNameId(),
-			blogsEntryModel.getEntryId(), "", 0, true, false, "",
-			String.valueOf(blogsEntryModel.getGroupId()));
-	}
-
-	public AssetEntryModel newMBDiscussionAssetEntryModel(
-		WikiPageModel wikiPageModel) {
-
-		ClassNameModel classNameModel = _classNameModels.get(
-			_getMBDiscussionCombinedClassName(WikiPage.class));
-
-		return newAssetEntryModel(
-			wikiPageModel.getGroupId(), wikiPageModel.getCreateDate(),
-			wikiPageModel.getModifiedDate(), classNameModel.getClassNameId(),
-			wikiPageModel.getResourcePrimKey(), "", 0, true, false, "",
-			String.valueOf(wikiPageModel.getGroupId()));
-	}
-
 	public MBDiscussionModel newMBDiscussionModel(
 		long groupId, long classNameId, long classPK, long threadId) {
 
@@ -4826,15 +4798,13 @@ public class DataFactory {
 	public List<ReleaseModel> newReleaseModels() throws IOException {
 		List<ReleaseModel> releases = new ArrayList<>();
 
-		Version latestSchemaVersion =
-			PortalUpgradeProcess.getLatestSchemaVersion();
-
 		releases.add(
 			newReleaseModel(
 				ReleaseConstants.DEFAULT_ID,
 				ReleaseConstants.DEFAULT_SERVLET_CONTEXT_NAME,
-				latestSchemaVersion.toString(), ReleaseInfo.getBuildNumber(),
-				false, ReleaseConstants.TEST_STRING));
+				String.valueOf(PortalUpgradeProcess.getLatestSchemaVersion()),
+				ReleaseInfo.getBuildNumber(), false,
+				ReleaseConstants.TEST_STRING));
 
 		try (InputStream inputStream = DataFactory.class.getResourceAsStream(
 				"dependencies/releases.txt");
@@ -5586,16 +5556,24 @@ public class DataFactory {
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject jsonObject = jsonArray.getJSONObject(i);
 
+			String portletName = jsonObject.getString("portletName");
+
+			if (ArrayUtil.contains(
+					BenchmarksPropsValues.COMMERCE_LAYOUT_EXCLUDED_PORTLETS,
+					portletName)) {
+
+				continue;
+			}
+
 			String key = jsonObject.getString("layoutColumnId");
 
 			if (portletNames.containsKey(key)) {
 				portletNames.put(
 					key,
-					portletNames.get(key) + StringPool.COMMA +
-						jsonObject.getString("portletName"));
+					portletNames.get(key) + StringPool.COMMA + portletName);
 			}
 			else {
-				portletNames.put(key, jsonObject.getString("portletName"));
+				portletNames.put(key, portletName);
 			}
 		}
 
@@ -6901,12 +6879,6 @@ public class DataFactory {
 		catch (ReflectiveOperationException reflectiveOperationException) {
 			ReflectionUtil.throwException(reflectiveOperationException);
 		}
-	}
-
-	private String _getMBDiscussionCombinedClassName(Class<?> clazz) {
-		return StringBundler.concat(
-			MBDiscussion.class.getName(), StringPool.UNDERLINE,
-			clazz.getName());
 	}
 
 	private String _getResourcePermissionModelName(String... classNames) {

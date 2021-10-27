@@ -36,7 +36,6 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8370 | Test Summary: 180 Days time period filter in Interests List"
-	@ignore = "true"
 	@priority = "3"
 	test CanTimeFilterUse180DaysInInterestsList {
 		property portal.upstream = "quarantine";
@@ -49,17 +48,15 @@ definition {
 		}
 
 		task ("View the blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
-		task ("Close sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+		task ("Close Sessions") {
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Navigate to AC workspace") {
@@ -98,7 +95,6 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8372 | Test Summary: Custom Range time period filter in Interests List"
-	@ignore = "true"
 	@priority = "5"
 	test CanTimeFilterUseCustomRangeInInterestsList {
 		property portal.upstream = "quarantine";
@@ -111,17 +107,15 @@ definition {
 		}
 
 		task ("View the blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
-		task ("Close sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+		task ("Close Sessions") {
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Navigate to AC workspace") {
@@ -164,7 +158,6 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8371 | Test Summary: Last Year time period filter in Interests List"
-	@ignore = "true"
 	@priority = "3"
 	test CanTimeFilterUseLastYearInInterestsList {
 		property portal.upstream = "quarantine";
@@ -177,17 +170,15 @@ definition {
 		}
 
 		task ("View the blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
-		task ("Close sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+		task ("Close Sessions") {
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Navigate to AC workspace") {

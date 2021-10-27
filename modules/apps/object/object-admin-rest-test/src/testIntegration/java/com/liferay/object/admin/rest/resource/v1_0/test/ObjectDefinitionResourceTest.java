@@ -17,6 +17,7 @@ package com.liferay.object.admin.rest.resource.v1_0.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.object.admin.rest.client.dto.v1_0.ObjectDefinition;
 import com.liferay.object.admin.rest.client.dto.v1_0.ObjectField;
+import com.liferay.object.admin.rest.client.pagination.Page;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.exception.NoSuchObjectDefinitionException;
 import com.liferay.object.service.ObjectDefinitionLocalService;
@@ -24,7 +25,9 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.test.rule.Inject;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Ignore;
@@ -59,6 +62,45 @@ public class ObjectDefinitionResourceTest
 		}
 	}
 
+	@Override
+	@Test
+	public void testGetObjectDefinitionsPageWithSortString() throws Exception {
+		ObjectDefinition objectDefinition1 = randomObjectDefinition();
+
+		objectDefinition1.setName("A" + objectDefinition1.getName());
+
+		objectDefinition1 = testGetObjectDefinitionsPage_addObjectDefinition(
+			objectDefinition1);
+
+		ObjectDefinition objectDefinition2 = randomObjectDefinition();
+
+		objectDefinition2.setName("B" + objectDefinition2.getName());
+
+		objectDefinition2 = testGetObjectDefinitionsPage_addObjectDefinition(
+			objectDefinition2);
+
+		Page<ObjectDefinition> ascPage =
+			objectDefinitionResource.getObjectDefinitionsPage(
+				null, null, null, null, "name:asc");
+
+		List<ObjectDefinition> items =
+			(List<ObjectDefinition>)ascPage.getItems();
+
+		assertEquals(
+			Arrays.asList(objectDefinition1, objectDefinition2),
+			items.subList(0, 2));
+
+		Page<ObjectDefinition> descPage =
+			objectDefinitionResource.getObjectDefinitionsPage(
+				null, null, null, null, "name:desc");
+
+		items = (List<ObjectDefinition>)descPage.getItems();
+
+		assertEquals(
+			Arrays.asList(objectDefinition2, objectDefinition1),
+			items.subList(items.size() - 2, items.size()));
+	}
+
 	@Ignore
 	@Override
 	@Test
@@ -71,17 +113,22 @@ public class ObjectDefinitionResourceTest
 	}
 
 	@Override
+	protected String[] getIgnoredEntityFieldNames() {
+		return new String[] {"dateCreated", "dateModified", "userId"};
+	}
+
+	@Override
 	protected ObjectDefinition randomObjectDefinition() throws Exception {
 		ObjectDefinition objectDefinition = super.randomObjectDefinition();
 
 		objectDefinition.setActive(false);
 		objectDefinition.setLabel(
 			Collections.singletonMap(
-				"en_US", "A" + objectDefinition.getName()));
-		objectDefinition.setName("A" + objectDefinition.getName());
+				"en_US", "O" + objectDefinition.getName()));
+		objectDefinition.setName("O" + objectDefinition.getName());
 		objectDefinition.setPluralLabel(
 			Collections.singletonMap(
-				"en_US", "A" + objectDefinition.getName()));
+				"en_US", "O" + objectDefinition.getName()));
 		objectDefinition.setObjectFields(
 			new ObjectField[] {
 				new ObjectField() {

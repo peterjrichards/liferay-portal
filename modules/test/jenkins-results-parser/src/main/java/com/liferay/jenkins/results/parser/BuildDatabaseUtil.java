@@ -101,8 +101,8 @@ public class BuildDatabaseUtil {
 					Arrays.asList(distNodes.split(",")));
 
 				String command = JenkinsResultsParserUtil.combine(
-					"time rsync -Iqs --timeout=1200 ", distNode, ":", distPath,
-					"/", BuildDatabase.FILE_NAME_BUILD_DATABASE, " ",
+					"time rsync -Iq --timeout=1200 \"", distNode, ":", distPath,
+					"/", BuildDatabase.FILE_NAME_BUILD_DATABASE, "\" ",
 					JenkinsResultsParserUtil.getCanonicalPath(
 						buildDatabaseFile));
 
@@ -149,18 +149,38 @@ public class BuildDatabaseUtil {
 			return;
 		}
 
-		String buildDatabaseURL = JenkinsResultsParserUtil.getBuildArtifactURL(
-			topLevelBuild.getBuildURL(), buildDatabaseFile.getName());
+		String buildDatabaseURL = JenkinsResultsParserUtil.getLocalURL(
+			JenkinsResultsParserUtil.getBuildArtifactURL(
+				topLevelBuild.getBuildURL(), buildDatabaseFile.getName()));
 
 		String buildDatabaseFilePath = buildDatabaseURL.replaceAll(
 			".*/(userContent/.*)", "/opt/java/jenkins/$1");
 
-		try {
-			JenkinsMaster jenkinsMaster = topLevelBuild.getJenkinsMaster();
+		buildDatabaseFilePath = buildDatabaseFilePath.replace("%28", "(");
+		buildDatabaseFilePath = buildDatabaseFilePath.replace("%29", ")");
 
+		JenkinsMaster jenkinsMaster = topLevelBuild.getJenkinsMaster();
+
+		try {
+			Process process = JenkinsResultsParserUtil.executeBashCommands(
+				JenkinsResultsParserUtil.combine(
+					"ssh ", jenkinsMaster.getName(), " ls \"",
+					JenkinsResultsParserUtil.escapeForBash(
+						buildDatabaseFilePath),
+					"\""));
+
+			if (process.exitValue() != 0) {
+				return;
+			}
+		}
+		catch (IOException | TimeoutException exception) {
+			return;
+		}
+
+		try {
 			_downloadBuildDatabaseFileFromDistNodes(
 				buildDatabaseFile, jenkinsMaster.getName(),
-				buildDatabaseFilePath);
+				buildDatabaseFilePath.replaceAll("(.*)/[^/]+", "$1"));
 
 			return;
 		}
@@ -179,14 +199,14 @@ public class BuildDatabaseUtil {
 	}
 
 	private static File _getBuildDir(Build build) {
+		if (build != null) {
+			return new File(build.getBuildDirPath());
+		}
+
 		String buildDir = System.getenv("BUILD_DIR");
 
 		if (!JenkinsResultsParserUtil.isNullOrEmpty(buildDir)) {
 			return new File(buildDir);
-		}
-
-		if (build != null) {
-			return new File(build.getBuildDirPath());
 		}
 
 		return new File(JenkinsResultsParserUtil.getBuildDirPath());

@@ -892,10 +892,10 @@ definition {
 			pageName = "Test Content Page Name",
 			siteName = "Site Name");
 
-		AssertTextEquals(
-			key_fragmentName = "paragraph",
-			locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-			value1 = "DL Image");
+		ContentPages.viewFragmentText(
+			fragmentName = "paragraph",
+			id = "element-text",
+			text = "DL Image");
 
 		Click(
 			key_append = "",
@@ -1464,8 +1464,6 @@ definition {
 	@priority = "4"
 	@uitest
 	test StagingPublishChildSiteWithReference {
-		property portal.upstream = "quarantine";
-
 		WebContentNavigator.openWebContentAdmin(siteURLKey = "site-name-staging");
 
 		WebContentNavigator.gotoAddCP();
@@ -1484,7 +1482,7 @@ definition {
 
 		Staging.publishToLive();
 
-		JSONGroup.addChildSite(
+		JSONGroup.addChildGroup(
 			groupName = "Child Site",
 			parentGroupName = "Site Name");
 
@@ -1492,15 +1490,27 @@ definition {
 
 		SitePages.addPublicPage(pageName = "Page 1");
 
+		JSONLayout.addWidgetToPublicLayout(
+			groupName = "Child Site",
+			layoutName = "Page 1",
+			parentGroupName = "Site Name",
+			widgetName = "Asset Publisher");
+
 		Navigator.gotoSitePage(
 			pageName = "Page 1",
 			siteName = "Child Site");
 
-		Portlet.addPG(portletName = "Web Content Display");
+		AssetPublisherPortlet.configureSiteScopePG(
+			siteName = "Site Name",
+			siteScopeType = "Parent Site");
 
-		WebContentDisplayPortlet.selectOtherSiteWebContent(
-			otherSiteName = "Site Name",
-			webContentTitle = "Web Content Title");
+		Navigator.gotoSitePage(
+			pageName = "Page 1",
+			siteName = "Child Site");
+
+		AssetPublisherPortlet.configureSiteScopeRemoveSitePG(
+			siteName = "Child Site",
+			siteScopeType = "Current Site");
 
 		Staging.openStagingAdmin(siteURLKey = "child-site");
 

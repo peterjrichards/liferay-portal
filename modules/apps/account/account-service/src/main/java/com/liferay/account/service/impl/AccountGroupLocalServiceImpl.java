@@ -22,6 +22,7 @@ import com.liferay.account.service.persistence.AccountGroupRelPersistence;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.search.Field;
@@ -35,6 +36,7 @@ import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.search.SortFactoryUtil;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -104,11 +106,12 @@ public class AccountGroupLocalServiceImpl
 			"This account group is used for guest users.");
 		accountGroup.setName(AccountConstants.ACCOUNT_GROUP_NAME_GUEST);
 
-		return addAccountGroup(accountGroup);
+		return accountGroupLocalService.addAccountGroup(accountGroup);
 	}
 
 	@Indexable(type = IndexableType.DELETE)
 	@Override
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
 	public AccountGroup deleteAccountGroup(AccountGroup accountGroup) {
 		accountGroupPersistence.remove(accountGroup);
 

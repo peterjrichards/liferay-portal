@@ -95,10 +95,7 @@ definition {
 
 		// TODO Review
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Accounts",
-			panel = "Applications",
-			portlet = "Account Groups");
+		AccountGroups.openAccountGroupsAdmin();
 
 		Click(locator1 = "Button#PLUS");
 
@@ -154,17 +151,7 @@ definition {
 	@priority = "3"
 	test RemoveAChannelFilter {
 		property portal.acceptance = "false";
-
-		CommerceNavigator.gotoPortlet(
-			category = "Store Management",
-			portlet = "Channels");
-
-		Click(locator1 = "Button#PLUS");
-
-		CommerceEntry.addNewChannelsEntry(
-			channelCurrency = "US Dollar",
-			channelName = "Test Channel",
-			channelType = "Site");
+		property test.name.skip.portal.instance = "CPCommerceProductVisibility#RemoveAChannelFilter";
 
 		CommerceNavigator.gotoPortlet(
 			category = "Product Management",
@@ -194,6 +181,10 @@ definition {
 		Button.click(button = "Add");
 
 		Alert.viewSuccessMessage();
+
+		WaitForElementPresent(
+			key_productName = "Test Channel",
+			locator1 = "CommerceOrders#ORDER_DETAILS_PRODUCT_NAME");
 
 		Button.click(button = "Delete");
 

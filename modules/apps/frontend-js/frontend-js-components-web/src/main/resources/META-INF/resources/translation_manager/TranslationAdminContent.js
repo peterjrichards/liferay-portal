@@ -12,14 +12,11 @@
  * details.
  */
 
-import ClayAlert from '@clayui/alert';
-import {ClayButtonWithIcon} from '@clayui/button';
+import ClayButton, {ClayButtonWithIcon} from '@clayui/button';
 import ClayDropDown from '@clayui/drop-down';
 import {ClayInput} from '@clayui/form';
 import ClayIcon from '@clayui/icon';
 import ClayLabel from '@clayui/label';
-import ClayLink from '@clayui/link';
-import ClayManagementToolbar from '@clayui/management-toolbar';
 import ClayModal from '@clayui/modal';
 import ClayTable from '@clayui/table';
 import PropTypes from 'prop-types';
@@ -39,11 +36,10 @@ const TranslationAdminContent = ({
 	activeLanguageIds: initialActiveLanguageIds = emptyArray,
 	availableLocales: initialAvailableLocales = emptyArray,
 	defaultLanguageId,
-	lastDeletedLocaleId,
 	onAddLocale = noop,
-	onClearRestoreLocale = noop,
+	onCancel = noop,
+	onDone = noop,
 	onRemoveLocale = noop,
-	onRestoreLocale = noop,
 	translations = {},
 }) => {
 	const [creationMenuActive, setCreationMenuActive] = useState(false);
@@ -74,96 +70,76 @@ const TranslationAdminContent = ({
 				{Liferay.Language.get('manage-translations')}
 			</ClayModal.Header>
 
-			<ClayModal.Body scrollable>
-				<ClayManagementToolbar
-					aria-label={ariaLabels.managementToolbar}
-				>
-					<ClayManagementToolbar.Search showMobile={true}>
-						<ClayInput.Group>
-							<ClayInput.GroupItem>
-								<ClayInput
-									aria-label={Liferay.Language.get('search')}
-									insetAfter={true}
-									onChange={(event) => {
-										const {value} = event.target;
+			<ClayModal.Header withTitle={false}>
+				<ClayModal.Title>
+					<ClayInput.Group className="align-items-center">
+						<ClayInput.GroupItem>
+							<ClayInput
+								aria-label={Liferay.Language.get('search')}
+								insetAfter={true}
+								onChange={(event) => {
+									const {value} = event.target;
 
-										setSearchValue(value);
-									}}
-									placeholder={Liferay.Language.get('search')}
-									value={searchValue}
-								/>
+									setSearchValue(value);
+								}}
+								placeholder={Liferay.Language.get('search')}
+								value={searchValue}
+							/>
 
-								<ClayInput.GroupInsetItem after tag="span">
-									<ClayButtonWithIcon
-										aria-label={Liferay.Language.get(
-											'search'
-										)}
-										displayType="unstyled"
-										onClick={() => {
-											setSearchValue('');
-										}}
-										symbol={
-											searchValue ? 'times' : 'search'
-										}
-									/>
-								</ClayInput.GroupInsetItem>
-							</ClayInput.GroupItem>
-						</ClayInput.Group>
-					</ClayManagementToolbar.Search>
-
-					<ClayManagementToolbar.ItemList>
-						<ClayDropDown
-							active={
-								creationMenuActive &&
-								availableLocales.length > 0
-							}
-							hasLeftSymbols
-							onActiveChange={setCreationMenuActive}
-							trigger={
+							<ClayInput.GroupInsetItem after tag="span">
 								<ClayButtonWithIcon
-									disabled={availableLocales.length === 0}
-									symbol="plus"
+									aria-label={Liferay.Language.get('search')}
+									displayType="unstyled"
+									onClick={() => {
+										setSearchValue('');
+									}}
+									symbol={searchValue ? 'times' : 'search'}
 								/>
-							}
-						>
-							<ClayDropDown.ItemList>
-								{availableLocales.map((availableLocale) => {
-									return (
-										<ClayDropDown.Item
-											key={availableLocale.label}
-											onClick={() => {
-												onAddLocale(availableLocale.id);
-											}}
-											symbolLeft={availableLocale.symbol}
-										>
-											{availableLocale.label}
-										</ClayDropDown.Item>
-									);
-								})}
-							</ClayDropDown.ItemList>
-						</ClayDropDown>
-					</ClayManagementToolbar.ItemList>
-				</ClayManagementToolbar>
+							</ClayInput.GroupInsetItem>
+						</ClayInput.GroupItem>
 
-				{lastDeletedLocaleId && (
-					<ClayAlert
-						displayType="success"
-						onClose={onClearRestoreLocale}
-						title={Liferay.Language.get('success')}
-					>
-						{Liferay.Util.sub(
-							Liferay.Language.get('translation-was-deleted'),
-							availableLocales.find(
-								(availableLocale) =>
-									availableLocale.id === lastDeletedLocaleId
-							).label
-						)}
-						<ClayLink onClick={onRestoreLocale}>
-							{Liferay.Language.get('undo')}
-						</ClayLink>
-					</ClayAlert>
-				)}
+						<ClayInput.GroupItem shrink>
+							<ClayDropDown
+								active={
+									creationMenuActive &&
+									availableLocales.length > 0
+								}
+								hasLeftSymbols
+								onActiveChange={setCreationMenuActive}
+								trigger={
+									<ClayButtonWithIcon
+										disabled={availableLocales.length === 0}
+										small
+										symbol="plus"
+									/>
+								}
+							>
+								<ClayDropDown.ItemList>
+									{availableLocales.map((availableLocale) => {
+										return (
+											<ClayDropDown.Item
+												key={availableLocale.label}
+												onClick={() => {
+													onAddLocale(
+														availableLocale.id
+													);
+												}}
+												symbolLeft={
+													availableLocale.symbol
+												}
+											>
+												{availableLocale.label}
+											</ClayDropDown.Item>
+										);
+									})}
+								</ClayDropDown.ItemList>
+							</ClayDropDown>
+						</ClayInput.GroupItem>
+					</ClayInput.Group>
+				</ClayModal.Title>
+			</ClayModal.Header>
 
+			<ClayModal.Body className="pb-0 pt-3" scrollable>
 				<ClayTable>
 					<ClayTable.Head>
 						<ClayTable.Row>
@@ -244,6 +220,18 @@ const TranslationAdminContent = ({
 					</ClayTable.Body>
 				</ClayTable>
 			</ClayModal.Body>
+			<ClayModal.Footer
+				last={
+					<ClayButton.Group spaced>
+						<ClayButton displayType="secondary" onClick={onCancel}>
+							{Liferay.Language.get('cancel')}
+						</ClayButton>
+						<ClayButton displayType="primary" onClick={onDone}>
+							{Liferay.Language.get('done')}
+						</ClayButton>
+					</ClayButton.Group>
+				}
+			/>
 		</>
 	);
 };

@@ -177,9 +177,10 @@ BlogsPortletInstanceConfiguration blogsPortletInstanceConfiguration = BlogsPortl
 		String coverImageURL = entry.getCoverImageURL(themeDisplay);
 		%>
 
-		<c:if test="<%= Validator.isNotNull(coverImageURL) %>">
-			<div class="aspect-ratio aspect-ratio-bg-cover cover-image" style="background-image: url(<%= coverImageURL %>);"></div>
-		</c:if>
+		<liferay-util:include page="/blogs/entry_cover_image_caption.jsp" servletContext="<%= application %>">
+			<liferay-util:param name="coverImageCaption" value="<%= entry.getCoverImageCaption() %>" />
+			<liferay-util:param name="coverImageURL" value="<%= coverImageURL %>" />
+		</liferay-util:include>
 
 		<!-- text resume -->
 

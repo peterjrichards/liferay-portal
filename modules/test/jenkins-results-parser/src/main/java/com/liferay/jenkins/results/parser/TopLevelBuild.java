@@ -30,6 +30,7 @@ import com.liferay.jenkins.results.parser.failure.message.generator.PoshiTestFai
 import com.liferay.jenkins.results.parser.failure.message.generator.PoshiValidationFailureMessageGenerator;
 import com.liferay.jenkins.results.parser.failure.message.generator.RebaseFailureMessageGenerator;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
@@ -260,48 +261,6 @@ public abstract class TopLevelBuild extends BaseBuild {
 		buildResultsJSONObject.put("upstreamBranchSHA", getUpstreamBranchSHA());
 
 		return buildResultsJSONObject;
-	}
-
-	public String getCompanionBranchName() {
-		TopLevelBuild topLevelBuild = getTopLevelBuild();
-
-		Map<String, String> gitRepositoryGitDetailsTempMap =
-			topLevelBuild.getCompanionGitRepositoryDetailsTempMap();
-
-		return gitRepositoryGitDetailsTempMap.get("github.sender.branch.name");
-	}
-
-	public Map<String, String> getCompanionGitRepositoryDetailsTempMap() {
-		String branchName = getBranchName();
-		String branchType = "ee";
-		String gitRepositoryType = getBaseGitRepositoryType();
-
-		if (branchName.endsWith("-private")) {
-			branchType = "base";
-		}
-
-		String tempMapName = JenkinsResultsParserUtil.combine(
-			"git.", gitRepositoryType, ".", branchType, ".properties");
-
-		return getTempMap(tempMapName);
-	}
-
-	public String getCompanionGitRepositorySHA() {
-		TopLevelBuild topLevelBuild = getTopLevelBuild();
-
-		Map<String, String> gitRepositoryGitDetailsTempMap =
-			topLevelBuild.getCompanionGitRepositoryDetailsTempMap();
-
-		return gitRepositoryGitDetailsTempMap.get("github.sender.branch.sha");
-	}
-
-	public String getCompanionUsername() {
-		TopLevelBuild topLevelBuild = getTopLevelBuild();
-
-		Map<String, String> gitRepositoryGitDetailsTempMap =
-			topLevelBuild.getCompanionGitRepositoryDetailsTempMap();
-
-		return gitRepositoryGitDetailsTempMap.get("github.sender.username");
 	}
 
 	public Build getControllerBuild() {
@@ -657,6 +616,97 @@ public abstract class TopLevelBuild extends BaseBuild {
 		}
 	}
 
+	public static class WorkspaceBranchInformation
+		implements BranchInformation {
+
+		@Override
+		public String getCachedRemoteGitRefName() {
+			return _workspaceGitRepository.getGitHubDevBranchName();
+		}
+
+		@Override
+		public String getOriginName() {
+			return _workspaceGitRepository.getSenderBranchUsername();
+		}
+
+		@Override
+		public Integer getPullRequestNumber() {
+			Matcher matcher = _pattern.matcher(
+				_workspaceGitRepository.getGitHubURL());
+
+			if (!matcher.find()) {
+				return 0;
+			}
+
+			return Integer.parseInt(matcher.group("pullNumber"));
+		}
+
+		@Override
+		public String getReceiverUsername() {
+			Matcher matcher = _pattern.matcher(
+				_workspaceGitRepository.getGitHubURL());
+
+			if (!matcher.find()) {
+				return "liferay";
+			}
+
+			return matcher.group("username");
+		}
+
+		@Override
+		public String getRepositoryName() {
+			return _workspaceGitRepository.getName();
+		}
+
+		@Override
+		public String getSenderBranchName() {
+			return _workspaceGitRepository.getSenderBranchName();
+		}
+
+		@Override
+		public String getSenderBranchSHA() {
+			return _workspaceGitRepository.getSenderBranchSHA();
+		}
+
+		@Override
+		public RemoteGitRef getSenderRemoteGitRef() {
+			String remoteURL = JenkinsResultsParserUtil.combine(
+				"git@github.com:", getSenderUsername(), "/",
+				getRepositoryName(), ".git");
+
+			return GitUtil.getRemoteGitRef(
+				getSenderBranchName(), new File("."), remoteURL);
+		}
+
+		@Override
+		public String getSenderUsername() {
+			return _workspaceGitRepository.getSenderBranchUsername();
+		}
+
+		@Override
+		public String getUpstreamBranchName() {
+			return _workspaceGitRepository.getUpstreamBranchName();
+		}
+
+		@Override
+		public String getUpstreamBranchSHA() {
+			return _workspaceGitRepository.getBaseBranchSHA();
+		}
+
+		protected WorkspaceBranchInformation(
+			WorkspaceGitRepository workspaceGitRepository) {
+
+			_workspaceGitRepository = workspaceGitRepository;
+		}
+
+		private static final Pattern _pattern = Pattern.compile(
+			"https://github.com/(?<username>[^/]+)/[^/]/pull/" +
+				"(?<pullNumber>\\d+)");
+
+		private final WorkspaceGitRepository _workspaceGitRepository;
+
+	}
+
 	protected TopLevelBuild(String url) {
 		this(url, null);
 	}
@@ -843,8 +893,18 @@ public abstract class TopLevelBuild extends BaseBuild {
 
 		String baseGitRepositorySHA = null;
 
-		if (!baseGitRepositoryName.equals("liferay-jenkins-ee") &&
-			baseGitRepositoryName.endsWith("-ee")) {
+		if ((this instanceof WorkspaceBuild) && !fromArchive) {
+			WorkspaceBuild workspaceBuild = (WorkspaceBuild)this;
+
+			Workspace workspace = workspaceBuild.getWorkspace();
+
+			WorkspaceGitRepository workspaceGitRepository =
+				workspace.getPrimaryWorkspaceGitRepository();
+
+			baseGitRepositorySHA = workspaceGitRepository.getBaseBranchSHA();
+		}
+		else if (!baseGitRepositoryName.equals("liferay-jenkins-ee") &&
+				 baseGitRepositoryName.endsWith("-ee")) {
 
 			baseGitRepositorySHA = getBaseGitRepositorySHA(
 				baseGitRepositoryName.substring(

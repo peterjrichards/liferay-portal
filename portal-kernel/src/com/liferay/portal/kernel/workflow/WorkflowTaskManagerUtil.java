@@ -270,17 +270,19 @@ public class WorkflowTaskManagerUtil {
 			long companyId, long userId, String assetTitle, String[] taskNames,
 			String[] assetTypes, Long[] assetPrimaryKeys,
 			String assigneeClassName, Long[] assigneeUserIds, Date dueDateGT,
-			Date dueDateLT, Boolean completed, Boolean searchByUserRoles,
-			Long workflowDefinitionId, Long[] workflowInstanceIds,
-			Boolean andOperator, int start, int end,
+			Date dueDateLT, Boolean completed,
+			Boolean searchByActivatedWorkflowHandlers,
+			Boolean searchByUserRoles, Long workflowDefinitionId,
+			Long[] workflowInstanceIds, Boolean andOperator, int start, int end,
 			OrderByComparator<WorkflowTask> orderByComparator)
 		throws WorkflowException {
 
 		return _workflowTaskManager.searchWorkflowTasks(
 			companyId, userId, assetTitle, taskNames, assetTypes,
 			assetPrimaryKeys, assigneeClassName, assigneeUserIds, dueDateGT,
-			dueDateLT, completed, searchByUserRoles, workflowDefinitionId,
-			workflowInstanceIds, andOperator, start, end, orderByComparator);
+			dueDateLT, completed, searchByActivatedWorkflowHandlers,
+			searchByUserRoles, workflowDefinitionId, workflowInstanceIds,
+			andOperator, start, end, orderByComparator);
 	}
 
 	public static WorkflowTask updateDueDate(

@@ -431,6 +431,19 @@ public class COREntryLocalServiceImpl extends COREntryLocalServiceBaseImpl {
 
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
+	public COREntry updateCOREntryExternalReferenceCode(
+			String externalReferenceCode, long corEntryId)
+		throws PortalException {
+
+		COREntry corEntry = corEntryPersistence.findByPrimaryKey(corEntryId);
+
+		corEntry.setExternalReferenceCode(externalReferenceCode);
+
+		return corEntryPersistence.update(corEntry);
+	}
+
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
 	public COREntry updateStatus(
 			long userId, long corEntryId, int status,
 			ServiceContext serviceContext)
@@ -444,8 +457,6 @@ public class COREntryLocalServiceImpl extends COREntryLocalServiceBaseImpl {
 			(corEntry.getDisplayDate() != null) &&
 			date.before(corEntry.getDisplayDate())) {
 
-			corEntry.setActive(false);
-
 			status = WorkflowConstants.STATUS_SCHEDULED;
 		}
 
@@ -454,10 +465,6 @@ public class COREntryLocalServiceImpl extends COREntryLocalServiceBaseImpl {
 
 			if ((expirationDate != null) && expirationDate.before(date)) {
 				corEntry.setExpirationDate(null);
-			}
-
-			if (corEntry.getStatus() == WorkflowConstants.STATUS_SCHEDULED) {
-				corEntry.setActive(true);
 			}
 		}
 
@@ -567,16 +574,15 @@ public class COREntryLocalServiceImpl extends COREntryLocalServiceBaseImpl {
 			COREntryTable.INSTANCE.companyId.eq(companyId)
 		).and(
 			COREntryTable.INSTANCE.active.eq(true)
-		);
+		).and(
+			() -> {
+				if (accountEntryId != null) {
+					return accountEntryCOREntryRel.classPK.eq(accountEntryId);
+				}
 
-		if (accountEntryId != null) {
-			predicate = predicate.and(
-				accountEntryCOREntryRel.classPK.eq(accountEntryId));
-		}
-		else {
-			predicate = predicate.and(
-				accountEntryCOREntryRel.COREntryId.isNull());
-		}
+				return accountEntryCOREntryRel.COREntryId.isNull();
+			}
+		);
 
 		if (accountGroupIds != null) {
 			if (accountGroupIds.length == 0) {
@@ -597,35 +603,36 @@ public class COREntryLocalServiceImpl extends COREntryLocalServiceBaseImpl {
 				accountGroupCOREntryRel.COREntryId.isNull());
 		}
 
-		if (commerceChannelId != null) {
-			predicate = predicate.and(
-				commerceChannelCOREntryRel.classPK.eq(commerceChannelId));
-		}
-		else {
-			predicate = predicate.and(
-				commerceChannelCOREntryRel.COREntryId.isNull());
-		}
+		return joinStep.where(
+			predicate.and(
+				() -> {
+					if (commerceChannelId != null) {
+						return commerceChannelCOREntryRel.classPK.eq(
+							commerceChannelId);
+					}
 
-		if (commerceOrderTypeId != null) {
-			predicate = predicate.and(
-				commerceOrderTypeCOREntryRel.classPK.eq(commerceOrderTypeId));
-		}
-		else {
-			predicate = predicate.and(
-				commerceOrderTypeCOREntryRel.COREntryId.isNull());
-		}
+					return commerceChannelCOREntryRel.COREntryId.isNull();
+				}
+			).and(
+				() -> {
+					if (commerceOrderTypeId != null) {
+						return commerceOrderTypeCOREntryRel.classPK.eq(
+							commerceOrderTypeId);
+					}
 
-		return joinStep.where(predicate);
+					return commerceOrderTypeCOREntryRel.COREntryId.isNull();
+				}
+			));
 	}
 
 	private Predicate _getPredicate(
-		String className, Column<COREntryRelTable, Long> classNameId,
-		Column<COREntryRelTable, Long> corEntryId) {
+		String className, Column<COREntryRelTable, Long> classNameIdColumn,
+		Column<COREntryRelTable, Long> corEntryIdColumn) {
 
-		return classNameId.eq(
+		return classNameIdColumn.eq(
 			classNameLocalService.getClassNameId(className)
 		).and(
-			corEntryId.eq(COREntryTable.INSTANCE.COREntryId)
+			corEntryIdColumn.eq(COREntryTable.INSTANCE.COREntryId)
 		);
 	}
 

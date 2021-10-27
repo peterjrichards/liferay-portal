@@ -25,13 +25,10 @@ import com.liferay.batch.planner.service.persistence.BatchPlannerMappingUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseTransactionalMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Collections;
 import java.util.List;
 
 import javax.portlet.ActionRequest;
@@ -59,30 +56,27 @@ public class EditExportBatchPlannerPlanMVCActionCommand
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		String name = ParamUtil.getString(
-			actionRequest, "name", "Plan " + System.currentTimeMillis());
 		String externalType = ParamUtil.getString(
 			actionRequest, "externalType");
 		String internalClassName = ParamUtil.getString(
 			actionRequest, "internalClassName");
+		String name = ParamUtil.getString(
+			actionRequest, "name", "Plan " + System.currentTimeMillis());
+		String taskItemDelegateName = ParamUtil.getString(
+			actionRequest, "taskItemDelegateName");
 
 		BatchPlannerPlan batchPlannerPlan =
 			_batchPlannerPlanService.addBatchPlannerPlan(
 				true, externalType, StringPool.SLASH, internalClassName, name,
-				false);
-
-		boolean containsHeaders = ParamUtil.getBoolean(
-			actionRequest, "containsHeaders");
+				taskItemDelegateName, false);
 
 		_batchPlannerPolicyService.addBatchPlannerPolicy(
 			batchPlannerPlan.getBatchPlannerPlanId(), "containsHeaders",
-			String.valueOf(containsHeaders));
-
-		boolean saveExport = ParamUtil.getBoolean(actionRequest, "saveExport");
+			_getCheckboxValue(actionRequest, "containsHeaders"));
 
 		_batchPlannerPolicyService.addBatchPlannerPolicy(
 			batchPlannerPlan.getBatchPlannerPlanId(), "saveExport",
-			String.valueOf(saveExport));
+			_getCheckboxValue(actionRequest, "saveExport"));
 
 		List<BatchPlannerMapping> batchPlannerMappings =
 			_getBatchPlannerMappings(actionRequest);
@@ -101,49 +95,20 @@ public class EditExportBatchPlannerPlanMVCActionCommand
 	private List<BatchPlannerMapping> _getBatchPlannerMappings(
 		ActionRequest actionRequest) {
 
+		String[] fieldNames = actionRequest.getParameterValues("fieldName");
+
+		if (fieldNames == null) {
+			return Collections.emptyList();
+		}
+
 		List<BatchPlannerMapping> batchPlannerMappings = new ArrayList<>();
 
-		Enumeration<String> enumeration = actionRequest.getParameterNames();
-
-		while (enumeration.hasMoreElements()) {
-			String parameterName = enumeration.nextElement();
-
-			if (!parameterName.startsWith("internalFieldName_") ||
-				Validator.isNull(
-					ParamUtil.getString(actionRequest, parameterName))) {
-
-				continue;
-			}
-
-			String suffix = StringUtil.extractLast(
-				parameterName, StringPool.UNDERLINE);
-
-			String externalFieldNameParamValue = ParamUtil.getString(
-				actionRequest, "externalFieldName_" + suffix);
-
-			if (Validator.isNull(externalFieldNameParamValue)) {
-				continue;
-			}
-
-			String internalFieldNameParamValue = ParamUtil.getString(
-				actionRequest, parameterName);
-
-			if (_isCheckboxValue(externalFieldNameParamValue)) {
-				if (GetterUtil.getBoolean(externalFieldNameParamValue)) {
-					externalFieldNameParamValue = internalFieldNameParamValue;
-				}
-				else {
-					continue;
-				}
-			}
-
+		for (String fieldName : fieldNames) {
 			BatchPlannerMapping batchPlannerMapping =
 				BatchPlannerMappingUtil.create(0);
 
-			batchPlannerMapping.setExternalFieldName(
-				externalFieldNameParamValue);
-			batchPlannerMapping.setInternalFieldName(
-				internalFieldNameParamValue);
+			batchPlannerMapping.setExternalFieldName(fieldName);
+			batchPlannerMapping.setInternalFieldName(fieldName);
 
 			batchPlannerMappings.add(batchPlannerMapping);
 		}
@@ -151,14 +116,14 @@ public class EditExportBatchPlannerPlanMVCActionCommand
 		return batchPlannerMappings;
 	}
 
-	private boolean _isCheckboxValue(String value) {
-		if (StringUtil.equalsIgnoreCase(StringPool.FALSE, value) ||
-			StringUtil.equalsIgnoreCase(StringPool.TRUE, value)) {
+	private String _getCheckboxValue(ActionRequest actionRequest, String name) {
+		String value = actionRequest.getParameter(name);
 
-			return true;
+		if (value == null) {
+			return Boolean.FALSE.toString();
 		}
 
-		return false;
+		return Boolean.TRUE.toString();
 	}
 
 	@Reference

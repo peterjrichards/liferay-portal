@@ -28,6 +28,8 @@ definition {
 			JSONGroup.deleteGroupByName(groupName = "Site Name");
 		}
 
+		JSONUser.tearDownNonAdminUsers();
+
 		ACUtils.tearDownAC();
 	}
 
@@ -72,7 +74,7 @@ definition {
 		task ("Launch DXP and go to site") {
 			ACUtils.launchDXP();
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -99,24 +101,6 @@ definition {
 				metricName = "Unique Visitors",
 				metricValue = "1");
 		}
-	}
-
-	@description = "Automation ID: LRAC-8830 | Test Summary: Add DXP data source and configure only an Organization's users"
-	@ignore = "true"
-	@priority = "3"
-	test AddDataSourceForOrganizationUsers {
-
-		// TODO LRAC-8830 AddDataSourceForOrganizationUsers
-
-	}
-
-	@description = "Automation ID: LRAC-8831 | Test Summary: Add DXP data source and configure only an User Group's users"
-	@ignore = "true"
-	@priority = "3"
-	test AddDataSourceForUsersGroups {
-
-		// TODO LRAC-8831 AddDataSourceForUsersGroups
-
 	}
 
 	@description = "Automation ID: LRAC-8108 | Test Summary: Add date source page that allows user to choose type of data source"
@@ -251,10 +235,6 @@ definition {
 
 		ACDXPSettings.syncNewContactData();
 
-		Navigator.openURL();
-
-		Pause(locator1 = "5000");
-
 		ACUtils.launchAC();
 
 		ACProperties.switchProperty(propertyName = "${propertyName}");
@@ -276,10 +256,6 @@ definition {
 			userScreenName = "usersn");
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud();
-
-		Navigator.openURL();
-
-		Pause(locator1 = "5000");
 
 		User.logoutAndLoginPG(
 			userLoginEmailAddress = "userea@liferay.com",
@@ -348,15 +324,6 @@ definition {
 		ACUtils.launchAC();
 
 		AnalyticsCloud.takeInvalidTokenFromAnalyticsCloud();
-	}
-
-	@description = "Automation ID: LRAC-8820 | Test Summary: There is a list of connected data sources including a table of properties/status"
-	@ignore = "true"
-	@priority = "5"
-	test ListOfConnectedDataSourcesIncludingTablePropertiesStatus {
-
-		// TODO LRAC-8820 ListOfConnectedDataSourcesIncludingTablePropertiesStatus
-
 	}
 
 	@description = "Automation ID: LRAC-8839 | Test Summary: Preview the number of Organization contacts to sync"
@@ -467,15 +434,6 @@ definition {
 		}
 	}
 
-	@description = "Automation ID: LRAC-8833 | Test Summary: Preview number of contacts to be added when configuring contacts"
-	@ignore = "true"
-	@priority = "5"
-	test PreviewNumberOfContactsToAddedWhenSyncContacts {
-
-		// TODO LRAC-8833 PreviewNumberOfContactsToAddedWhenSyncContacts
-
-	}
-
 	@description = "Automation ID: LRAC-8822 | Test Summary: Sync Liferay Data Source Contacts by User Groups"
 	@priority = "4"
 	test SyncDataSourceContactsByGroups {
@@ -503,11 +461,8 @@ definition {
 		task ("Connect to AC") {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(userGroup = "User Group Name");
 		}
+
 		task ("Login as another user and visit DXP") {
-			Navigator.openURL();
-
-			Pause(locator1 = "5000");
-
 			User.logoutAndLoginPG(
 				userLoginEmailAddress = "userea@liferay.com",
 				userLoginFullName = "userfn userln");
@@ -582,10 +537,6 @@ definition {
 		}
 
 		task ("Login as another user and visit DXP") {
-			Navigator.openURL();
-
-			Pause(locator1 = "5000");
-
 			User.logoutAndLoginPG(
 				userLoginEmailAddress = "userea@liferay.com",
 				userLoginFullName = "userfn userln");
@@ -706,11 +657,11 @@ definition {
 		}
 
 		task ("View the blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
 		task ("Close DXP, launch AC and switch the propety") {
@@ -746,19 +697,18 @@ definition {
 
 		task ("Connect DXP to AC") {
 			ACUtils.addSiteAndPage();
+
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Go to page and get data") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
 		task ("Close all sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Go to AC and assert and switch property") {

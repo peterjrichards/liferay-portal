@@ -1,5 +1,19 @@
 definition {
 
+	macro addPage {
+		if (!(isSet(siteName))) {
+			siteName = "Site Name";
+		}
+
+		if (!(isSet(layoutName))) {
+			layoutName = "AC Page";
+		}
+
+		JSONLayout.addPublicLayout(
+			groupName = "${siteName}",
+			layoutName = "${layoutName}");
+	}
+
 	macro addSiteAndPage {
 		if (!(isSet(siteName))) {
 			siteName = "Site Name";
@@ -11,9 +25,9 @@ definition {
 			layoutName = "AC Page";
 		}
 
-		JSONLayout.addPublicLayout(
-			groupName = "${siteName}",
-			layoutName = "${layoutName}");
+		ACUtils.addPage(
+			layoutName = "${layoutName}",
+			siteName = "${siteName}");
 	}
 
 	macro addWidgetToPage {
@@ -36,6 +50,10 @@ definition {
 
 		for (var percentage : list "${percentageList}") {
 			var key_percentage = "${percentage}";
+
+			while (IsElementNotPresent(locator1 = "ACUtils#METRIC_VALUE_PERCENTAGE") && (maxIterations = "50")) {
+				TestUtils.hardRefresh();
+			}
 
 			AssertElementPresent(locator1 = "ACUtils#METRIC_VALUE_PERCENTAGE");
 		}
@@ -276,8 +294,11 @@ definition {
 		com.liferay.poshi.runner.util.JSONCurlUtil.post("${cleanCurl}");
 	}
 
+	@summary = "This macro close all open AC sessions. It needs a 30 second pause which is the time required for the command to be executed. For more information about pause see LRAC-9518"
 	macro closeAllSessionsAndWait {
 		ACUtils.closeAllSessions();
+
+		// It needs a 30 second pause which is the time required for the command to be executed. For more information about pause see LRAC-9518
 
 		Pause(locator1 = "30000");
 	}
@@ -501,6 +522,69 @@ definition {
 		}
 	}
 
+	@summary = "This macro access a page/document"
+	macro navigateToSitePage {
+		for (var documentTitle : list "${documentTitleList}") {
+			Navigator.gotoSitePage(
+				pageName = "${pageName}",
+				siteName = "${siteName}");
+
+			if ("${actionType}" == "View Blog") {
+				BlogsNavigator.gotoPG(entryTitle = "${documentTitle}");
+			}
+
+			if ("${actionType}" == "Comment Blog") {
+				BlogsNavigator.gotoPG(entryTitle = "${documentTitle}");
+
+				Comments.addPG(entryComment = "${commentText}");
+			}
+
+			if ("${actionType}" == "View DM") {
+				DMNavigator.gotoDocumentPG(dmDocumentTitle = "${documentTitle}");
+			}
+
+			if ("${actionType}" == "Download DM") {
+				DMDocument.downloadPG(dmDocumentTitle = "${documentTitle}");
+			}
+
+			if ("${actionType}" == "View Form") {
+				FormPortlet.waitFormRenderer(text = "Submit");
+			}
+
+			if ("${actionType}" == "Submit Form") {
+				FormPortlet.waitFormRenderer(text = "Submit");
+
+				FormFields.viewTextLabel(
+					fieldLabel = "Text",
+					fieldName = "Text");
+
+				FormFields.editText(
+					fieldName = "Text",
+					fieldValue = "${submitText}");
+
+				FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
+			}
+		}
+	}
+
+	@summary = "This macro access a page/document with different users. Pause is necessary because poshi logs in from one user to another very quickly. For more information about pause see LRAC-9514"
+	macro navigateToSitePageWithUser {
+		for (var email : list "${emailList}") {
+			User.logoutAndLoginPG(userLoginEmailAddress = "${email}");
+
+			ACUtils.navigateToSitePage(
+				actionType = "${actionType}",
+				documentTitleList = "${documentTitleList}",
+				pageName = "${pageName}",
+				siteName = "${siteName}",
+				submitText = "${submitText}");
+
+			// Pause is necessary because poshi logs in from one user to another very quickly. For more information about pause see LRAC-9514
+
+			Pause(locator1 = "5000");
+		}
+	}
+
 	macro orderArrow {
 		var type = "${type}";
 
@@ -586,10 +670,8 @@ definition {
 		for (var name : list "${nameList}") {
 			var key_nameList = "${name}";
 
-			while (IsElementNotPresent(locator1 = "ACUtils#NAME_LIST", value1 = "${name}") && (maxIterations = "50")) {
+			while (IsElementNotPresent(locator1 = "ACUtils#NAME_LIST") && (maxIterations = "50")) {
 				Refresh();
-
-				Pause(locator1 = "3000");
 			}
 
 			AssertTextEquals(
@@ -598,8 +680,26 @@ definition {
 		}
 	}
 
+	macro viewNameListInOrder {
+		var key_userName = "${name}";
+
+		var index = "${index}";
+
+		while (IsElementNotPresent(locator1 = "ACSegments#ADD_MEMBERS_INDEX_TABLE") && (maxIterations = "50")) {
+			Refresh();
+		}
+
+		AssertTextEquals(
+			locator1 = "ACSegments#ADD_MEMBERS_INDEX_TABLE",
+			value1 = "${name}");
+	}
+
 	macro viewNoResultsMessage {
 		var key_noResultMessage = "${noResultMessage}";
+
+		while (IsElementNotPresent(locator1 = "ACAssets#NO_RESULTS_CONTENT_MESSAGE") && (maxIterations = "50")) {
+			TestUtils.hardRefresh();
+		}
 
 		AssertTextEquals(
 			locator1 = "ACAssets#NO_RESULTS_CONTENT_MESSAGE",

@@ -34,6 +34,11 @@ definition {
 		if ("${testPortalInstance}" == "true") {
 			PortalInstances.tearDownCP();
 		}
+		else {
+			JSONGroup.deleteGroupByName(groupName = "Site Name");
+		}
+
+		JSONUser.tearDownNonAdminUsers();
 
 		ACUtils.tearDownAC();
 	}
@@ -51,7 +56,7 @@ definition {
 		}
 
 		task ("Launch DXP and visit the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -115,42 +120,23 @@ definition {
 		}
 	}
 
-	@description = "Feature ID: Legacy | Automation ID: LRAC-9206 | Test Summary: Add segment using a session property 'Language'"
-	@ignore = "true"
-	@priority = "4"
-	test CanCreateSessionAttributeUsingLanguage {
-
-		// TODO LRAC-9206 CanCreateSessionAttributeUsingLanguage pending implementation
-
-	}
-
-	@description = "Feature ID: Legacy | Automation ID: LRAC-9207 | Test Summary: Add segment using a session property 'Last Sign In Date'"
-	@ignore = "true"
-	@priority = "4"
-	test CanCreateSessionAttributeUsingLastSignInDate {
-
-		// TODO LRAC-9207 CanCreateSessionAttributeUsingLastSignInDate pending implementation
-
-	}
-
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9208 | Test Summary: Add segment using a session property 'Referrer URL'"
 	@priority = "4"
 	test CanCreateSessionAttributeUsingReferrerURL {
-		property portal.upstream = "quarantine";
-
-		// AC Refactor: timing issue for Referrer URL with page sync
-		// AC Refactor ticket: LRAC-9272
+		var usernameList = "ac,liferay";
 
 		task ("Connect the DXP to Analytics Cloud") {
-			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud();
+			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Add a new user in DXP") {
-			JSONUser.addUser(
-				userEmailAddress = "ac@liferay.com",
-				userFirstName = "ac",
-				userLastName = "ac",
-				userScreenName = "ac");
+			for (var name : list "${usernameList}") {
+				JSONUser.addUser(
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
+			}
 		}
 
 		task ("Sync new user") {
@@ -158,37 +144,21 @@ definition {
 		}
 
 		task ("Add pages") {
-			for (var n : list "1,2") {
-				ACUtils.addSiteAndPage(layoutName = "AC Page ${n}");
-			}
-		}
-
-		task ("Go to AC Page and get URL") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page 1",
-				siteName = "Site Name");
-
-			var myURL = Navigator.getCurrentURL();
-
-			Pause(locator1 = "3000");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page 2",
-				siteName = "Site Name");
+			ACUtils.addPage(layoutName = "AC Page 2");
 		}
 
 		task ("Sign in with the new user") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "ac@liferay.com",
-				userLoginFullName = "ac ac");
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "liferay@liferay.com",
+				pageName = "AC Page",
+				siteName = "Site Name");
 
-			for (var n : list "1,2") {
-				Navigator.gotoSitePage(
-					pageName = "AC Page ${n}",
-					siteName = "Site Name");
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "ac@liferay.com",
+				pageName = "AC Page 2",
+				siteName = "Site Name");
 
-				Pause(locator1 = "3000");
-			}
+			var myURL = Navigator.getCurrentURL();
 		}
 
 		task ("Switch to new property in AC") {
@@ -233,36 +203,19 @@ definition {
 				preposition = "ever");
 		}
 
-		task ("Refresh the page to receive data") {
-			Refresh();
+		task ("Navigate to Segments") {
+			ACNavigation.goToSegments();
+		}
+
+		task ("Access the new segment") {
+			ACSegments.accessSegment(segmentName = "Dynamic Segment Test");
 		}
 
 		task ("Assert that new user is on segment") {
+			ACNavigation.switchTab(tabName = "Membership");
 
-			// Takes too much time to sync and get data from the page on AC
-
-			ACNavigation.openItem(itemName = "Membership");
-
-			ACSegments.assertMember(memberName = "ac ac");
+			ACUtils.viewNameList(nameList = "ac ac");
 		}
-	}
-
-	@description = "Feature ID: Legacy | Automation ID: LRAC-9209 | Test Summary: Add segment using a session property 'Request Parameters'"
-	@ignore = "true"
-	@priority = "4"
-	test CanCreateSessionAttributeUsingRequestParameters {
-
-		// TODO LRAC-9209 CanCreateSessionAttributeUsingRequestParameters pending implementation
-
-	}
-
-	@description = "Feature ID: Legacy | Automation ID: LRAC-9210 | Test Summary: Add segment using a session property 'Signed In'"
-	@ignore = "true"
-	@priority = "4"
-	test CanCreateSessionAttributeUsingSignedIn {
-
-		// TODO LRAC-9210 CanCreateSessionAttributeUsingSignedIn pending implementation
-
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9211 | Test Summary: Add segment using a session property 'URL'"
@@ -349,15 +302,6 @@ definition {
 
 			ACSegments.assertMember(memberName = "ac ac");
 		}
-	}
-
-	@description = "Feature ID: Legacy | Automation ID: LRAC-9212 | Test Summary: Create a Segment of Session in a Topic"
-	@ignore = "true"
-	@priority = "4"
-	test CreateSegmentSessionInATopic {
-
-		// TODO LRAC-9212 CreateSegmentSessionInATopic pending implementation
-
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9213 | Test Summary: Show 'duplicate' and 'delete' options in a list for every segment criteria"

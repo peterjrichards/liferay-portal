@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBus;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserNotificationDeliveryConstants;
 import com.liferay.portal.kernel.process.ProcessCallable;
@@ -45,6 +46,7 @@ import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserNotificationEventLocalService;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -182,15 +184,14 @@ public class MicroblogsEntryLocalServiceImpl
 			activityKey = MicroblogsActivityKeys.REPOST_ENTRY;
 		}
 
-		JSONObject extraDataJSONObject = JSONUtil.put(
-			"content", microblogsEntry.getContent()
-		).put(
-			"parentMicroblogsEntryId", parentMicroblogsEntryId
-		);
-
 		_socialActivityLocalService.addActivity(
 			userId, 0, MicroblogsEntry.class.getName(), microblogsEntryId,
-			activityKey, extraDataJSONObject.toString(),
+			activityKey,
+			JSONUtil.put(
+				"content", microblogsEntry.getContent()
+			).put(
+				"parentMicroblogsEntryId", parentMicroblogsEntryId
+			).toString(),
 			microblogsEntry.getParentMicroblogsEntryUserId());
 
 		// Notification
@@ -222,6 +223,7 @@ public class MicroblogsEntryLocalServiceImpl
 	}
 
 	@Override
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
 	public MicroblogsEntry deleteMicroblogsEntry(
 			MicroblogsEntry microblogsEntry)
 		throws PortalException {

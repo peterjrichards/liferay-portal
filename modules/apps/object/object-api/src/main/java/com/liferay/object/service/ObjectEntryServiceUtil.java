@@ -67,6 +67,14 @@ public class ObjectEntryServiceUtil {
 		return getService().deleteObjectEntry(objectEntryId);
 	}
 
+	public static ObjectEntry deleteObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws PortalException {
+
+		return getService().deleteObjectEntry(
+			externalReferenceCode, companyId, groupId);
+	}
+
 	public static ObjectEntry fetchObjectEntry(long objectEntryId)
 		throws PortalException {
 
@@ -79,6 +87,14 @@ public class ObjectEntryServiceUtil {
 		return getService().getObjectEntry(objectEntryId);
 	}
 
+	public static ObjectEntry getObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws PortalException {
+
+		return getService().getObjectEntry(
+			externalReferenceCode, companyId, groupId);
+	}
+
 	/**
 	 * Returns the OSGi service identifier.
 	 *
@@ -86,6 +102,13 @@ public class ObjectEntryServiceUtil {
 	 */
 	public static String getOSGiServiceIdentifier() {
 		return getService().getOSGiServiceIdentifier();
+	}
+
+	public static boolean hasModelResourcePermission(
+			ObjectEntry objectEntry, String actionId)
+		throws PortalException {
+
+		return getService().hasModelResourcePermission(objectEntry, actionId);
 	}
 
 	public static ObjectEntry updateObjectEntry(

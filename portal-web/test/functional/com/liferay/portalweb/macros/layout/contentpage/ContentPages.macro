@@ -220,25 +220,103 @@ definition {
 
 		PageEditor.assertFragmentSidebarLoaded();
 
-		AssertTextEquals(
-			locator1 = "ControlMenu#HEADING",
-			value1 = "${pageName}");
+		ControlMenu.viewHeaderTitle(headerTitle = "${pageName}");
 
-		AssertTextEquals(
-			id = "element-text",
-			key_fragmentName = "Heading",
-			locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
-			value1 = "${collectionName}");
+		PageEditor.viewFragmentEditableText(
+			editableText = "${collectionName}",
+			fragmentName = "Heading",
+			id = "element-text");
 
-		AssertElementPresent(
-			key_fragmentName = "Collection Display",
-			locator1 = "Fragment#FRAGMENT_HEADER");
+		PageEditor.viewFragment(fragmentName = "Collection Display");
 	}
 
-	macro clickPencil {
+	macro gotoPageEditor {
 		Click(locator1 = "Icon#EDIT_PENCIL");
 
 		PageEditor.assertFragmentSidebarLoaded();
+	}
+
+	macro viewFragmentBackgroundImage {
+		if (!(isSet(position))) {
+			var position = "1";
+		}
+
+		AssertVisible(
+			image = "${image}",
+			index = "${position}",
+			locator1 = "Fragment#FRAGMENT_BACKGROUND_IMAGE");
+	}
+
+	macro viewFragmentImage {
+		if (!(isSet(position))) {
+			var position = "1";
+		}
+
+		if ("${fragmentName}" == "Content Display") {
+			if (!(isSet(assetType))) {
+				AssertVisible(
+					image = "${image}",
+					index = "${position}",
+					locator1 = "Fragment#CONTENT_DISPLAY_PREVIEW_IMAGE");
+			}
+
+			else {
+				AssertVisible(
+					assetType = "${assetType}",
+					image = "${image}",
+					index = "${position}",
+					locator1 = "Fragment#CONTENT_DISPLAY_IMAGE");
+			}
+		}
+
+		else {
+			AssertVisible(
+				fragmentName = "${fragmentName}",
+				id = "${id}",
+				image = "${image}",
+				index = "${position}",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_IMAGE");
+		}
+	}
+
+	macro viewFragmentText {
+		if (!(isSet(position))) {
+			var position = "1";
+		}
+
+		if ("${contributed}" == "false") {
+			AssertTextEquals(
+				fragmentName = "${fragmentName}",
+				index = "${position}",
+				locator1 = "Fragment#EDITABLE_FIELD_ANY",
+				value1 = "${text}");
+		}
+
+		else if (("${fragmentName}" == "Content Display") || ("${fragmentName}" == "Display Page Content")) {
+			if (!(isSet(assetType))) {
+				AssertTextEquals(
+					index = "${position}",
+					locator1 = "Fragment#CONTENT_DISPLAY_ASSET_SUMMARY",
+					value1 = "${text}");
+			}
+
+			else {
+				AssertTextEquals(
+					assetType = "${assetType}",
+					index = "${position}",
+					locator1 = "Fragment#CONTENT_DISPLAY_TEXT",
+					value1 = "${text}");
+			}
+		}
+
+		else {
+			AssertTextEquals(
+				fragmentName = "${fragmentName}",
+				id = "${id}",
+				index = "${position}",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
+				value1 = "${text}");
+		}
 	}
 
 }

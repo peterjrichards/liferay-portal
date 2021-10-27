@@ -13,9 +13,9 @@ definition {
 		ApplicationsMenu.gotoPortlet(
 			category = "Publications",
 			panel = "Applications",
-			portlet = "Settings");
+			portlet = "Publications");
 
-		Publications.enablePublications(gotoOverview = "true");
+		Publications.enablePublications();
 	}
 
 	tearDown {
@@ -28,7 +28,7 @@ definition {
 			ApplicationsMenu.gotoPortlet(
 				category = "Publications",
 				panel = "Applications",
-				portlet = "Settings");
+				portlet = "Publications");
 
 			Publications.disablePublications();
 		}

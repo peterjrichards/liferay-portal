@@ -253,7 +253,7 @@ definition {
 			depotDescription = "This is the description of a depot",
 			depotName = "Test Depot Name");
 
-		JSONDocument.addFolder(
+		JSONFolder.addFolder(
 			dmFolderDescription = "DM Folder Description",
 			dmFolderName = "DM Folder Name",
 			groupName = "Test Depot Name");
@@ -809,9 +809,7 @@ definition {
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
 
-		AssertVisible(
-			key_imageName = "Document_1.jpeg",
-			locator1 = "Fragment#FRAGMENT_SECTION_BACKGROUND_IMAGE");
+		ContentPages.viewFragmentBackgroundImage(image = "Document_1.jpeg");
 	}
 
 	@description = "This test covers LPS-119553. It ensures that the assets in the connected site can not be filtered out after navigating to the depot through the breadcrumb."
@@ -938,7 +936,7 @@ definition {
 			mimeType = "image/jpeg",
 			sourceFileName = "Document_1.jpg");
 
-		JSONDocument.addFolder(
+		JSONFolder.addFolder(
 			dmFolderDescription = "DM Folder Description",
 			dmFolderName = "DM Folder Name",
 			groupName = "Test Depot Name",
@@ -959,7 +957,7 @@ definition {
 			mimeType = "image/jpeg",
 			sourceFileName = "Document_1.jpg");
 
-		JSONDocument.addFolder(
+		JSONFolder.addFolder(
 			dmFolderDescription = "DM Folder Description",
 			dmFolderName = "DM Folder Name",
 			groupName = "Site Name");
@@ -998,7 +996,7 @@ definition {
 			depotDescription = "This is the description of a depot",
 			depotName = "Test Depot Name");
 
-		JSONDocument.addFolder(
+		JSONFolder.addFolder(
 			dmFolderDescription = "DM Folder Description",
 			dmFolderName = "DM Folder Name",
 			groupName = "Test Depot Name");

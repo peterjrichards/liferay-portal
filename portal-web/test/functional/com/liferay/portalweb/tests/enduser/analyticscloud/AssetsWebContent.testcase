@@ -39,6 +39,8 @@ definition {
 			JSONGroup.deleteGroupByName(groupName = "Site Name");
 		}
 
+		JSONUser.tearDownNonAdminUsers();
+
 		ACUtils.tearDownAC();
 	}
 
@@ -53,7 +55,7 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("Go to the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -104,15 +106,13 @@ definition {
 		}
 
 		task ("Go to Site Page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
 		task ("Navigate to AC workspace") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 
 			ACUtils.launchAC();
 		}
@@ -150,9 +150,11 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8448 | Test Summary: Web content audience card shows expected amount of known and anonymous individuals"
 	@priority = "5"
 	test AudienceCardShowsExpectedAmountKnowAndAnonymousIndividualsInWC {
-		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+		var usernameList = "ac,liferay";
 
-		for (var name : list "ac,liferay") {
+		var emailList = "ac@liferay.com,liferay@liferay.com";
+
+		for (var name : list "${usernameList}") {
 			JSONUser.addUser(
 				userEmailAddress = "${name}@liferay.com",
 				userFirstName = "${name}",
@@ -160,27 +162,18 @@ definition {
 				userScreenName = "${name}");
 		}
 
-		ACDXPSettings.syncNewContactData();
+		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var name : list "ac,liferay") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "${name}@liferay.com",
-				userLoginFullName = "${name} ${name}");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
-		}
-
-		User.logoutPG();
-
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePageWithUser(
+			emailList = "${emailList}",
 			pageName = "AC Page",
 			siteName = "Site Name");
 
-		Pause(locator1 = "5000");
+		User.logoutPG();
+
+		ACUtils.navigateToSitePage(
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -210,10 +203,12 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8449 | Test Summary: Web content audience card shows expected amount of segmented and unsegmented individuals"
 	@priority = "5"
 	test AudienceCardShowsExpectedAmountSegmentedAndUnsegmentedInWC {
-		task ("Create users and sync") {
-			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+		var usernameList = "ac,liferay";
 
-			for (var name : list "ac,liferay") {
+		var emailList = "ac@liferay.com,liferay@liferay.com";
+
+		task ("Create users and sync") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
 					userEmailAddress = "${name}@liferay.com",
 					userFirstName = "${name}",
@@ -221,21 +216,26 @@ definition {
 					userScreenName = "${name}");
 			}
 
-			ACDXPSettings.syncNewContactData();
+			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Go to page and get data for unsegmented individuals") {
-			for (var name : list "ac,liferay") {
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${name}@liferay.com",
-					userLoginFullName = "${name} ${name}");
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
+		}
 
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
+		task ("View page with anonymous user") {
+			User.logoutPG();
 
-				Pause(locator1 = "5000");
-			}
+			ACUtils.navigateToSitePage(
+				pageName = "AC Page",
+				siteName = "Site Name");
+		}
+
+		task ("Close all sessions") {
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Go to AC and create segment for the user") {
@@ -257,7 +257,7 @@ definition {
 		task ("Go to page and get data for segmented individuals") {
 			ACUtils.launchDXP(userEmailAddress = "ac@liferay.com");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -292,7 +292,6 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8444 | Test Summary: Custom Range time filter in Web Content assets page"
-	@ignore = "true"
 	@priority = "4"
 	test CanAssertWebContentTimeFIlterCustom {
 		property portal.upstream = "quarantine";
@@ -305,15 +304,13 @@ definition {
 		}
 
 		task ("Go to Site Page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
 		task ("Navigate to AC workspace") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 
 			ACUtils.launchAC();
 		}
@@ -374,11 +371,10 @@ definition {
 			userLoginEmailAddress = "ac@liferay.com",
 			userLoginFullName = "ac ac");
 
-		for (var n : list "1,2,3") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-		}
+		ACUtils.navigateToSitePage(
+			documentTitleList = "1,2,3",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -416,7 +412,7 @@ definition {
 
 		task ("Add pages and add web content to earch of the page") {
 			for (var layoutName : list "AC Page 2,AC Page 3") {
-				ACUtils.addSiteAndPage(layoutName = "${layoutName}");
+				ACUtils.addPage(layoutName = "${layoutName}");
 			}
 
 			for (var n : list "2,3") {
@@ -448,7 +444,7 @@ definition {
 				userLoginFullName = "ac ac");
 
 			for (var pageName : list "AC Page,AC Page 2,AC Page 3") {
-				Navigator.gotoSitePage(
+				ACUtils.navigateToSitePage(
 					pageName = "${pageName}",
 					siteName = "Site Name");
 			}
@@ -490,7 +486,6 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8445 | Test Summary: Assert Web Content 180 Days Time Filter In Web Content Assets Page"
-	@ignore = "true"
 	@priority = "5"
 	test CanUse180DaysTimeFilterInWebContentOverview {
 		property portal.upstream = "quarantine";
@@ -539,7 +534,6 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8443 | Test Summary: Assert Custom Range time filter in assets"
-	@ignore = "true"
 	@priority = "5"
 	test CanUseCustomRangeTimeFilterInWebContentOverview {
 		property portal.upstream = "quarantine";
@@ -554,9 +548,7 @@ definition {
 		// Use a macro that create the page in the custom range time.
 
 		task ("Navigate to AC property") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 
 			ACUtils.launchAC();
 
@@ -605,9 +597,15 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8131 | Test Summary: Web content known individuals shows which individuals interact with the web content"
 	@priority = "5"
 	test KnownIndividualsShowsWhichIndividualsInteractWithWebContent {
+		var nameList = "ac ac,liferay liferay,dxp dxp";
+
+		var usernameList = "ac,liferay,dxp";
+
+		var emailList = "ac@liferay.com,liferay@liferay.com,dxp@liferay.com";
+
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var name : list "ac,liferay,dxp") {
+		for (var name : list "${usernameList}") {
 			JSONUser.addUser(
 				userEmailAddress = "${name}@liferay.com",
 				userFirstName = "${name}",
@@ -617,17 +615,10 @@ definition {
 
 		ACDXPSettings.syncNewContactData();
 
-		for (var name : list "ac,liferay,dxp") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "${name}@liferay.com",
-				userLoginFullName = "${name} ${name}");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
-		}
+		ACUtils.navigateToSitePageWithUser(
+			emailList = "${emailList}",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		JSONUser.addUser(
 			userEmailAddress = "userac@liferay.com",
@@ -635,13 +626,8 @@ definition {
 			userLastName = "userac",
 			userScreenName = "userac");
 
-		User.logoutAndLoginPG(
-			userEmailAddress = "userac@liferay.com",
-			userFirstName = "userac",
-			userLastName = "userac",
-			userScreenName = "userac");
-
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePageWithUser(
+			emailList = "userac@liferay.com",
 			pageName = "AC Page",
 			siteName = "Site Name");
 
@@ -669,11 +655,7 @@ definition {
 
 		ACTimeFilter.setLast24Hours();
 
-		for (var name : list "ac,liferay,dxp") {
-			AssertElementPresent(
-				key_userName = "${name} ${name}",
-				locator1 = "ACSegments#SEGMENT_MEMBERS");
-		}
+		ACUtils.viewNameList(nameList = "${nameList}");
 
 		AssertElementNotPresent(
 			key_userName = "userac userac",
@@ -686,7 +668,7 @@ definition {
 		var assetNameList = "Web Content AC Title,Web Content AC Title 2,Web Content AC Title 3";
 
 		for (var layoutName : list "AC Page 2,AC Page 3") {
-			ACUtils.addSiteAndPage(layoutName = "${layoutName}");
+			ACUtils.addPage(layoutName = "${layoutName}");
 		}
 
 		for (var n : list "2,3") {
@@ -710,7 +692,7 @@ definition {
 			userLoginFullName = "ac ac");
 
 		for (var pageName : list "AC Page,AC Page 2,AC Page 3") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "${pageName}",
 				siteName = "Site Name");
 		}
@@ -740,11 +722,10 @@ definition {
 		}
 
 		task ("Visit page 4 times on DXP") {
-			for (var n : list "1,2,3,4") {
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-			}
+			ACUtils.navigateToSitePage(
+				documentTitleList = "1,2,3,4",
+				pageName = "AC Page",
+				siteName = "Site Name");
 
 			ACUtils.closeAllSessionsAndWait();
 		}
@@ -813,7 +794,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -883,11 +864,10 @@ definition {
 			userLoginEmailAddress = "ac@liferay.com",
 			userLoginFullName = "ac ac");
 
-		for (var n : list "1,2,3") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-		}
+		ACUtils.navigateToSitePage(
+			documentTitleList = "1,2,3",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -939,11 +919,10 @@ definition {
 			userLoginEmailAddress = "ac@liferay.com",
 			userLoginFullName = "ac ac");
 
-		for (var n : list "1,2,3") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-		}
+		ACUtils.navigateToSitePage(
+			documentTitleList = "1,2,3",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 

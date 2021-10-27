@@ -50,11 +50,11 @@ definition {
 		}
 
 		task ("View the page and blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
 		task ("Close sessions") {
@@ -94,7 +94,7 @@ definition {
 	@priority = "3"
 	test LocationsBySession {
 
-		// TODO LRAC-8308 LocationsBySession
+		// TODO LRAC-8308 LocationsBySession pending implementation
 
 	}
 

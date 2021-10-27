@@ -30,6 +30,8 @@ definition {
 			JSONGroup.deleteGroupByName(groupName = "Site Name");
 		}
 
+		JSONUser.tearDownNonAdminUsers();
+
 		ACUtils.tearDownAC();
 	}
 
@@ -42,13 +44,12 @@ definition {
 		// AC Refactor ticket: LRAC-9010
 
 		var pageCreation = "AC Page 1,AC Page 2";
+
 		var pageInteraction = "AC Page,AC Page 1,AC Page 1,AC Page 2,AC Page 2,AC Page 2";
 
 		task ("Add Site and Page") {
 			for (var n : list "${pageCreation}") {
-				JSONLayout.addPublicLayout(
-					groupName = "Site Name",
-					layoutName = "${n}");
+				ACUtils.addPage(layoutName = "${n}");
 			}
 		}
 
@@ -57,19 +58,15 @@ definition {
 		}
 
 		task ("Interation with Pages") {
-			for (var n : list "${pageInteraction}") {
-				Navigator.gotoSitePage(
-					pageName = "${n}",
+			for (var pageName : list "${pageInteraction}") {
+				ACUtils.navigateToSitePage(
+					pageName = "${pageName}",
 					siteName = "Site Name");
-
-				Pause(locator1 = "3000");
 			}
 		}
 
 		task ("AC launch") {
 			ACUtils.closeAllSessionsAndWait();
-
-			Pause(locator1 = "30000");
 
 			ACUtils.launchAC();
 
@@ -100,14 +97,14 @@ definition {
 		// AC Refactor: the issue is due to data not appearing on time
 		// AC Refactor ticket: LRAC-8964
 
-		task ("Connect Analytics Cloud to DXP") {
-			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
-		}
-
 		task ("Blogs creation") {
 			for (var n : list "1,2") {
 				ACUtils.createBlogsAndAddToPage(entryTitle = "Test Blog ${n}");
 			}
+		}
+
+		task ("Connect Analytics Cloud to DXP") {
+			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Interation with Test Blogs") {
@@ -116,13 +113,11 @@ definition {
 					userLoginEmailAddress = "test@liferay.com",
 					userLoginFullName = "test test");
 
-				Navigator.gotoSitePage(
+				ACUtils.navigateToSitePage(
+					actionType = "View Blog",
+					documentTitleList = "Test Blog ${n}",
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				BlogsNavigator.gotoPG(entryTitle = "Test Blog ${n}");
-
-				Pause(locator1 = "3000");
 			}
 		}
 
@@ -131,17 +126,13 @@ definition {
 				userLoginEmailAddress = "test@liferay.com",
 				userLoginFullName = "test test");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "3000");
 		}
 
 		task ("AC launch") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 
 			ACUtils.launchAC();
 
@@ -174,8 +165,12 @@ definition {
 
 		var num = "1,2";
 
+		var usernameList = "ac,liferay";
+
+		var emailList = "ac@liferay.com,liferay@liferay.com";
+
 		task ("Add two new users") {
-			for (var name : list "ac,liferay") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
 					userEmailAddress = "${name}@liferay.com",
 					userFirstName = "${name}",
@@ -184,22 +179,20 @@ definition {
 			}
 		}
 
-		task ("Connect Analytics Cloud to DXP") {
-			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
-		}
-
 		task ("Blogs creation") {
 			for (var n : list "${num}") {
 				ACUtils.createBlogsAndAddToPage(entryTitle = "Test Blog ${n}");
 			}
 		}
 
+		task ("Connect Analytics Cloud to DXP") {
+			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+		}
+
 		task ("Access the page as a Test user") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Interation with ac user") {
@@ -208,13 +201,11 @@ definition {
 				userLoginFullName = "ac ac");
 
 			for (var n : list "${num}") {
-				Navigator.gotoSitePage(
+				ACUtils.navigateToSitePage(
+					actionType = "View Blog",
+					documentTitleList = "Test Blog ${n}",
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				BlogsNavigator.gotoPG(entryTitle = "Test Blog ${n}");
-
-				Pause(locator1 = "3000");
 			}
 		}
 
@@ -223,17 +214,15 @@ definition {
 				userLoginEmailAddress = "liferay@liferay.com",
 				userLoginFullName = "liferay liferay");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Test Blog 2",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Test Blog 2");
 		}
 
 		task ("AC launch") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 
 			ACUtils.launchAC();
 
@@ -269,17 +258,13 @@ definition {
 		}
 
 		task ("Interation with pages") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
 
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
-
-			Pause(locator1 = "6000");
-
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 		task ("AC launch") {
 			ACUtils.launchAC();
@@ -325,21 +310,14 @@ definition {
 
 		task ("Interation with pages") {
 			for (var n : list "2,3,4,5") {
-				Refresh();
-
-				Navigator.gotoSitePage(
+				ACUtils.navigateToSitePage(
+					actionType = "View Blog",
+					documentTitleList = "Test Blog ${n}",
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				BlogsNavigator.gotoPG(entryTitle = "Test Blog ${n}");
-
-				Refresh();
-
-				Pause(locator1 = "3000");
 			}
-			ACUtils.closeAllSessions();
 
-			Pause(locator1 = "60000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 		task ("AC launch") {
 			ACUtils.launchAC();
@@ -383,10 +361,9 @@ definition {
 
 			for (var n : list "${pages}") {
 				if ("${n}" != "AC Page") {
-					JSONLayout.addPublicLayout(
-						groupName = "Site Name",
-						layoutName = "${n}");
+					ACUtils.addPage(layoutName = "${n}");
 				}
+
 				ACUtils.addWidgetToPage(
 					layoutName = "${n}",
 					widgetName = "Blogs");
@@ -399,20 +376,16 @@ definition {
 
 		task ("Interation with pages") {
 			for (var n : list "${pages}") {
-				Navigator.gotoSitePage(
-					pageName = "${n}",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-
 				User.logoutAndLoginPG(
 					userLoginEmailAddress = "test@liferay.com",
 					userLoginFullName = "test test");
+
+				ACUtils.navigateToSitePage(
+					pageName = "${n}",
+					siteName = "Site Name");
 			}
 
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("AC launch") {
@@ -473,12 +446,11 @@ definition {
 
 		task ("Interation with pages") {
 			for (var x : list "${n}") {
-				Navigator.gotoSitePage(
+				ACUtils.navigateToSitePage(
+					actionType = "View Blog",
+					documentTitleList = "Test Blog ${x}",
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				BlogsNavigator.gotoPG(entryTitle = "Test Blog ${x}");
-				Pause(locator1 = "5000");
 			}
 
 			User.logoutAndLoginPG(
@@ -486,12 +458,11 @@ definition {
 				userLoginFullName = "test1 test1");
 
 			for (var x : list "${u}") {
-				Navigator.gotoSitePage(
+				ACUtils.navigateToSitePage(
+					actionType = "View Blog",
+					documentTitleList = "Test Blog ${x}",
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				BlogsNavigator.gotoPG(entryTitle = "Test Blog ${x}");
-				Pause(locator1 = "5000");
 			}
 		}
 		task ("Close all sessions") {

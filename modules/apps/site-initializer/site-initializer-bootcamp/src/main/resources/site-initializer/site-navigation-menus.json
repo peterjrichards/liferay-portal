@@ -3,7 +3,7 @@
 		"name": "Main Navigation",
 		"pages": [
 			{
-				"friendlyURL": "/home",
+				"friendlyURL": "/courses",
 				"privateLayout": false
 			},
 			{
@@ -12,6 +12,23 @@
 			},
 			{
 				"friendlyURL": "/apply",
+				"privateLayout": false
+			}
+		]
+	},
+	{
+		"name": "Private Area Navigation",
+		"pages": [
+			{
+				"friendlyURL": "/my-learning",
+				"privateLayout": false
+			},
+			{
+				"friendlyURL": "/notifications",
+				"privateLayout": false
+			},
+			{
+				"friendlyURL": "/account-settings",
 				"privateLayout": false
 			}
 		]

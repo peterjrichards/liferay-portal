@@ -115,32 +115,13 @@ definition {
 				navTab = "Fragments");
 		}
 
-		task ("Add a Tabs below the Container") {
-			PageEditor.addFragment(
+		task ("Add a Tabs to the top of Paragraph inside the Container") {
+			PageEditor.addElementToContainer(
 				collectionName = "Basic Components",
+				dropTarget = "Up",
 				fragmentName = "Tabs",
-				targetFragmentName = "Container");
-		}
-
-		task ("Move the Tabs to the top of Paragraph inside the Container via Browser Panel") {
-			PageEditor.gotoTab(tabName = "Browser");
-
-			Pause(locator1 = "3000");
-
-			Click(
-				key_nodeName = "Container",
-				locator1 = "Treeview#PAGE_STRUCTURE_TREE_NODE_COLLAPSED");
-
-			DragAndDrop.javaScriptDragAndDropToUp(
-				locator1 = "//div[contains(@class,'list-item__node')][contains(.,'Tabs')]//div[@role='button'][@draggable='true']",
-				locator2 = "//div[contains(@class,'list-item__node')][contains(.,'Paragraph')]//div[@role='button'][@draggable='true']");
-
-			Pause(locator1 = "3000");
-
-			AssertElementPresent(
-				key_elementHeader = "//li[contains(@class,'topper__title') and contains(.,'Tabs')]",
-				key_position = "1",
-				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
+				navTab = "Fragments",
+				targetElementName = "Paragraph");
 		}
 
 		task ("Assert the Container styles") {
@@ -249,32 +230,13 @@ definition {
 				navTab = "Fragments");
 		}
 
-		task ("Add a Image below the Container") {
-			PageEditor.addFragment(
+		task ("Add an Image to the top of Button inside the Container") {
+			PageEditor.addElementToContainer(
 				collectionName = "Basic Components",
+				dropTarget = "Up",
 				fragmentName = "Image",
-				targetFragmentName = "Container");
-		}
-
-		task ("Move the Image to the top of Button inside the Container via Browser Panel") {
-			PageEditor.gotoTab(tabName = "Browser");
-
-			Pause(locator1 = "3000");
-
-			Click(
-				key_nodeName = "Container",
-				locator1 = "Treeview#PAGE_STRUCTURE_TREE_NODE_COLLAPSED");
-
-			DragAndDrop.javaScriptDragAndDropToUp(
-				locator1 = "//div[contains(@class,'list-item__node')][contains(.,'Image')]//div[@role='button'][@draggable='true']",
-				locator2 = "//div[contains(@class,'list-item__node')][contains(.,'Button')]//div[@role='button'][@draggable='true']");
-
-			Pause(locator1 = "3000");
-
-			AssertElementPresent(
-				key_elementHeader = "//li[contains(@class,'topper__title') and contains(.,'Image')]",
-				key_position = "1",
-				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
+				navTab = "Fragments",
+				targetElementName = "Button");
 		}
 
 		task ("View the Container styles") {
@@ -329,28 +291,16 @@ definition {
 				navTab = "Fragments");
 		}
 
-		task ("Add a Banner Center below the Container") {
-			PageEditor.addFragment(
+		task ("Add a Banner Center to the top of Heading inside the Container") {
+			PageEditor.addElementToContainer(
 				collectionName = "Featured Content",
 				composition = "true",
+				dropTarget = "Up",
 				fragmentName = "Banner Center",
-				targetFragmentName = "Container");
-		}
-
-		task ("Move the Banner Center to the top of Heading inside the Container via Browser Panel") {
-			PageEditor.gotoTab(tabName = "Browser");
-
-			Pause(locator1 = "3000");
-
-			Click(
-				key_nodeName = "Container",
-				locator1 = "Treeview#PAGE_STRUCTURE_TREE_NODE_COLLAPSED");
-
-			DragAndDrop.javaScriptDragAndDropToUp(
-				locator1 = "xpath=(//div[contains(@class,'list-item__node')][contains(.,'Container')]//div[@role='button'][@draggable='true'])[2]",
-				locator2 = "//div[contains(@class,'list-item__node')][contains(.,'Heading')]//div[@role='button'][@draggable='true']");
-
-			Pause(locator1 = "3000");
+				index = "2",
+				layoutElementName = "Container",
+				navTab = "Fragments",
+				targetElementName = "Heading");
 
 			AssertElementPresent(
 				key_elementHeader = "//*[contains(@data-lfr-editable-id,'element-text')][normalize-space()='Banner Title Example']",
@@ -410,32 +360,13 @@ definition {
 				navTab = "Fragments");
 		}
 
-		task ("Add a Card below the Container") {
-			PageEditor.addFragment(
+		task ("Add a Card to the top of Heading inside the Container") {
+			PageEditor.addElementToContainer(
 				collectionName = "Basic Components",
+				dropTarget = "Up",
 				fragmentName = "Card",
-				targetFragmentName = "Container");
-		}
-
-		task ("Move the Card to the top of Heading inside the Container via Browser Panel") {
-			PageEditor.gotoTab(tabName = "Browser");
-
-			Pause(locator1 = "3000");
-
-			Click(
-				key_nodeName = "Container",
-				locator1 = "Treeview#PAGE_STRUCTURE_TREE_NODE_COLLAPSED");
-
-			DragAndDrop.javaScriptDragAndDropToUp(
-				locator1 = "//div[contains(@class,'list-item__node')][contains(.,'Card')]//div[@role='button'][@draggable='true']",
-				locator2 = "//div[contains(@class,'list-item__node')][contains(.,'Heading')]//div[@role='button'][@draggable='true']");
-
-			Pause(locator1 = "3000");
-
-			AssertElementPresent(
-				key_elementHeader = "//li[contains(@class,'topper__title') and contains(.,'Card')]",
-				key_position = "1",
-				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
+				navTab = "Fragments",
+				targetElementName = "Heading");
 		}
 
 		task ("View the Container styles") {
@@ -644,36 +575,44 @@ definition {
 	test MapDMImageToBackgroundImageOfContainer {
 		property portal.acceptance = "true";
 
-		JSONDocument.addFileWithUploadedFile(
-			dmDocumentDescription = "DM Document Description",
-			dmDocumentTitle = "Document_1.jpg",
-			groupName = "Test Site Name",
-			mimeType = "image/jpeg",
-			sourceFileName = "Document_1.jpg");
+		task ("Add a document with an image") {
+			JSONDocument.addFileWithUploadedFile(
+				dmDocumentDescription = "DM Document Description",
+				dmDocumentTitle = "Document_1.jpg",
+				groupName = "Test Site Name",
+				mimeType = "image/jpeg",
+				sourceFileName = "Document_1.jpg");
+		}
 
-		ContentPagesNavigator.openEditContentPage(
-			pageName = "Content Page Name",
-			siteName = "Test Site Name");
+		task ("Add a Container to a content page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Content Page Name",
+				siteName = "Test Site Name");
 
-		PageEditor.addFragment(
-			collectionName = "Layout Elements",
-			fragmentName = "Container");
+			PageEditor.addFragment(
+				collectionName = "Layout Elements",
+				fragmentName = "Container");
+		}
 
-		PageEditor.editLayoutContainer(
-			backgroundImage = "Mapping",
-			entryTitle = "Document_1.jpg",
-			fieldName = "File URL",
-			navItem = "Documents and Media",
-			paddingTop = "2",
-			panel = "Styles");
+		task ("Map the File URL field of document to background image of Container") {
+			PageEditor.editLayoutContainer(
+				backgroundImage = "Mapping",
+				entryTitle = "Document_1.jpg",
+				fieldName = "File URL",
+				navItem = "Documents and Media",
+				paddingTop = "2",
+				panel = "Styles");
 
-		PageEditor.clickPublish();
+			PageEditor.clickPublish();
+		}
 
-		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page-name");
+		task ("View the mapped image shown in Container at view mode") {
+			ContentPagesNavigator.openViewContentPage(
+				pageName = "Content Page Name",
+				siteName = "Test Site Name");
 
-		AssertElementPresent(
-			key_imageName = "Document_1.jpg",
-			locator1 = "Fragment#FRAGMENT_SECTION_BACKGROUND_IMAGE");
+			ContentPages.viewFragmentBackgroundImage(image = "Document_1.jpg");
+		}
 	}
 
 	@description = "This is a test for LPS-119817. Map manual URL to Container element."
@@ -735,65 +674,75 @@ definition {
 	test MapWebContentImageToBackgroundImageOfContainerInContentPage {
 		property portal.acceptance = "true";
 
-		WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
+		task ("Add a web content structure with an Image field") {
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
 
-		NavItem.gotoStructures();
+			NavItem.gotoStructures();
 
-		WebContentStructures.addCP(
-			structureDescription = "WC Structure Description",
-			structureName = "WC Structure Name");
+			WebContentStructures.addCP(
+				structureDescription = "WC Structure Description",
+				structureName = "WC Structure Name");
 
-		DataEngine.addField(
-			fieldFieldLabel = "Image",
-			fieldName = "Image");
+			DataEngine.addField(
+				fieldFieldLabel = "Image",
+				fieldName = "Image");
 
-		WebContentStructures.saveCP(structureName = "WC Structure Name");
+			WebContentStructures.saveCP();
+		}
 
-		WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
+		task ("Add a template for new structure") {
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
 
-		NavItem.gotoTemplates();
+			NavItem.gotoTemplates();
 
-		WebContentTemplates.addCP(
-			structureName = "WC Structure Name",
-			templateDescription = "WC Template Description",
-			templateFieldNames = "Image",
-			templateName = "WC Template Name");
+			WebContentTemplates.addCP(
+				structureName = "WC Structure Name",
+				templateDescription = "WC Template Description",
+				templateFieldNames = "Image",
+				templateName = "WC Template Name");
+		}
 
-		WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
+		task ("Add a web content based on new structure") {
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
 
-		WebContentNavigator.gotoAddWithStructureCP(structureName = "WC Structure Name");
+			WebContentNavigator.gotoAddWithStructureCP(structureName = "WC Structure Name");
 
-		WebContent.addWithStructureCP(
-			navTab = "Web Content Images",
-			structureName = "WC Structure Name",
-			templateName = "WC Template Name",
-			webContentImage = "Document_2.jpeg",
-			webContentTitle = "WC WebContent Title");
+			WebContent.addWithStructureCP(
+				navTab = "Web Content Images",
+				structureName = "WC Structure Name",
+				templateName = "WC Template Name",
+				webContentImage = "Document_2.jpeg",
+				webContentTitle = "WC WebContent Title");
 
-		PortletEntry.publish();
+			PortletEntry.publish();
+		}
 
-		ContentPagesNavigator.openEditContentPage(
-			pageName = "Content Page Name",
-			siteName = "Test Site Name");
+		task ("Add a Container to a content page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Content Page Name",
+				siteName = "Test Site Name");
 
-		PageEditor.addFragment(
-			collectionName = "Layout Elements",
-			fragmentName = "Container");
+			PageEditor.addFragment(
+				collectionName = "Layout Elements",
+				fragmentName = "Container");
+		}
 
-		PageEditor.editLayoutContainer(
-			backgroundImage = "Mapping",
-			entryTitle = "WC WebContent Title",
-			navItem = "Web Content",
-			panel = "Styles");
+		task ("Map the Image field of web content to background image of Container") {
+			PageEditor.editLayoutContainer(
+				backgroundImage = "Mapping",
+				entryTitle = "WC WebContent Title",
+				navItem = "Web Content",
+				panel = "Styles");
 
-		task ("Assert the layout background field contains the mapped image.") {
 			PageEditor.clickPublish();
+		}
 
-			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page-name");
+		task ("View the mapped image shown in Container at view mode") {
+			ContentPagesNavigator.openViewContentPage(
+				pageName = "Content Page Name",
+				siteName = "Test Site Name");
 
-			AssertElementPresent(
-				key_imageName = "Document_2.jpeg",
-				locator1 = "Fragment#FRAGMENT_SECTION_BACKGROUND_IMAGE");
+			ContentPages.viewFragmentBackgroundImage(image = "Document_2.jpeg");
 		}
 	}
 
@@ -868,9 +817,7 @@ definition {
 		}
 
 		task ("Assert the mapped image is shown in background image field") {
-			AssertVisible(
-				key_imageName = "Document_2.jpeg",
-				locator1 = "Fragment#FRAGMENT_SECTION_BACKGROUND_IMAGE");
+			ContentPages.viewFragmentBackgroundImage(image = "Document_2.jpeg");
 
 			PageEditor.clickPublish();
 		}
@@ -885,9 +832,7 @@ definition {
 		}
 
 		task ("Assert the mapped image is shown in background image field in edit mode") {
-			AssertVisible(
-				key_imageName = "Document_2.jpeg",
-				locator1 = "Fragment#FRAGMENT_SECTION_BACKGROUND_IMAGE");
+			ContentPages.viewFragmentBackgroundImage(image = "Document_2.jpeg");
 
 			PageEditor.clickPublish();
 		}
@@ -897,9 +842,7 @@ definition {
 				pageName = "Test Page Name",
 				siteName = "Test Site Name");
 
-			AssertVisible(
-				key_imageName = "Document_2.jpeg",
-				locator1 = "Fragment#FRAGMENT_SECTION_BACKGROUND_IMAGE");
+			ContentPages.viewFragmentBackgroundImage(image = "Document_2.jpeg");
 		}
 	}
 
@@ -977,9 +920,7 @@ definition {
 		}
 
 		task ("Assert mapped image is shown in display page template") {
-			AssertVisible(
-				key_imageName = "Document_2.jpeg",
-				locator1 = "Fragment#FRAGMENT_SECTION_BACKGROUND_IMAGE");
+			ContentPages.viewFragmentBackgroundImage(image = "Document_2.jpeg");
 		}
 	}
 
@@ -1120,9 +1061,10 @@ definition {
 
 			PageEditor.waitForAutoSave();
 
-			AssertVisible(
-				key_text = "WC WebContent Content",
-				locator1 = "Fragment#EDITABLE_FIELD_CONTENT");
+			PageEditor.viewFragmentEditableText(
+				editableText = "WC WebContent Content",
+				fragmentName = "Heading",
+				id = "element-text");
 		}
 
 		task ("Assert mapped content duplicated with nested Heading") {

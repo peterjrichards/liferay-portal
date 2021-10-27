@@ -29,6 +29,11 @@ definition {
 		if ("${testPortalInstance}" == "true") {
 			PortalInstances.tearDownCP();
 		}
+		else {
+			JSONGroup.deleteGroupByName(groupName = "Site Name");
+		}
+
+		JSONUser.tearDownNonAdminUsers();
 
 		ACUtils.tearDownAC();
 	}
@@ -40,6 +45,10 @@ definition {
 
 		// AC Refactor: members are not appearing in correct order
 		// AC Refactor ticket: LRAC-8767
+
+		var usernameList = "user1,user2,user3";
+
+		var emailList = "user1@liferay.com,user2@liferay.com,user3@liferay.com";
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
@@ -72,17 +81,17 @@ definition {
 		task ("Add 3 new users in DXP") {
 			ACUtils.launchDXP();
 
-			for (var n : list "1,2,3") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "user${n}@liferay.com",
-					userFirstName = "user${n}",
-					userLastName = "user${n}",
-					userScreenName = "user${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 
 				JSONUser.setFirstPassword(
 					agreeToTermsAndAnswerReminderQuery = "true",
 					requireReset = "false",
-					userEmailAddress = "user${n}@liferay.com");
+					userEmailAddress = "${name}@liferay.com");
 			}
 		}
 
@@ -91,19 +100,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "user1,user2,user3") {
-				var fullName = "${username} ${username}";
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				for (var n : list "1,2") {
-					Navigator.gotoSitePage(
-						pageName = "AC Page",
-						siteName = "Site Name");
-				}
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions") {
@@ -122,8 +122,6 @@ definition {
 			ACSegments.previewSegmentMembership();
 
 			ACSegments.filterKnownSegmentMembersList();
-
-			Pause(locator1 = "3000");
 
 			for (var username : list "user3 user3,user2 user2,user1 user1") {
 				ACSegments.viewKnownSegmentMembersSpecificOrder(username = "${username}");
@@ -190,15 +188,11 @@ definition {
 		}
 
 		task ("Sign in as new user and view the site page") {
-			for (var n : list "1,2") {
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "user1@liferay.com",
-					userLoginFullName = "user1 user1");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				documentTitleList = "1,2",
+				emailList = "user1@liferay.com",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions") {
@@ -282,15 +276,11 @@ definition {
 		}
 
 		task ("Sign in as new user and view the site page") {
-			for (var n : list "1,2") {
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "user1@liferay.com",
-					userLoginFullName = "user1 user1");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				documentTitleList = "1,2",
+				emailList = "user1@liferay.com",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions") {
@@ -360,11 +350,9 @@ definition {
 
 			User.logoutPG();
 
-			for (var n : list "1,2") {
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-			}
+			ACUtils.navigateToSitePage(
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions") {
@@ -402,9 +390,13 @@ definition {
 		// AC Refactor: timing issue for membership card
 		// AC Refactor ticket: LRAC-8887
 
-		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
-
 		var userList = "user1,user2";
+
+		var emailList = "user1@liferay.com,user2@liferay.com";
+
+		var nameList = "user1 user1,user2 user2";
+
+		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("Add new users in DXP") {
 			for (var n : list "${userList}") {
@@ -426,19 +418,10 @@ definition {
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "${userList}") {
-				var fullName = "${username} ${username}";
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "3000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions") {
@@ -456,7 +439,7 @@ definition {
 
 			ACSegments.nameSegment(segmentName = "Static Segment Test");
 
-			ACSegments.addStaticMultiMember(tableMember = "user1 user1,user2 user2");
+			ACSegments.addStaticMultiMember(tableMember = "${nameList}");
 
 			ACSegments.saveSegment();
 		}

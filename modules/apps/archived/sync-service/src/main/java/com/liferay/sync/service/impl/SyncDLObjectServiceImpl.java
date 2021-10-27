@@ -38,7 +38,6 @@ import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
-import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.jsonwebservice.NoSuchJSONWebServiceException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -1102,12 +1101,10 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 			JSONArray jsonArray = JSONFactoryUtil.createJSONArray(manifest);
 
 			for (int i = 0; i < jsonArray.length(); i++) {
-				JSONObject jsonObject = jsonArray.getJSONObject(i);
-
 				JSONWebServiceActionParametersMap
 					jsonWebServiceActionParametersMap =
 						JSONFactoryUtil.looseDeserialize(
-							jsonObject.toString(),
+							String.valueOf(jsonArray.getJSONObject(i)),
 							JSONWebServiceActionParametersMap.class);
 
 				String zipFileId = MapUtil.getString(
@@ -1532,11 +1529,11 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 			ServiceContext serviceContext, long groupId)
 		throws PortalException {
 
-		ServiceContext serviceContextThreadLocal =
+		ServiceContext currentServiceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
 		HttpServletRequest httpServletRequest =
-			serviceContextThreadLocal.getRequest();
+			currentServiceContext.getRequest();
 
 		if (httpServletRequest == null) {
 			return;
@@ -1605,10 +1602,10 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 
 		ServiceContext serviceContext = new ServiceContext();
 
-		ServiceContext serviceContextThreadLocal =
+		ServiceContext currentServiceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
-		serviceContext.setRequest(serviceContextThreadLocal.getRequest());
+		serviceContext.setRequest(currentServiceContext.getRequest());
 
 		List<Map.Entry<String, Object>> innerParameters =
 			jsonWebServiceActionParametersMap.getInnerParameters(

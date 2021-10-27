@@ -16,6 +16,8 @@ package com.liferay.jenkins.results.parser;
 
 import java.io.IOException;
 
+import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +30,7 @@ import org.dom4j.Element;
  * @author Peter Yoo
  */
 public class PullRequestPortalTopLevelBuild
-	extends PortalTopLevelBuild implements PullRequestBuild {
+	extends PortalTopLevelBuild implements PullRequestBuild, WorkspaceBuild {
 
 	public PullRequestPortalTopLevelBuild(
 		String url, TopLevelBuild topLevelBuild) {
@@ -49,6 +51,81 @@ public class PullRequestPortalTopLevelBuild
 
 			exception.printStackTrace();
 		}
+	}
+
+	public boolean bypassCITestRelevant() {
+		String testSuiteName = getTestSuiteName();
+
+		if ((testSuiteName == null) || !testSuiteName.equals("relevant")) {
+			return false;
+		}
+
+		Workspace workspace = getWorkspace();
+
+		WorkspaceGitRepository workspaceGitRepository =
+			workspace.getPrimaryWorkspaceGitRepository();
+
+		if (!(workspaceGitRepository instanceof PortalWorkspaceGitRepository)) {
+			return false;
+		}
+
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			(PortalWorkspaceGitRepository)workspaceGitRepository;
+
+		return portalWorkspaceGitRepository.bypassCITestRelevant();
+	}
+
+	@Override
+	public BranchInformation getOSBAsahBranchInformation() {
+		Workspace workspace = getWorkspace();
+
+		return new WorkspaceBranchInformation(
+			workspace.getWorkspaceGitRepository(
+				"com-liferay-osb-asah-private"));
+	}
+
+	@Override
+	public BranchInformation getOSBFaroBranchInformation() {
+		Workspace workspace = getWorkspace();
+
+		return new WorkspaceBranchInformation(
+			workspace.getWorkspaceGitRepository(
+				"com-liferay-osb-faro-private"));
+	}
+
+	@Override
+	public BranchInformation getPluginsBranchInformation() {
+		Workspace workspace = getWorkspace();
+
+		if (!(workspace instanceof PortalWorkspace)) {
+			return null;
+		}
+
+		PortalWorkspace portalWorkspace = (PortalWorkspace)workspace;
+
+		return new WorkspaceBranchInformation(
+			portalWorkspace.getPluginsWorkspaceGitRepository());
+	}
+
+	@Override
+	public BranchInformation getPortalBranchInformation() {
+		Workspace workspace = getWorkspace();
+
+		if (!(workspace instanceof PortalWorkspace)) {
+			return null;
+		}
+
+		PortalWorkspace portalWorkspace = (PortalWorkspace)workspace;
+
+		return new WorkspaceBranchInformation(
+			portalWorkspace.getPortalWorkspaceGitRepository());
+	}
+
+	@Override
+	public PullRequest getPullRequest() {
+		if (_pullRequest != null) {
+			return _pullRequest;
+		}
 
 		StringBuilder sb = new StringBuilder();
 
@@ -65,11 +142,8 @@ public class PullRequestPortalTopLevelBuild
 		sb.append("/pull/");
 		sb.append(getParameterValue("GITHUB_PULL_REQUEST_NUMBER"));
 
-		_pullRequest = PullRequestFactory.newPullRequest(sb.toString());
-	}
+		_pullRequest = PullRequestFactory.newPullRequest(sb.toString(), this);
 
-	@Override
-	public PullRequest getPullRequest() {
 		return _pullRequest;
 	}
 
@@ -190,6 +264,42 @@ public class PullRequestPortalTopLevelBuild
 		}
 
 		return _stableJobResult;
+	}
+
+	@Override
+	public Workspace getWorkspace() {
+		PullRequest pullRequest = getPullRequest();
+
+		Workspace workspace = WorkspaceFactory.newWorkspace(
+			pullRequest.getGitRepositoryName(),
+			pullRequest.getUpstreamRemoteGitBranchName(), getJobName());
+
+		if (workspace instanceof PortalWorkspace) {
+			PortalWorkspace portalWorkspace = (PortalWorkspace)workspace;
+
+			portalWorkspace.setBuildProfile(getBuildProfile());
+			portalWorkspace.setOSBAsahGitHubURL(_getOSBAsahGitHubURL());
+			portalWorkspace.setOSBFaroGitHubURL(_getOSBFaroGitHubURL());
+		}
+
+		WorkspaceGitRepository workspaceGitRepository =
+			workspace.getPrimaryWorkspaceGitRepository();
+
+		workspaceGitRepository.setGitHubURL(pullRequest.getHtmlURL());
+
+		String senderBranchSHA = _getSenderBranchSHA();
+
+		if (JenkinsResultsParserUtil.isSHA(senderBranchSHA)) {
+			workspaceGitRepository.setSenderBranchSHA(senderBranchSHA);
+		}
+
+		String upstreamBranchSHA = _getUpstreamBranchSHA();
+
+		if (JenkinsResultsParserUtil.isSHA(upstreamBranchSHA)) {
+			workspaceGitRepository.setBaseBranchSHA(upstreamBranchSHA);
+		}
+
+		return workspace;
 	}
 
 	@Override
@@ -367,7 +477,89 @@ public class PullRequestPortalTopLevelBuild
 		return rootElement;
 	}
 
-	private final PullRequest _pullRequest;
+	private String _getOSBAsahGitHubURL() {
+		String osbAsahGitHubURL = getParameterValue("OSB_ASAH_GITHUB_URL");
+
+		if (!JenkinsResultsParserUtil.isNullOrEmpty(osbAsahGitHubURL)) {
+			return osbAsahGitHubURL;
+		}
+
+		Build controllerBuild = getControllerBuild();
+
+		if (controllerBuild != null) {
+			return controllerBuild.getParameterValue("OSB_ASAH_GITHUB_URL");
+		}
+
+		return null;
+	}
+
+	private String _getOSBFaroGitHubURL() {
+		String osbFaroGitHubURL = getParameterValue("OSB_FARO_GITHUB_URL");
+
+		if (!JenkinsResultsParserUtil.isNullOrEmpty(osbFaroGitHubURL)) {
+			return osbFaroGitHubURL;
+		}
+
+		Build controllerBuild = getControllerBuild();
+
+		if (controllerBuild != null) {
+			return controllerBuild.getParameterValue("OSB_FARO_GITHUB_URL");
+		}
+
+		return null;
+	}
+
+	private String _getSenderBranchSHA() {
+		String senderBranchSHA = getParameterValue("GITHUB_SENDER_BRANCH_SHA");
+
+		if (JenkinsResultsParserUtil.isSHA(senderBranchSHA)) {
+			return senderBranchSHA;
+		}
+
+		return null;
+	}
+
+	private String _getUpstreamBranchSHA() {
+		String upstreamBranchSHA = getParameterValue(
+			"GITHUB_UPSTREAM_BRANCH_SHA");
+
+		if (JenkinsResultsParserUtil.isSHA(upstreamBranchSHA)) {
+			return upstreamBranchSHA;
+		}
+
+		String portalBundlesDistURL = getParameterValue(
+			"PORTAL_BUNDLES_DIST_URL");
+
+		if (JenkinsResultsParserUtil.isNullOrEmpty(portalBundlesDistURL)) {
+			return null;
+		}
+
+		try {
+			URL portalBundlesGitHashURL = new URL(
+				JenkinsResultsParserUtil.getLocalURL(portalBundlesDistURL) +
+					"/git-hash");
+
+			if (!JenkinsResultsParserUtil.exists(portalBundlesGitHashURL)) {
+				return null;
+			}
+
+			String portalBundlesGitHash = JenkinsResultsParserUtil.toString(
+				portalBundlesGitHashURL.toString());
+
+			portalBundlesGitHash = portalBundlesGitHash.trim();
+
+			if (JenkinsResultsParserUtil.isSHA(portalBundlesGitHash)) {
+				return portalBundlesGitHash;
+			}
+
+			return null;
+		}
+		catch (IOException ioException) {
+			return null;
+		}
+	}
+
+	private PullRequest _pullRequest;
 	private Job _stableJob;
 	private String _stableJobResult;
 

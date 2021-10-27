@@ -2,18 +2,18 @@
 	{
 		"cssURLs": "",
 		"elementURLs": [
-			"[$DOCUMENT_URL:/site-initializer/documents/extra/direct-to-customer/js/2.js$]",
-			"[$DOCUMENT_URL:/site-initializer/documents/extra/direct-to-customer/js/main.js$]",
-			"[$DOCUMENT_URL:/site-initializer/documents/extra/direct-to-customer/js/runtime-main.js$]"
+			"[$DOCUMENT_URL:/site-initializer/documents/remote-app/2.js$]",
+			"[$DOCUMENT_URL:/site-initializer/documents/remote-app/main.js$]",
+			"[$DOCUMENT_URL:/site-initializer/documents/remote-app/runtime-main.js$]"
 		],
-		"htmlElementName": "liferay-direct-to-customer",
+		"htmlElementName": "liferay-remote-app-raylife",
 		"name_i18n": {
-			"en_US": "Direct to Customer"
+			"en_US": "Raylife (Get a Quote)"
 		},
 		"portletCategoryName": "category.remote-apps",
 		"properties": {
-			"APPLICATION": "get-a-quote",
-			"GOOGLE_PLACES_KEY": ""
+			"googleplaceskey": "",
+			"route": "get-a-quote"
 		},
 		"remoteAppEntryKey": "RAYLIFE-GET-A-QUOTE",
 		"widgetName": "com_liferay_remote_app_web_internal_portlet_RemoteAppEntryPortlet_[$REMOTE_APP_ENTRY_ID:RAYLIFE-GET-A-QUOTE$]"
@@ -21,18 +21,17 @@
 	{
 		"cssURLs": "",
 		"elementURLs": [
-			"[$DOCUMENT_URL:/site-initializer/documents/extra/direct-to-customer/js/2.js$]",
-			"[$DOCUMENT_URL:/site-initializer/documents/extra/direct-to-customer/js/main.js$]",
-			"[$DOCUMENT_URL:/site-initializer/documents/extra/direct-to-customer/js/runtime-main.js$]"
+			"[$DOCUMENT_URL:/site-initializer/documents/remote-app/2.js$]",
+			"[$DOCUMENT_URL:/site-initializer/documents/remote-app/main.js$]",
+			"[$DOCUMENT_URL:/site-initializer/documents/remote-app/runtime-main.js$]"
 		],
-		"htmlElementName": "liferay-direct-to-customer",
+		"htmlElementName": "liferay-remote-app-raylife",
 		"name_i18n": {
-			"en_US": "Direct to Customer - Quote Comparison"
+			"en_US": "Raylife (Quote Comparison)"
 		},
 		"portletCategoryName": "category.remote-apps",
 		"properties": {
-			"APPLICATION": "quote-comparison",
-			"GOOGLE_PLACES_KEY": ""
+			"route": "quote-comparison"
 		},
 		"remoteAppEntryKey": "RAYLIFE-QUOTE-COMPARISON",
 		"widgetName": "com_liferay_remote_app_web_internal_portlet_RemoteAppEntryPortlet_[$REMOTE_APP_ENTRY_ID:RAYLIFE-QUOTE-COMPARISON$]"
@@ -40,18 +39,18 @@
 	{
 		"cssURLs": "",
 		"elementURLs": [
-			"[$DOCUMENT_URL:/site-initializer/documents/extra/direct-to-customer/js/2.js$]",
-			"[$DOCUMENT_URL:/site-initializer/documents/extra/direct-to-customer/js/main.js$]",
-			"[$DOCUMENT_URL:/site-initializer/documents/extra/direct-to-customer/js/runtime-main.js$]"
+			"[$DOCUMENT_URL:/site-initializer/documents/remote-app/2.js$]",
+			"[$DOCUMENT_URL:/site-initializer/documents/remote-app/main.js$]",
+			"[$DOCUMENT_URL:/site-initializer/documents/remote-app/runtime-main.js$]"
 		],
-		"htmlElementName": "liferay-direct-to-customer",
+		"htmlElementName": "liferay-remote-app-raylife",
 		"name_i18n": {
-			"en_US": "Direct to Customer - Selected Quote"
+			"en_US": "Raylife (Selected Quote)"
 		},
 		"portletCategoryName": "category.remote-apps",
 		"properties": {
-			"APPLICATION": "selected-quote",
-			"GOOGLE_PLACES_KEY": ""
+			"applicationsfoldername": "Quote Applications",
+			"route": "selected-quote"
 		},
 		"remoteAppEntryKey": "RAYLIFE-SELECTED-QUOTE",
 		"widgetName": "com_liferay_remote_app_web_internal_portlet_RemoteAppEntryPortlet_[$REMOTE_APP_ENTRY_ID:RAYLIFE-SELECTED-QUOTE$]"

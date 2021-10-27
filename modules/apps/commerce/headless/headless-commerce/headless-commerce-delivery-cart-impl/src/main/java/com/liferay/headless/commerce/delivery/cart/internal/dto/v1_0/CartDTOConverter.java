@@ -134,7 +134,7 @@ public class CartDTOConverter implements DTOConverter<CommerceOrder, Cart> {
 				shippingAddressId = commerceOrder.getShippingAddressId();
 				status = commerceOrderWorkflowStatusLabel;
 				summary = _getSummary(commerceOrder, locale);
-				workflowStatusInfo = _getWorkflowStatusInfo(
+				workflowStatusInfo = _toStatus(
 					commerceOrder.getStatus(), commerceOrderWorkflowStatusLabel,
 					commerceOrderWorkflowStatusLabelI18n);
 			}
@@ -318,19 +318,6 @@ public class CartDTOConverter implements DTOConverter<CommerceOrder, Cart> {
 		return summary;
 	}
 
-	private Status _getWorkflowStatusInfo(
-		int orderStatus, String commerceOrderWorkflowStatusLabel,
-		String commerceOrderWorkflowStatusLabelI18n) {
-
-		return new Status() {
-			{
-				code = orderStatus;
-				label = commerceOrderWorkflowStatusLabel;
-				label_i18n = commerceOrderWorkflowStatusLabelI18n;
-			}
-		};
-	}
-
 	private void _setShippingDiscountOnSummary(
 			CommerceOrder commerceOrder, CommerceCurrency commerceCurrency,
 			Locale locale, String priceDisplayType, Summary summary)
@@ -490,6 +477,19 @@ public class CartDTOConverter implements DTOConverter<CommerceOrder, Cart> {
 		summary.setTotalDiscountValue(totalDiscountAmount.doubleValue());
 		summary.setTotalDiscountValueFormatted(
 			_formatPrice(totalDiscountAmount, commerceCurrency, locale));
+	}
+
+	private Status _toStatus(
+		int orderStatus, String commerceOrderWorkflowStatusLabel,
+		String commerceOrderWorkflowStatusLabelI18n) {
+
+		return new Status() {
+			{
+				code = orderStatus;
+				label = commerceOrderWorkflowStatusLabel;
+				label_i18n = commerceOrderWorkflowStatusLabelI18n;
+			}
+		};
 	}
 
 	@Reference

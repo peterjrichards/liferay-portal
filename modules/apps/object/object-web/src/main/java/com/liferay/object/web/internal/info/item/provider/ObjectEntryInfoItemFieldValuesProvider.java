@@ -29,8 +29,11 @@ import com.liferay.info.item.field.reader.InfoItemFieldReaderFieldSetProvider;
 import com.liferay.info.item.provider.InfoItemFieldValuesProvider;
 import com.liferay.info.localized.InfoLocalizedValue;
 import com.liferay.info.type.WebImage;
+import com.liferay.list.type.model.ListTypeEntry;
+import com.liferay.list.type.service.ListTypeEntryLocalService;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.ObjectField;
+import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.web.internal.info.item.ObjectEntryInfoItemFields;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -41,6 +44,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.util.TransformUtil;
 import com.liferay.template.info.item.provider.TemplateInfoItemFieldSetProvider;
 
@@ -61,6 +65,8 @@ public class ObjectEntryInfoItemFieldValuesProvider
 		AssetDisplayPageFriendlyURLProvider assetDisplayPageFriendlyURLProvider,
 		InfoItemFieldReaderFieldSetProvider infoItemFieldReaderFieldSetProvider,
 		JSONFactory jsonFactory,
+		ListTypeEntryLocalService listTypeEntryLocalService,
+		ObjectEntryLocalService objectEntryLocalService,
 		ObjectFieldLocalService objectFieldLocalService,
 		TemplateInfoItemFieldSetProvider templateInfoItemFieldSetProvider,
 		UserLocalService userLocalService) {
@@ -70,6 +76,8 @@ public class ObjectEntryInfoItemFieldValuesProvider
 		_infoItemFieldReaderFieldSetProvider =
 			infoItemFieldReaderFieldSetProvider;
 		_jsonFactory = jsonFactory;
+		_listTypeEntryLocalService = listTypeEntryLocalService;
+		_objectEntryLocalService = objectEntryLocalService;
 		_objectFieldLocalService = objectFieldLocalService;
 		_templateInfoItemFieldSetProvider = templateInfoItemFieldSetProvider;
 		_userLocalService = userLocalService;
@@ -104,7 +112,10 @@ public class ObjectEntryInfoItemFieldValuesProvider
 	}
 
 	private InfoFieldType _getInfoFieldType(ObjectField objectField) {
-		if (Objects.equals(objectField.getType(), "Boolean")) {
+		if (Validator.isNotNull(objectField.getRelationshipType())) {
+			return TextInfoFieldType.INSTANCE;
+		}
+		else if (Objects.equals(objectField.getType(), "Boolean")) {
 			return BooleanInfoFieldType.INSTANCE;
 		}
 		else if (Objects.equals(objectField.getType(), "BigDecimal") ||
@@ -218,6 +229,25 @@ public class ObjectEntryInfoItemFieldValuesProvider
 
 			return webImage;
 		}
+		else if (objectField.getListTypeDefinitionId() != 0) {
+			ServiceContext serviceContext =
+				ServiceContextThreadLocal.getServiceContext();
+
+			ListTypeEntry listTypeEntry =
+				_listTypeEntryLocalService.fetchListTypeEntry(
+					objectField.getListTypeDefinitionId(),
+					(String)values.get(objectField.getName()));
+
+			return listTypeEntry.getName(serviceContext.getLocale());
+		}
+		else if (Validator.isNotNull(objectField.getRelationshipType())) {
+			ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
+				(Long)values.get(objectField.getName()));
+
+			if (objectEntry != null) {
+				return objectEntry.getTitleValue();
+			}
+		}
 
 		return values.get(objectField.getName());
 	}
@@ -247,6 +277,8 @@ public class ObjectEntryInfoItemFieldValuesProvider
 	private final InfoItemFieldReaderFieldSetProvider
 		_infoItemFieldReaderFieldSetProvider;
 	private final JSONFactory _jsonFactory;
+	private final ListTypeEntryLocalService _listTypeEntryLocalService;
+	private final ObjectEntryLocalService _objectEntryLocalService;
 	private final ObjectFieldLocalService _objectFieldLocalService;
 	private final TemplateInfoItemFieldSetProvider
 		_templateInfoItemFieldSetProvider;

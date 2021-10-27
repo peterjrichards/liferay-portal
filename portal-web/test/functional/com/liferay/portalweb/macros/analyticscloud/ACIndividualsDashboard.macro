@@ -101,6 +101,11 @@ definition {
 
 	macro goToKnownIndividualDetails {
 		var key_individualName = "${individualName}";
+
+		while (IsElementNotPresent(locator1 = "ACIndividualsDashboard#KNOWN_INDIVIDUALS_LIST_ITEMS") && (maxIterations = "50")) {
+			Refresh();
+		}
+
 		Click(locator1 = "ACIndividualsDashboard#KNOWN_INDIVIDUALS_LIST_ITEMS");
 	}
 
@@ -216,7 +221,7 @@ definition {
 		}
 	}
 
-	@summary = "Assert the Individual Activity Chart displays"
+	@summary = "This macro asserts in the individual chart bar. The pause is necessary because the bar takes a while to load into the chart. For more information about pause see LRAC-9517"
 	macro viewRechartsBarOnIndividualsActivitiesChart {
 		if (!(isSet(index))) {
 			var index = "1";
@@ -229,7 +234,7 @@ definition {
 
 			ACTimeFilter.setLast24Hours();
 
-			// The pause is necessary for the loop to capture the element.
+			// The pause is necessary because the bar takes a while to load into the chart. For more information about pause see LRAC-9517
 
 			Pause(locator1 = "2000");
 		}

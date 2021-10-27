@@ -24,11 +24,13 @@ import com.liferay.commerce.model.CommerceOrderItem;
 import com.liferay.commerce.price.CommerceOrderItemPrice;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
 import com.liferay.commerce.product.model.CPInstance;
+import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.service.CPInstanceLocalService;
 import com.liferay.commerce.product.util.CPInstanceHelper;
 import com.liferay.commerce.service.CPDefinitionInventoryLocalService;
 import com.liferay.commerce.service.CommerceOrderItemService;
 import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.headless.commerce.core.util.LanguageUtils;
 import com.liferay.headless.commerce.delivery.cart.dto.v1_0.CartItem;
 import com.liferay.headless.commerce.delivery.cart.dto.v1_0.Price;
 import com.liferay.headless.commerce.delivery.cart.dto.v1_0.Settings;
@@ -91,6 +93,9 @@ public class CartItemDTOConverter
 					commerceOrderItem.getParentCommerceOrderItemId();
 				price = _getPrice(commerceOrderItem, locale);
 				productId = commerceOrderItem.getCProductId();
+				productURLs = LanguageUtils.getLanguageIdMap(
+					_cpDefinitionLocalService.getUrlTitleMap(
+						commerceOrderItem.getCPDefinitionId()));
 				quantity = commerceOrderItem.getQuantity();
 				settings = _getSettings(commerceOrderItem.getCPInstanceId());
 				sku = commerceOrderItem.getSku();
@@ -263,6 +268,9 @@ public class CartItemDTOConverter
 	@Reference
 	private CPDefinitionInventoryLocalService
 		_cpDefinitionInventoryLocalService;
+
+	@Reference
+	private CPDefinitionLocalService _cpDefinitionLocalService;
 
 	@Reference
 	private CPInstanceHelper _cpInstanceHelper;

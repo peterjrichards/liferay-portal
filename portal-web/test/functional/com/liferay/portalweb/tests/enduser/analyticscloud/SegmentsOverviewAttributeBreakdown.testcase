@@ -30,6 +30,8 @@ definition {
 			JSONGroup.deleteGroupByName(groupName = "Site Name");
 		}
 
+		JSONUser.tearDownNonAdminUsers();
+
 		ACUtils.tearDownAC();
 	}
 
@@ -38,9 +40,9 @@ definition {
 	test SegmentOverviewDistributionFilteredByBoolean {
 		var users = "user1,user2";
 
-		task ("Add a new site with a public widget page") {
-			ACUtils.addSiteAndPage();
-		}
+		var emailList = "user1@liferay.com,user2@liferay.com";
+
+		var nameList = "user1 user1,user2 user2";
 
 		task ("Add a new user") {
 			for (var user : list "${users}") {
@@ -57,17 +59,10 @@ definition {
 		}
 
 		task ("View AC Page as new user") {
-			for (var user : list "${users}") {
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${user}@liferay.com",
-					userLoginFullName = "${user} ${user}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -97,9 +92,7 @@ definition {
 		}
 
 		task ("Add new user as member") {
-			for (var user : list "${users}") {
-				ACSegments.addStaticMember(tableMember = "${user} ${user}");
-			}
+			ACSegments.addStaticMultiMember(tableMember = "${nameList}");
 
 			ACSegments.saveSegment();
 		}
@@ -128,6 +121,10 @@ definition {
 	test SegmentOverviewDistributionFilteredByDate {
 		var users = "ac1,ac2";
 
+		var emailList = "ac1@liferay.com,ac2@liferay.com";
+
+		var nameList = "ac1 ac1,ac2 ac2";
+
 		task ("Create two new users") {
 			JSONUser.addUser(
 				birthdayDay = "15",
@@ -149,18 +146,11 @@ definition {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
-		task ("Login with the two new users and see page") {
-			for (var name : list "${users}") {
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${name}@liferay.com",
-					userLoginFullName = "${name} ${name}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+		task ("View AC Page as new user") {
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close all sessions, lauch AC, change the property and go to segments") {
@@ -176,9 +166,7 @@ definition {
 
 			ACSegments.nameSegment(segmentName = "Static Segment Test");
 
-			for (var name : list "${users}") {
-				ACSegments.addStaticMember(tableMember = "${name} ${name}");
-			}
+			ACSegments.addStaticMultiMember(tableMember = "${nameList}");
 
 			ACSegments.saveSegment();
 		}
@@ -218,6 +206,10 @@ definition {
 
 		var users = "user1,user2";
 
+		var emailList = "user1@liferay.com,user2@liferay.com";
+
+		var nameList = "user1 user1,user2 user2";
+
 		task ("Add a new site with a public widget page") {
 			ACUtils.addSiteAndPage();
 		}
@@ -237,17 +229,10 @@ definition {
 		}
 
 		task ("View AC Page as new user") {
-			for (var user : list "${users}") {
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${user}@liferay.com",
-					userLoginFullName = "${user} ${user}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -281,9 +266,7 @@ definition {
 		}
 
 		task ("Add new user as member") {
-			for (var user : list "${users}") {
-				ACSegments.addStaticMember(tableMember = "${user} ${user}");
-			}
+			ACSegments.addStaticMultiMember(tableMember = "${nameList}");
 
 			ACSegments.saveSegment();
 		}
@@ -316,16 +299,22 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8507 | Test Summary: Segment Overview distribution filtered by text"
 	@priority = "3"
 	test SegmentOverviewDistributionFilteredByText {
+		var users = "ac,liferay";
+
+		var emailList = "ac@liferay.com,liferay@liferay.com";
+
+		var nameList = "ac ac,liferay liferay";
+
 		task ("Connect Analytics Cloud to DXP") {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud();
 		}
 
 		task ("Create page") {
-			ACUtils.addSiteAndPage(layoutName = "AC Page");
+			ACUtils.addPage(layoutName = "AC Page");
 		}
 
 		task ("Add two new users") {
-			for (var name : list "ac,liferay") {
+			for (var name : list "${users}") {
 				JSONUser.addUser(
 					jobTitle = "QA",
 					userEmailAddress = "${name}@liferay.com",
@@ -337,18 +326,11 @@ definition {
 			ACDXPSettings.syncNewContactData();
 		}
 
-		task ("Login with the users and open the site") {
-			for (var name : list "ac,liferay") {
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${name}@liferay.com",
-					userLoginFullName = "${name} ${name}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+		task ("View AC Page as new user") {
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -368,9 +350,7 @@ definition {
 		}
 
 		task ("Add new user as member") {
-			for (var name : list "ac,liferay" ) {
-				ACSegments.addStaticMember(tableMember = "${name} ${name}");
-			}
+			ACSegments.addStaticMultiMember(tableMember = "${nameList}");
 
 			ACSegments.saveSegment();
 		}

@@ -40,7 +40,7 @@ definition {
 	macro addAndViewAccountGroup {
 		ApplicationsMenu.gotoPortlet(
 			category = "Accounts",
-			panel = "Applications",
+			panel = "Control Panel",
 			portlet = "Account Groups");
 
 		AccountGroups.addCP(
@@ -55,7 +55,7 @@ definition {
 	macro addAndViewBusinessAccount {
 		ApplicationsMenu.gotoPortlet(
 			category = "Accounts",
-			panel = "Applications",
+			panel = "Control Panel",
 			portlet = "Accounts");
 
 		Accounts.addBusinessAccount(
@@ -63,10 +63,7 @@ definition {
 			accountName = "${accountName}",
 			accountTaxID = "${accountTaxID}");
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Accounts",
-			panel = "Applications",
-			portlet = "Accounts");
+		Accounts.openAccountsAdmin();
 
 		LexiconEntry.viewEntryName(rowEntry = "${accountName}");
 	}
@@ -220,14 +217,13 @@ definition {
 		}
 
 		task ("Navigate to the content page's 'Edit Mode'") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 		}
 
 		task ("Edit the Title fragment's editable text") {
 			PageEditor.editFragmentText(
 				contributed = "false",
 				fragmentName = "Title",
-				id = "title",
 				text = "New editable fragment text");
 		}
 
@@ -247,7 +243,7 @@ definition {
 		}
 
 		task ("Navigate to the content page's 'Edit Mode'") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 		}
 
 		task ("Add a Rich Text fragment to the content page") {
@@ -662,7 +658,7 @@ definition {
 	macro addUserToBusinessAccount {
 		ApplicationsMenu.gotoPortlet(
 			category = "Accounts",
-			panel = "Applications",
+			panel = "Control Panel",
 			portlet = "Account Users");
 
 		AccountUsers.addUser(
@@ -908,7 +904,7 @@ definition {
 
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-fragment-content-page");
 
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			PageEditor.addFragment(
 				collectionName = "Basic Components",
@@ -937,7 +933,7 @@ definition {
 		task ("Assert could delete fragment upgrading from 7.2") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-fragment-content-page");
 
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			PageEditor.removeFragment(fragmentName = "Fragment Name");
 		}
@@ -945,7 +941,7 @@ definition {
 		task ("Assert the experience survived and could edit") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-experience-content-page");
 
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			PageEditor.changeExperience(newExperience = "New Experience Name");
 
@@ -972,23 +968,17 @@ definition {
 		task ("Assert layout has been converted to a section with columns inside") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-layout-content-page");
 
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
-			AssertElementPresent(
-				key_elementType = "Container",
-				key_position = "1",
-				locator1 = "PageEditor#LAYOUT_ELEMENTS_HEADER");
-
-			AssertElementPresent(
-				key_elementType = "Grid",
-				key_position = "1",
-				locator1 = "PageEditor#LAYOUT_ELEMENTS_HEADER");
+			for (var fragmentName : list "Container,Grid") {
+				PageEditor.viewFragment(fragmentName = "${fragmentName}");
+			}
 		}
 
 		task ("Assert translation is working after migration") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-translation-content-page");
 
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			AssertVisible(
 				key_content = "New editable fragment en-US text",
@@ -1275,6 +1265,8 @@ definition {
 			webContentContent = "WebContent",
 			webContentDescription = "",
 			webContentTitle = "WebContentTitle");
+
+		WebContentNavigator.openWebContentAdmin(siteURLKey = "guest");
 
 		Translations.importTranslation(
 			fileName = "WebContentTitle-en_US-ja_JP.xlf",
@@ -2370,7 +2362,7 @@ definition {
 	macro viewAndEditContentPageReview {
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
 
-		ContentPages.clickPencil();
+		ContentPages.gotoPageEditor();
 
 		PageEditor.gotoTab(tabName = "Comments");
 
@@ -2389,7 +2381,7 @@ definition {
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
 
-		ContentPages.clickPencil();
+		ContentPages.gotoPageEditor();
 
 		PageEditor.addComment(
 			fragmentComment = "This is a new fragment comment",
@@ -2401,7 +2393,7 @@ definition {
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
 
-		ContentPages.clickPencil();
+		ContentPages.gotoPageEditor();
 
 		PageEditor.gotoTab(tabName = "Comments");
 
@@ -2573,7 +2565,6 @@ definition {
 
 	macro viewAndEditSERPPreview {
 		var portalURL = PropsUtil.get("portal.url");
-		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		Navigator.gotoPage(pageName = "Test Page");
 
@@ -2583,7 +2574,7 @@ definition {
 
 		Page.viewPreview(
 			description = "Description",
-			htmlTitle = "Page HTML Title - ${siteName}",
+			htmlTitle = "Page HTML Title - Liferay DXP",
 			pageName = "Test Page",
 			portalURL = "${portalURL}");
 
@@ -2599,7 +2590,7 @@ definition {
 
 		Page.viewPreview(
 			description = "Page Description Edit",
-			htmlTitle = "Page HTML Title Edit - ${siteName}",
+			htmlTitle = "Page HTML Title Edit - Liferay DXP",
 			pageName = "Test Page",
 			portalURL = "${portalURL}");
 	}
@@ -3543,20 +3534,19 @@ definition {
 				pageName = "Test Page Name",
 				siteName = "Test Site Name");
 
-			AssertTextEquals.assertPartialText(
-				key_fragmentName = "card",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Test Title");
+			ContentPages.viewFragmentText(
+				contributed = "false",
+				fragmentName = "card",
+				text = "Test Title");
 		}
 
 		task ("View the inline text of the card fragment at edit mode after Upgrade") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
-			AssertTextEquals(
-				id = "02-title",
-				key_fragmentName = "Card",
-				locator1 = "Fragment#EDITABLE_FIELD",
-				value1 = "Test Title");
+			PageEditor.viewFragmentEditableText(
+				contributed = "false",
+				editableText = "Test Title",
+				fragmentName = "Card");
 		}
 
 		task ("Edit the inline text of the Card fragment") {
@@ -3570,11 +3560,10 @@ definition {
 		}
 
 		task ("View the updated inline text of the card fragment") {
-			AssertTextEquals(
-				id = "02-title",
-				key_fragmentName = "Card",
-				locator1 = "Fragment#EDITABLE_FIELD",
-				value1 = "Editable Title");
+			ContentPages.viewFragmentText(
+				contributed = "false",
+				fragmentName = "card",
+				text = "Editable Title");
 		}
 
 		task ("Publish the content page") {
@@ -3586,10 +3575,10 @@ definition {
 				pageName = "Test Page Name",
 				siteName = "Test Site Name");
 
-			AssertTextEquals.assertPartialText(
-				key_fragmentName = "card",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Editable Title");
+			ContentPages.viewFragmentText(
+				contributed = "false",
+				fragmentName = "card",
+				text = "Editable Title");
 		}
 	}
 
@@ -3802,8 +3791,7 @@ definition {
 			AssertVisible(
 				key_content = "Submit",
 				key_fragmentClass = "footer",
-				key_position = "1",
-				locator1 = "Fragment#PAGE_EDITOR_FRAGMENT");
+				locator1 = "Fragment#FRAGMENT");
 
 			for (var button : list "Submit,Cancel") {
 				Button.viewPresent(button = "${button}");

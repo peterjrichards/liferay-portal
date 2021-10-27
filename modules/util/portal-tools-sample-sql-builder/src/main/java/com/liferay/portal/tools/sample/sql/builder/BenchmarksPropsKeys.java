@@ -19,6 +19,9 @@ package com.liferay.portal.tools.sample.sql.builder;
  */
 public interface BenchmarksPropsKeys {
 
+	public static final String COMMERCE_LAYOUT_EXCLUDED_PORTLETS =
+		"sample.sql.commerce.layout.excluded.portlets";
+
 	public static final String DB_TYPE = "sample.sql.db.type";
 
 	public static final String MAX_ASSET_CATEGORY_COUNT =

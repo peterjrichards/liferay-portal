@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.search.queue.QueuingSearchEngine;
 import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.search.configuration.SearchEngineHelperConfiguration;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -110,6 +111,17 @@ public class SearchEngineHelperImpl implements SearchEngineHelper {
 		}
 
 		return assetEntryClassNames.toArray(new String[0]);
+	}
+
+	@Override
+	public Collection<Long> getIndexedCompanyIds() {
+		Collection<Long> companyIds = new ArrayList<>();
+
+		for (SearchEngine searchEngine : _searchEngines.values()) {
+			companyIds.addAll(searchEngine.getIndexedCompanyIds());
+		}
+
+		return companyIds;
 	}
 
 	@Override
@@ -212,8 +224,13 @@ public class SearchEngineHelperImpl implements SearchEngineHelper {
 	}
 
 	@Override
-	public synchronized void removeCompany(long companyId) {
-		if (!_companyIds.containsKey(companyId)) {
+	public void removeCompany(long companyId) {
+		removeCompany(companyId, false);
+	}
+
+	@Override
+	public synchronized void removeCompany(long companyId, boolean force) {
+		if (!force && !_companyIds.containsKey(companyId)) {
 			return;
 		}
 

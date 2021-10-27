@@ -14,6 +14,7 @@
 
 package com.liferay.portal.instances.service.impl;
 
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.instances.service.base.PortalInstancesLocalServiceBaseImpl;
 import com.liferay.portal.kernel.cluster.Clusterable;
@@ -23,9 +24,11 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactory;
@@ -33,13 +36,18 @@ import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.CompanyService;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.ServletContextPool;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PortalInstances;
 import com.liferay.site.initializer.SiteInitializer;
 import com.liferay.site.initializer.SiteInitializerRegistry;
@@ -116,32 +124,49 @@ public class PortalInstancesLocalServiceImpl
 				"Invalid site initializer key " + siteInitializerKey);
 		}
 
-		Role role = _roleLocalService.fetchRole(
-			companyId, RoleConstants.ADMINISTRATOR);
-
-		List<User> users = _userLocalService.getRoleUsers(role.getRoleId());
-
-		User user = users.get(0);
-
-		PermissionChecker permissionChecker =
+		PermissionChecker currentThreadPermissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
+		String currentThreadPrincipalName = PrincipalThreadLocal.getName();
+		ServiceContext currentThreadServiceContext =
+			ServiceContextThreadLocal.getServiceContext();
 
-		PermissionThreadLocal.setPermissionChecker(
-			_permissionCheckerFactory.create(user));
+		try (SafeCloseable safeCloseable =
+				CompanyThreadLocal.setInitializingPortalInstance(true)) {
 
-		String name = PrincipalThreadLocal.getName();
+			Role role = _roleLocalService.fetchRole(
+				companyId, RoleConstants.ADMINISTRATOR);
 
-		PrincipalThreadLocal.setName(user.getUserId());
+			List<User> users = _userLocalService.getRoleUsers(role.getRoleId());
 
-		try {
+			User user = users.get(0);
+
+			PermissionChecker permissionChecker =
+				_permissionCheckerFactory.create(user);
+
+			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
+			PrincipalThreadLocal.setName(user.getUserId());
+
 			Group group = _groupLocalService.getGroup(
 				company.getCompanyId(), GroupConstants.GUEST);
+
+			ServiceContextThreadLocal.pushServiceContext(
+				_populateServiceContext(
+					company, group, currentThreadServiceContext.getRequest(),
+					permissionChecker,
+					(ServiceContext)currentThreadServiceContext.clone(), user));
+
+			_layoutLocalService.deleteLayouts(
+				group.getGroupId(), false, new ServiceContext());
 
 			siteInitializer.initialize(group.getGroupId());
 		}
 		finally {
-			PermissionThreadLocal.setPermissionChecker(permissionChecker);
-			PrincipalThreadLocal.setName(name);
+			PermissionThreadLocal.setPermissionChecker(
+				currentThreadPermissionChecker);
+			PrincipalThreadLocal.setName(currentThreadPrincipalName);
+			ServiceContextThreadLocal.pushServiceContext(
+				currentThreadServiceContext);
 		}
 	}
 
@@ -215,6 +240,54 @@ public class PortalInstancesLocalServiceImpl
 		}
 	}
 
+	private ServiceContext _populateServiceContext(
+			Company company, Group group, HttpServletRequest httpServletRequest,
+			PermissionChecker permissionChecker, ServiceContext serviceContext,
+			User user)
+		throws PortalException {
+
+		serviceContext.setCompanyId(user.getCompanyId());
+		serviceContext.setRequest(httpServletRequest);
+		serviceContext.setScopeGroupId(group.getGroupId());
+		serviceContext.setUserId(user.getUserId());
+
+		if (httpServletRequest != null) {
+			long controlPanelPlid = _portal.getControlPanelPlid(
+				company.getCompanyId());
+
+			Layout controlPanelLayout = _layoutLocalService.getLayout(
+				controlPanelPlid);
+
+			httpServletRequest.setAttribute(WebKeys.LAYOUT, controlPanelLayout);
+
+			ThemeDisplay currentThemeDisplay =
+				(ThemeDisplay)httpServletRequest.getAttribute(
+					WebKeys.THEME_DISPLAY);
+
+			try {
+				ThemeDisplay themeDisplay =
+					(ThemeDisplay)currentThemeDisplay.clone();
+
+				themeDisplay.setCompany(company);
+				themeDisplay.setLayout(controlPanelLayout);
+				themeDisplay.setPermissionChecker(permissionChecker);
+				themeDisplay.setPlid(controlPanelPlid);
+				themeDisplay.setRequest(httpServletRequest);
+				themeDisplay.setScopeGroupId(group.getGroupId());
+				themeDisplay.setSiteGroupId(group.getGroupId());
+				themeDisplay.setUser(user);
+
+				httpServletRequest.setAttribute(
+					WebKeys.THEME_DISPLAY, themeDisplay);
+			}
+			catch (CloneNotSupportedException cloneNotSupportedException) {
+				_log.error(cloneNotSupportedException);
+			}
+		}
+
+		return serviceContext;
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		PortalInstancesLocalServiceImpl.class);
 
@@ -226,6 +299,9 @@ public class PortalInstancesLocalServiceImpl
 
 	@Reference
 	private GroupLocalService _groupLocalService;
+
+	@Reference
+	private LayoutLocalService _layoutLocalService;
 
 	@Reference
 	private PermissionCheckerFactory _permissionCheckerFactory;

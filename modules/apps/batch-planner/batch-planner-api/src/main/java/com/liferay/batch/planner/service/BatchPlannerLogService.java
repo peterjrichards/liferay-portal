@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.service.BaseService;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
+import com.liferay.portal.kernel.util.OrderByComparator;
 
 import java.util.List;
 
@@ -61,16 +62,36 @@ public interface BatchPlannerLogService extends BaseService {
 		throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<BatchPlannerLog> getBatchPlannerLogs(long batchPlannerPlanId)
-		throws PortalException;
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<BatchPlannerLog> getBatchPlannerLogs(
-			long batchPlannerPlanId, int start, int end)
+	public BatchPlannerLog getBatchPlannerLog(long batchPlannerLogId)
 		throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getBatchPlannerLogsCount(long batchPlannerPlanId)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public BatchPlannerLog getBatchPlannerPlanBatchPlannerLog(
+			long batchPlannerPlanId)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<BatchPlannerLog> getCompanyBatchPlannerLogs(
+			long companyId, boolean export, int start, int end,
+			OrderByComparator<BatchPlannerLog> orderByComparator)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<BatchPlannerLog> getCompanyBatchPlannerLogs(
+			long companyId, int start, int end,
+			OrderByComparator<BatchPlannerLog> orderByComparator)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getCompanyBatchPlannerLogsCount(long companyId)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getCompanyBatchPlannerLogsCount(long companyId, boolean export)
 		throws PortalException;
 
 	/**

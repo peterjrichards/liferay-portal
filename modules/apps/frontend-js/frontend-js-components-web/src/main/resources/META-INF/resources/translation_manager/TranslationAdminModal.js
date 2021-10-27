@@ -38,36 +38,32 @@ const TranslationAdminModal = ({
 	const [activeLanguageIds, setActiveLanguageIds] = useState(
 		initialActiveLanguageIds
 	);
-	const [lastDeletedLanguageId, setLastDeletedLanguageId] = useState(null);
 	const [visible, setVisible] = useState(initialVisible);
-
-	const {observer} = useModal({
-		onClose: () => {
-			setVisible(false);
-			onClose([...activeLanguageIds]);
-		},
-	});
 
 	const handleAddLocale = (localeId) => {
 		setActiveLanguageIds([...activeLanguageIds, localeId]);
-		setLastDeletedLanguageId(null);
 	};
 
-	const handleClearRestoreLocale = () => {
-		setLastDeletedLanguageId(null);
+	const handleCancel = () => {
+		setVisible(false);
+		setActiveLanguageIds([...initialActiveLanguageIds]);
+		onClose([...initialActiveLanguageIds]);
+	};
+
+	const handleDone = () => {
+		setVisible(false);
+		onClose([...activeLanguageIds]);
 	};
 
 	const handleRemoveLocale = (localeId) => {
 		const newActiveLanguageIds = [...activeLanguageIds];
 		newActiveLanguageIds.splice(activeLanguageIds.indexOf(localeId), 1);
 		setActiveLanguageIds(newActiveLanguageIds);
-		setLastDeletedLanguageId(localeId);
 	};
 
-	const handleRestoreLocale = () => {
-		handleAddLocale(lastDeletedLanguageId);
-		setLastDeletedLanguageId(null);
-	};
+	const {observer} = useModal({
+		onClose: handleCancel,
+	});
 
 	useEffect(() => {
 		setActiveLanguageIds(initialActiveLanguageIds);
@@ -86,11 +82,10 @@ const TranslationAdminModal = ({
 						ariaLabels={ariaLabels}
 						availableLocales={availableLocales}
 						defaultLanguageId={defaultLanguageId}
-						lastDeletedLanguageId={lastDeletedLanguageId}
 						onAddLocale={handleAddLocale}
-						onClearRestoreLocale={handleClearRestoreLocale}
+						onCancel={handleCancel}
+						onDone={handleDone}
 						onRemoveLocale={handleRemoveLocale}
-						onRestoreLocale={handleRestoreLocale}
 						translations={translations}
 					/>
 				</ClayModal>

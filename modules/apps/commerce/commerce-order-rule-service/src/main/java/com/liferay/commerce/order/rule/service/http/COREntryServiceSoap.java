@@ -113,6 +113,44 @@ public class COREntryServiceSoap {
 		}
 	}
 
+	public static com.liferay.commerce.order.rule.model.COREntrySoap
+			fetchByExternalReferenceCode(
+				long companyId, String externalReferenceCode)
+		throws RemoteException {
+
+		try {
+			com.liferay.commerce.order.rule.model.COREntry returnValue =
+				COREntryServiceUtil.fetchByExternalReferenceCode(
+					companyId, externalReferenceCode);
+
+			return com.liferay.commerce.order.rule.model.COREntrySoap.
+				toSoapModel(returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
+	public static com.liferay.commerce.order.rule.model.COREntrySoap
+			fetchCOREntry(long corEntryId)
+		throws RemoteException {
+
+		try {
+			com.liferay.commerce.order.rule.model.COREntry returnValue =
+				COREntryServiceUtil.fetchCOREntry(corEntryId);
+
+			return com.liferay.commerce.order.rule.model.COREntrySoap.
+				toSoapModel(returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
 	public static com.liferay.commerce.order.rule.model.COREntrySoap[]
 			getCOREntries(long companyId, boolean active, int start, int end)
 		throws RemoteException {
@@ -172,6 +210,24 @@ public class COREntryServiceSoap {
 	}
 
 	public static com.liferay.commerce.order.rule.model.COREntrySoap
+			getCOREntry(long corEntryId)
+		throws RemoteException {
+
+		try {
+			com.liferay.commerce.order.rule.model.COREntry returnValue =
+				COREntryServiceUtil.getCOREntry(corEntryId);
+
+			return com.liferay.commerce.order.rule.model.COREntrySoap.
+				toSoapModel(returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
+	public static com.liferay.commerce.order.rule.model.COREntrySoap
 			updateCOREntry(
 				long corEntryId, boolean active, String description,
 				int displayDateMonth, int displayDateDay, int displayDateYear,
@@ -192,6 +248,26 @@ public class COREntryServiceSoap {
 					expirationDateYear, expirationDateHour,
 					expirationDateMinute, neverExpire, name, priority,
 					typeSettings, serviceContext);
+
+			return com.liferay.commerce.order.rule.model.COREntrySoap.
+				toSoapModel(returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
+	public static com.liferay.commerce.order.rule.model.COREntrySoap
+			updateCOREntryExternalReferenceCode(
+				String externalReferenceCode, long corEntryId)
+		throws RemoteException {
+
+		try {
+			com.liferay.commerce.order.rule.model.COREntry returnValue =
+				COREntryServiceUtil.updateCOREntryExternalReferenceCode(
+					externalReferenceCode, corEntryId);
 
 			return com.liferay.commerce.order.rule.model.COREntrySoap.
 				toSoapModel(returnValue);

@@ -62,6 +62,15 @@ public class ObjectEntryServiceWrapper
 	}
 
 	@Override
+	public com.liferay.object.model.ObjectEntry deleteObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _objectEntryService.deleteObjectEntry(
+			externalReferenceCode, companyId, groupId);
+	}
+
+	@Override
 	public com.liferay.object.model.ObjectEntry fetchObjectEntry(
 			long objectEntryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -77,6 +86,15 @@ public class ObjectEntryServiceWrapper
 		return _objectEntryService.getObjectEntry(objectEntryId);
 	}
 
+	@Override
+	public com.liferay.object.model.ObjectEntry getObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _objectEntryService.getObjectEntry(
+			externalReferenceCode, companyId, groupId);
+	}
+
 	/**
 	 * Returns the OSGi service identifier.
 	 *
@@ -85,6 +103,15 @@ public class ObjectEntryServiceWrapper
 	@Override
 	public String getOSGiServiceIdentifier() {
 		return _objectEntryService.getOSGiServiceIdentifier();
+	}
+
+	@Override
+	public boolean hasModelResourcePermission(
+			com.liferay.object.model.ObjectEntry objectEntry, String actionId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _objectEntryService.hasModelResourcePermission(
+			objectEntry, actionId);
 	}
 
 	@Override

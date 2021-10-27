@@ -163,8 +163,6 @@ public class EditCSDiagramSettingMVCActionCommand extends BaseMVCActionCommand {
 			ActionRequest actionRequest)
 		throws Exception {
 
-		String type = ParamUtil.getString(actionRequest, "type");
-
 		long cpDefinitionId = ParamUtil.getLong(
 			actionRequest, "cpDefinitionId");
 
@@ -176,16 +174,20 @@ public class EditCSDiagramSettingMVCActionCommand extends BaseMVCActionCommand {
 			_addOrUpdateCPAttachmentFileEntry(
 				actionRequest, csDiagramSetting, cpDefinitionId);
 
+		double radius = ParamUtil.getDouble(actionRequest, "radius");
+		String type = ParamUtil.getString(actionRequest, "type");
+
 		if (csDiagramSetting == null) {
 			return _csDiagramSettingService.addCSDiagramSetting(
 				cpDefinitionId,
-				cpAttachmentFileEntry.getCPAttachmentFileEntryId(), null, 0D,
-				type);
+				cpAttachmentFileEntry.getCPAttachmentFileEntryId(), null,
+				radius, type);
 		}
 
 		return _csDiagramSettingService.updateCSDiagramSetting(
 			csDiagramSetting.getCSDiagramSettingId(),
-			cpAttachmentFileEntry.getCPAttachmentFileEntryId(), null, 0D, type);
+			cpAttachmentFileEntry.getCPAttachmentFileEntryId(), null, radius,
+			type);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

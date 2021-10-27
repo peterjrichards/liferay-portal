@@ -15,6 +15,7 @@
 package com.liferay.marketplace.service.impl;
 
 import com.liferay.document.library.kernel.exception.NoSuchFileException;
+import com.liferay.document.library.kernel.store.DLStoreRequest;
 import com.liferay.document.library.kernel.store.DLStoreUtil;
 import com.liferay.marketplace.exception.AppPropertiesException;
 import com.liferay.marketplace.exception.AppTitleException;
@@ -33,8 +34,10 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.CompanyConstants;
+import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.plugin.PluginPackage;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -48,6 +51,8 @@ import com.liferay.portal.kernel.util.Validator;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
+import java.nio.file.Files;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -81,6 +86,7 @@ public class AppLocalServiceImpl extends AppLocalServiceBaseImpl {
 	}
 
 	@Override
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
 	public App deleteApp(App app) {
 
 		// App
@@ -392,16 +398,23 @@ public class AppLocalServiceImpl extends AppLocalServiceBaseImpl {
 				DLStoreUtil.deleteFile(
 					app.getCompanyId(), CompanyConstants.SYSTEM,
 					app.getFilePath());
+
+				DLStoreUtil.addFile(
+					DLStoreRequest.builder(
+						app.getCompanyId(), CompanyConstants.SYSTEM,
+						app.getFilePath()
+					).className(
+						this
+					).size(
+						Files.size(file.toPath())
+					).build(),
+					file);
 			}
 			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
 					_log.debug(exception, exception);
 				}
 			}
-
-			DLStoreUtil.addFile(
-				app.getCompanyId(), CompanyConstants.SYSTEM, app.getFilePath(),
-				false, file);
 		}
 
 		clearInstalledAppsCache();

@@ -161,11 +161,23 @@ public class BuildFactory {
 				url, (TopLevelBuild)parentBuild);
 		}
 
+		if (jobName.matches(
+				"test-subrepository-acceptance-pullrequest\\(.*\\)")) {
+
+			return new PullRequestSubrepositoryTopLevelBuild(
+				url, (TopLevelBuild)parentBuild);
+		}
+
 		if (jobName.contains("plugins")) {
 			return new PluginsTopLevelBuild(url, (TopLevelBuild)parentBuild);
 		}
 
 		if (jobName.contains("portal")) {
+			if (jobName.contains("upstream")) {
+				return new UpstreamPortalTopLevelBuild(
+					url, (TopLevelBuild)parentBuild);
+			}
+
 			return new PortalTopLevelBuild(url, (TopLevelBuild)parentBuild);
 		}
 

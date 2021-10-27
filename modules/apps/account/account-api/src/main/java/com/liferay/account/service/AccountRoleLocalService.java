@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 
 import java.io.Serializable;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -298,30 +299,8 @@ public interface AccountRoleLocalService
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public BaseModelSearchResult<AccountRole> searchAccountRoles(
-		long companyId, long accountEntryId, String keywords, int start,
-		int end, OrderByComparator<?> orderByComparator);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public BaseModelSearchResult<AccountRole> searchAccountRoles(
-		long companyId, long[] accountEntryIds, String keywords, int start,
-		int end, OrderByComparator<?> orderByComparator);
-
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x)
-	 */
-	@Deprecated
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public BaseModelSearchResult<AccountRole> searchAccountRoles(
-		long accountEntryId, String keywords, int start, int end,
-		OrderByComparator<?> orderByComparator);
-
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x)
-	 */
-	@Deprecated
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public BaseModelSearchResult<AccountRole> searchAccountRoles(
-		long[] accountEntryIds, String keywords, int start, int end,
+		long companyId, long[] accountEntryIds, String keywords,
+		LinkedHashMap<String, Object> params, int start, int end,
 		OrderByComparator<?> orderByComparator);
 
 	public void unassociateUser(

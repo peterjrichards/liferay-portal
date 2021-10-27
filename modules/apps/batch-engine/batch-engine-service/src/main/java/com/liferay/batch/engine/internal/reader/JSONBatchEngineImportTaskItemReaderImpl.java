@@ -38,7 +38,12 @@ public class JSONBatchEngineImportTaskItemReaderImpl
 
 		_jsonParser = _jsonFactory.createParser(_inputStream);
 
-		_jsonParser.nextToken();
+		JsonToken jsonToken = _jsonParser.nextToken();
+
+		if (jsonToken != JsonToken.START_ARRAY) {
+			throw new IllegalArgumentException(
+				"Provided stream is not a JSON array");
+		}
 	}
 
 	@Override

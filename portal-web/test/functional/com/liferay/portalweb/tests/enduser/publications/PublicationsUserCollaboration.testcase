@@ -1,6 +1,7 @@
 @component-name = "portal-publications"
 definition {
 
+	property custom.properties = "jsonws.web.service.paths.excludes=";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Publications";
@@ -9,8 +10,6 @@ definition {
 		TestCase.setUpPortalInstance();
 
 		User.firstLoginPG();
-
-		JSONPublications.enablePublications();
 	}
 
 	tearDown {
@@ -25,18 +24,14 @@ definition {
 			ApplicationsMenu.gotoPortlet(
 				category = "Publications",
 				panel = "Applications",
-				portlet = "Settings");
+				portlet = "Publications");
 
 			Publications.disablePublications();
-
-			Click(locator1 = "Button#SUBMIT");
 		}
 	}
 
 	@priority = "5"
-	test InviteUserAsEditor {
-		property custom.properties = "jsonws.web.service.paths.excludes=";
-
+	test CanBeInvitedToCollaborateOnMultiplePublications {
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
 			userFirstName = "userfn",
@@ -61,7 +56,130 @@ definition {
 			roleTitle = "Publications User",
 			userEmailAddress = "userea@liferay.com");
 
+		JSONPublications.enablePublications();
+
+		JSONPublications.addPublication(publicationName = "Publication Name 1");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Publications");
+
+		Publications.inviteUsers(
+			publicationName = "Publication Name 1",
+			userInvite = "userea@liferay.com");
+
+		JSONPublications.selectPublication(publicationName = "Publication Name 1");
+
+		JSONWebcontent.addWebContent(
+			content = "WC WebContent Content 1",
+			groupName = "Guest",
+			title = "WC WebContent Title 1");
+
+		JSONDocument.addFileWithUploadedFile(
+			dmDocumentTitle = "DM Document Title 1",
+			groupName = "Guest",
+			mimeType = "text/plain",
+			sourceFileName = "Document_1.txt");
+
+		JSONPublications.addPublication(publicationName = "Publication Name 2");
+
+		Publications.inviteUsers(
+			publicationName = "Publication Name 2",
+			publicationRole = "Editor",
+			userInvite = "userea@liferay.com");
+
+		JSONPublications.selectPublication(publicationName = "Publication Name 2");
+
+		JSONWebcontent.addWebContent(
+			content = "WC WebContent Content 2",
+			groupName = "Guest",
+			title = "WC WebContent Title 2");
+
+		JSONDocument.addFileWithUploadedFile(
+			dmDocumentTitle = "DM Document Title 2",
+			groupName = "Guest",
+			mimeType = "text/plain",
+			sourceFileName = "Document_2.txt");
+
+		SignOut.signOut();
+
+		User.firstLoginUI(
+			password = "test",
+			userEmailAddress = "userea@liferay.com");
+
+		Notifications.gotoNotifications();
+
+		AssertElementPresent(
+			locator1 = "Notifications#NOTIFICATIONS_WORKFLOW_TITLE",
+			value1 = "Test Test has invited you to work on Publication Name 1 as a Viewer.");
+
+		AssertElementPresent(
+			locator1 = "Notifications#NOTIFICATIONS_WORKFLOW_TITLE",
+			value1 = "Test Test has invited you to work on Publication Name 2 as a Editor.");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Publications");
+
+		AssertElementPresent(
+			key_publicationName = "Publication Name 1",
+			locator1 = "Publications#PUBLISHED_PUBLICATION_NAME");
+
+		Publications.assertViewerPermissions(publicationName = "Publication Name 1");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Publications");
+
+		AssertElementPresent(
+			key_publicationName = "Publication Name 2",
+			locator1 = "Publications#PUBLISHED_PUBLICATION_NAME");
+
+		Publications.assertEditorPermissions(publicationName = "Publication Name 2");
+	}
+
+	@priority = "5"
+	test InviteUserAsEditor {
+		JSONUser.addUser(
+			userEmailAddress = "userea@liferay.com",
+			userFirstName = "userfn",
+			userLastName = "userln",
+			userScreenName = "usersn");
+
+		JSONUser.setFirstPassword(
+			agreeToTermsAndAnswerReminderQuery = "true",
+			requireReset = "false",
+			userEmailAddress = "userea@liferay.com");
+
+		JSONUser.addUserToSite(
+			groupName = "Guest",
+			userEmailAddress = "userea@liferay.com");
+
+		JSONRole.assignSiteRoleToUser(
+			groupName = "Guest",
+			roleTitle = "Site Administrator",
+			userEmailAddress = "userea@liferay.com");
+
+		JSONRole.assignRoleToUser(
+			roleTitle = "Publications User",
+			userEmailAddress = "userea@liferay.com");
+
+		JSONPublications.enablePublications();
+
 		JSONPublications.addPublication(publicationName = "Publication Name");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Publications");
+
+		Publications.inviteUsers(
+			publicationName = "Publication Name",
+			publicationRole = "Editor",
+			userInvite = "userea@liferay.com");
 
 		JSONPublications.selectPublication(publicationName = "Publication Name");
 
@@ -76,19 +194,11 @@ definition {
 			mimeType = "text/plain",
 			sourceFileName = "Document_1.txt");
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Publications",
-			panel = "Applications",
-			portlet = "Publications");
+		SignOut.signOut();
 
-		Publications.inviteUsers(
-			publicationName = "Publication Name",
-			publicationRole = "Editor",
-			userInvite = "userea@liferay.com");
-
-		User.logoutAndLoginPG(
-			userLoginEmailAddress = "userea@liferay.com",
-			userLoginFullName = "userfn userln");
+		User.firstLoginUI(
+			password = "test",
+			userEmailAddress = "userea@liferay.com");
 
 		Notifications.gotoNotifications();
 
@@ -110,8 +220,6 @@ definition {
 
 	@priority = "5"
 	test InviteUserAsInviter {
-		property custom.properties = "jsonws.web.service.paths.excludes=";
-
 		for (var userNumber : list "1,2") {
 			JSONUser.addUser(
 				userEmailAddress = "userea${userNumber}@liferay.com",
@@ -143,7 +251,19 @@ definition {
 			resourceName = "com.liferay.change.tracking.model.CTCollection",
 			roleTitle = "Publications User");
 
+		JSONPublications.enablePublications();
+
 		JSONPublications.addPublication(publicationName = "Publication Name");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Publications");
+
+		Publications.inviteUsers(
+			publicationName = "Publication Name",
+			publicationRole = "Inviter",
+			userInvite = "userea1@liferay.com");
 
 		JSONPublications.selectPublication(publicationName = "Publication Name");
 
@@ -158,19 +278,11 @@ definition {
 			mimeType = "text/plain",
 			sourceFileName = "Document_1.txt");
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Publications",
-			panel = "Applications",
-			portlet = "Publications");
+		SignOut.signOut();
 
-		Publications.inviteUsers(
-			publicationName = "Publication Name",
-			publicationRole = "Inviter",
-			userInvite = "userea1@liferay.com");
-
-		User.logoutAndLoginPG(
-			userLoginEmailAddress = "userea1@liferay.com",
-			userLoginFullName = "userfn1 userln1");
+		User.firstLoginUI(
+			password = "test",
+			userEmailAddress = "userea1@liferay.com");
 
 		Notifications.gotoNotifications();
 
@@ -192,8 +304,6 @@ definition {
 
 	@priority = "5"
 	test InviteUserAsPublisher {
-		property custom.properties = "jsonws.web.service.paths.excludes=";
-
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
 			userFirstName = "userfn",
@@ -223,7 +333,19 @@ definition {
 			resourceName = "com.liferay.change.tracking.model.CTCollection",
 			roleTitle = "Publications User");
 
+		JSONPublications.enablePublications();
+
 		JSONPublications.addPublication(publicationName = "Publication Name");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Publications");
+
+		Publications.inviteUsers(
+			publicationName = "Publication Name",
+			publicationRole = "Publisher",
+			userInvite = "userea@liferay.com");
 
 		JSONPublications.selectPublication(publicationName = "Publication Name");
 
@@ -238,19 +360,11 @@ definition {
 			mimeType = "text/plain",
 			sourceFileName = "Document_1.txt");
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Publications",
-			panel = "Applications",
-			portlet = "Publications");
+		SignOut.signOut();
 
-		Publications.inviteUsers(
-			publicationName = "Publication Name",
-			publicationRole = "Publisher",
-			userInvite = "userea@liferay.com");
-
-		User.logoutAndLoginPG(
-			userLoginEmailAddress = "userea@liferay.com",
-			userLoginFullName = "userfn userln");
+		User.firstLoginUI(
+			password = "test",
+			userEmailAddress = "userea@liferay.com");
 
 		Notifications.gotoNotifications();
 
@@ -272,8 +386,6 @@ definition {
 
 	@priority = "5"
 	test InviteUserAsViewer {
-		property custom.properties = "jsonws.web.service.paths.excludes=";
-
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
 			userFirstName = "userfn",
@@ -294,7 +406,19 @@ definition {
 			roleTitle = "Site Administrator",
 			userEmailAddress = "userea@liferay.com");
 
+		JSONPublications.enablePublications();
+
 		JSONPublications.addPublication(publicationName = "Publication Name");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Publications");
+
+		Publications.inviteUsers(
+			publicationName = "Publication Name",
+			userInvite = "userea@liferay.com",
+			userMissingPublicationsRole = "true");
 
 		JSONPublications.selectPublication(publicationName = "Publication Name");
 
@@ -309,19 +433,11 @@ definition {
 			mimeType = "text/plain",
 			sourceFileName = "Document_1.txt");
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Publications",
-			panel = "Applications",
-			portlet = "Publications");
+		SignOut.signOut();
 
-		Publications.inviteUsers(
-			publicationName = "Publication Name",
-			userInvite = "userea@liferay.com",
-			userMissingPublicationsRole = "true");
-
-		User.logoutAndLoginPG(
-			userLoginEmailAddress = "userea@liferay.com",
-			userLoginFullName = "userfn userln");
+		User.firstLoginUI(
+			password = "test",
+			userEmailAddress = "userea@liferay.com");
 
 		Notifications.gotoNotifications();
 

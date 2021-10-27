@@ -20,7 +20,7 @@ import com.liferay.batch.engine.service.BatchEngineExportTaskLocalServiceUtil;
 import com.liferay.batch.engine.service.BatchEngineImportTaskLocalServiceUtil;
 import com.liferay.batch.planner.model.BatchPlannerLog;
 import com.liferay.batch.planner.model.BatchPlannerPlan;
-import com.liferay.batch.planner.service.BatchPlannerLogLocalServiceUtil;
+import com.liferay.batch.planner.service.BatchPlannerLogServiceUtil;
 import com.liferay.batch.planner.service.BatchPlannerPlanServiceUtil;
 import com.liferay.batch.planner.web.internal.display.BatchPlannerLogDisplay;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
@@ -50,6 +50,8 @@ public class BatchPlannerLogDisplayContext extends BaseDisplayContext {
 	public PortletURL getPortletURL() {
 		return PortletURLBuilder.createRenderURL(
 			renderResponse
+		).setNavigation(
+			ParamUtil.getString(renderRequest, "navigation", "all")
 		).setTabs1(
 			"batch-planner-logs"
 		).setParameter(
@@ -57,7 +59,9 @@ public class BatchPlannerLogDisplayContext extends BaseDisplayContext {
 		).buildPortletURL();
 	}
 
-	public SearchContainer<BatchPlannerLogDisplay> getSearchContainer() {
+	public SearchContainer<BatchPlannerLogDisplay> getSearchContainer()
+		throws PortalException {
+
 		if (_searchContainer != null) {
 			return _searchContainer;
 		}
@@ -78,18 +82,37 @@ public class BatchPlannerLogDisplayContext extends BaseDisplayContext {
 
 		long companyId = PortalUtil.getCompanyId(renderRequest);
 
-		_searchContainer.setResults(
-			TransformUtil.transform(
-				BatchPlannerLogLocalServiceUtil.getBatchPlannerLogs(
-					companyId, _searchContainer.getStart(),
-					_searchContainer.getEnd(),
-					OrderByComparatorFactoryUtil.create(
-						"BatchPlannerLog", orderByCol,
-						orderByType.equals("asc"))),
-				this::_toBatchPlannerLogDisplay));
-		_searchContainer.setTotal(
-			BatchPlannerLogLocalServiceUtil.getBatchPlannerLogsCount(
-				companyId));
+		String navigation = ParamUtil.getString(
+			renderRequest, "navigation", "all");
+
+		if (navigation.equals("all")) {
+			_searchContainer.setResults(
+				TransformUtil.transform(
+					BatchPlannerLogServiceUtil.getCompanyBatchPlannerLogs(
+						companyId, _searchContainer.getStart(),
+						_searchContainer.getEnd(),
+						OrderByComparatorFactoryUtil.create(
+							"BatchPlannerLog", orderByCol,
+							orderByType.equals("asc"))),
+					this::_toBatchPlannerLogDisplay));
+			_searchContainer.setTotal(
+				BatchPlannerLogServiceUtil.getCompanyBatchPlannerLogsCount(
+					companyId));
+		}
+		else {
+			_searchContainer.setResults(
+				TransformUtil.transform(
+					BatchPlannerLogServiceUtil.getCompanyBatchPlannerLogs(
+						companyId, isExport(navigation),
+						_searchContainer.getStart(), _searchContainer.getEnd(),
+						OrderByComparatorFactoryUtil.create(
+							"BatchPlannerLog", orderByCol,
+							orderByType.equals("asc"))),
+					this::_toBatchPlannerLogDisplay));
+			_searchContainer.setTotal(
+				BatchPlannerLogServiceUtil.getCompanyBatchPlannerLogsCount(
+					companyId, isExport(navigation)));
+		}
 
 		return _searchContainer;
 	}

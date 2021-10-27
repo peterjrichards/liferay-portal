@@ -1,6 +1,19 @@
 definition {
 
 	macro addInitializerProductToCart {
+		CommerceNavigator.gotoMiniCart();
+
+		var currentItemCount = selenium.getAttribute("//div[contains(@class,'mini-cart')]/button[contains(@class,'mini-cart-opener') and @data-badge-count]@data-badge-count");
+
+		if (IsElementPresent(locator1 = "CommerceAccelerators#MINI_CART_ITEM_NAME", key_cartItemName = "${productName}")) {
+			var newItemCount = "${currentItemCount}";
+		}
+		else {
+			var newItemCount = ${currentItemCount} + 1;
+		}
+
+		Refresh();
+
 		Type(
 			key_productName = "${productName}",
 			locator1 = "CommerceAccelerators#PRODUCT_CARD_QUANTITY_SELECTOR_INPUT_FIELD",
@@ -9,6 +22,10 @@ definition {
 		Click(
 			key_productName = "${productName}",
 			locator1 = "CommerceAccelerators#ADD_TO_CART_BUTTON");
+
+		WaitForElementPresent(
+			key_itemCount = "${newItemCount}",
+			locator1 = "CommerceAccelerators#MINI_CART_BUTTON_DATA_BADGE_COUNT");
 	}
 
 	macro selectAssociatedFSOptionsValue {
@@ -58,7 +75,7 @@ definition {
 	macro viewMiniCartItem {
 		AssertTextEquals(
 			key_cartItemSKU = "${cartItemSKU}",
-			locator1 = "CommerceAccelerators#MINI_CART_ITEM_NAME",
+			locator1 = "CommerceAccelerators#MINI_CART_ITEM_NAME_USING_SKU",
 			value1 = "${cartItemName}");
 
 		AssertTextEquals(

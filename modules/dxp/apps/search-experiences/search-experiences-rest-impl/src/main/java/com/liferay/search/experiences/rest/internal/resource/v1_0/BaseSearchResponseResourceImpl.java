@@ -38,6 +38,7 @@ import com.liferay.portal.vulcan.resource.EntityModelResource;
 import com.liferay.portal.vulcan.util.ActionUtil;
 import com.liferay.portal.vulcan.util.TransformUtil;
 import com.liferay.search.experiences.rest.dto.v1_0.Parameter;
+import com.liferay.search.experiences.rest.dto.v1_0.SXPBlueprint;
 import com.liferay.search.experiences.rest.dto.v1_0.SearchResponse;
 import com.liferay.search.experiences.rest.resource.v1_0.SearchResponseResource;
 
@@ -69,17 +70,13 @@ public abstract class BaseSearchResponseResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'GET' 'http://localhost:8080/o/search-experiences-rest/v1.0/search'  -u 'test@liferay.com:test'
+	 * curl -X 'POST' 'http://localhost:8080/o/search-experiences-rest/v1.0/search' -d $'{"configuration": ___, "description": ___, "id": ___, "title": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
 				name = "query"
-			),
-			@io.swagger.v3.oas.annotations.Parameter(
-				in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
-				name = "sxpBlueprint"
 			),
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
@@ -96,18 +93,17 @@ public abstract class BaseSearchResponseResourceImpl
 			@io.swagger.v3.oas.annotations.tags.Tag(name = "SearchResponse")
 		}
 	)
-	@javax.ws.rs.GET
+	@javax.ws.rs.Consumes({"application/json", "application/xml"})
 	@javax.ws.rs.Path("/search")
+	@javax.ws.rs.POST
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public SearchResponse getSearch(
+	public SearchResponse postSearch(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@javax.ws.rs.QueryParam("query")
 			String query,
-			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
-			@javax.ws.rs.QueryParam("sxpBlueprint")
-			String sxpBlueprint,
-			@javax.ws.rs.core.Context Pagination pagination)
+			@javax.ws.rs.core.Context Pagination pagination,
+			SXPBlueprint sxpBlueprint)
 		throws Exception {
 
 		return new SearchResponse();
@@ -264,9 +260,7 @@ public abstract class BaseSearchResponseResourceImpl
 				contextAcceptLanguage.getPreferredLocale(), entityModel);
 		}
 		catch (Exception exception) {
-			if (_log.isDebugEnabled()) {
-				_log.debug("Invalid filter " + filterString, exception);
-			}
+			_log.error("Invalid filter " + filterString, exception);
 		}
 
 		return null;

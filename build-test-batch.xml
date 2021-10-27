@@ -1631,6 +1631,59 @@ app.server.type=@{app.server.type}]]></echo>
 		</sequential>
 	</macrodef>
 
+	<macrodef name="run-empty-osgi-core-dir-test">
+		<sequential>
+			<run-batch-test>
+				<test-action>
+					<database-test-run-test database.type="mysql" stop.app.server="true">
+						<test-action>
+							<local name="junit.failure.count" />
+							<local name="junit.failure.message" />
+
+							<trycatch property="junit.failure.message">
+								<try>
+									<if>
+										<available file="${liferay.home}/osgi/core" type="dir" />
+										<then>
+											<fileset
+												dir="${liferay.home}/osgi/core"
+												id="osgiCore"
+											>
+												<include name="*" />
+											</fileset>
+
+											<property name="osgiCoreFiles" refid="osgiCore" />
+
+											<fail message="osgi/core directory has been found in the portal bundle. Files found in directory: ${osgiCoreFiles}" />
+										</then>
+									</if>
+								</try>
+								<finally>
+									<condition else="0" property="junit.failure.count" value="1">
+										<isset property="junit.failure.message" />
+									</condition>
+
+									<get-junit-failure-message-element />
+
+									<generate-backend-batch-junit-report
+										junit.failure.count="${junit.failure.count}"
+										junit.failure.message.element="${junit.failure.message.element}"
+										test.class.name="EmptyOsgiCoreDir"
+										test.command.name="emptyOsgiCoreDir"
+									/>
+								</finally>
+							</trycatch>
+						</test-action>
+					</database-test-run-test>
+				</test-action>
+
+				<test-set-up>
+					<setup-test-environment />
+				</test-set-up>
+			</run-batch-test>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="run-empty-temp-dir-test">
 		<sequential>
 			<run-batch-test tomcat.gc.log="true">
@@ -3078,6 +3131,8 @@ log.sanitizer.enabled=false</echo>
 								tofile="${liferay.home}/osgi/test/com.liferay.portal.test.jar"
 							/>
 
+							<ant dir="portal-test" inheritAll="false" target="install-portal-snapshot" />
+
 							<gradle-execute dir="modules/apps/static/required-dependencies/required-dependencies" task="deployReqTestLibs" />
 
 							<local name="artifact.version" />
@@ -3908,6 +3963,10 @@ log.sanitizer.enabled=false</echo>
 		</parallel>
 	</target>
 
+	<target name="empty-osgi-core-dir-jdk8">
+		<run-empty-osgi-core-dir-test />
+	</target>
+
 	<target name="empty-temp-dir-jdk8">
 		<run-empty-temp-dir-test />
 	</target>
@@ -4265,13 +4324,13 @@ log.sanitizer.enabled=false</echo>
 		/>
 	</target>
 
-	<target name="functional-bundle-tomcat-postgresql11-jdk8">
+	<target name="functional-bundle-tomcat-postgresql121-jdk8">
 		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
 
 		<run-functional-test
 			app.server.type="tomcat"
 			database.type="postgresql"
-			database.version="11"
+			database.version="12.1"
 			setup.proxy="false"
 			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
 			test.fix.pack.base.url="${test.fix.pack.base.url}"
@@ -4285,13 +4344,13 @@ log.sanitizer.enabled=false</echo>
 		/>
 	</target>
 
-	<target name="functional-bundle-tomcat-postgresql121-jdk8">
+	<target name="functional-bundle-tomcat-postgresql134-jdk8">
 		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
 
 		<run-functional-test
 			app.server.type="tomcat"
 			database.type="postgresql"
-			database.version="12.1"
+			database.version="13.4"
 			setup.proxy="false"
 			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
 			test.fix.pack.base.url="${test.fix.pack.base.url}"
@@ -4668,8 +4727,8 @@ log.sanitizer.enabled=false</echo>
 		<antcall target="functional-bundle-tomcat-oracle193-jdk8" />
 	</target>
 
-	<target name="functional-smoke-bundle-tomcat-postgresql11-jdk8">
-		<antcall target="functional-bundle-tomcat-postgresql11-jdk8" />
+	<target name="functional-smoke-bundle-tomcat-postgresql134-jdk8">
+		<antcall target="functional-bundle-tomcat-postgresql134-jdk8" />
 	</target>
 
 	<target name="functional-smoke-bundle-weblogic-mysql57-jdk8">
@@ -4840,20 +4899,20 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="oracle" database.version="19.3.0.0.0" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-tomcat90-postgresql11-jdk8">
-		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="11" test.portal.log.assert="true" />
-	</target>
-
-	<target name="functional-smoke-tomcat90-postgresql11-jdk11_open">
-		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="11" test.portal.log.assert="true" />
-	</target>
-
 	<target name="functional-smoke-tomcat90-postgresql121-jdk8">
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="12.1" test.portal.log.assert="true" />
 	</target>
 
 	<target name="functional-smoke-tomcat90-postgresql121-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="12.1" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-tomcat90-postgresql134-jdk8">
+		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="13.4" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-tomcat90-postgresql134-jdk11_open">
+		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="13.4" test.portal.log.assert="true" />
 	</target>
 
 	<target name="functional-smoke-tomcat90-sqlserver2017-jdk8">
@@ -4988,20 +5047,20 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="oracle" database.version="19.3.0.0.0" />
 	</target>
 
-	<target name="functional-tomcat90-postgresql11-jdk8">
-		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="11" />
-	</target>
-
-	<target name="functional-tomcat90-postgresql11-jdk11_open">
-		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="11" />
-	</target>
-
 	<target name="functional-tomcat90-postgresql121-jdk8">
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="12.1" />
 	</target>
 
 	<target name="functional-tomcat90-postgresql121-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="12.1" />
+	</target>
+
+	<target name="functional-tomcat90-postgresql134-jdk8">
+		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="13.4" />
+	</target>
+
+	<target name="functional-tomcat90-postgresql134-jdk11_open">
+		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="13.4" />
 	</target>
 
 	<target name="functional-tomcat90-sqlserver2017-jdk8">
@@ -5116,20 +5175,20 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="oracle" database.version="19.3.0.0.0" />
 	</target>
 
-	<target name="functional-upgrade-tomcat90-postgresql11-jdk8">
-		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="11" />
-	</target>
-
-	<target name="functional-upgrade-tomcat90-postgresql11-jdk11_open">
-		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="11" />
-	</target>
-
 	<target name="functional-upgrade-tomcat90-postgresql121-jdk8">
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="12.1" />
 	</target>
 
 	<target name="functional-upgrade-tomcat90-postgresql121-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="12.1" />
+	</target>
+
+	<target name="functional-upgrade-tomcat90-postgresql134-jdk8">
+		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="13.4" />
+	</target>
+
+	<target name="functional-upgrade-tomcat90-postgresql134-jdk11_open">
+		<run-functional-test app.server.type="tomcat" database.type="postgresql" database.version="13.4" />
 	</target>
 
 	<target name="functional-upgrade-tomcat90-sqlserver2017-jdk8">
@@ -5392,10 +5451,6 @@ log.sanitizer.enabled=false</echo>
 
 	<target name="legacy-functional-bundle-tomcat-oracle193">
 		<run-legacy-database-dump database.type="oracle" database.version="19.3.0.0.0" />
-	</target>
-
-	<target name="legacy-functional-bundle-tomcat-postgresql11">
-		<run-legacy-database-dump database.type="postgresql" database.version="11" />
 	</target>
 
 	<target name="legacy-functional-bundle-tomcat-sqlserver2017">
@@ -5794,12 +5849,12 @@ log.sanitizer.enabled=false</echo>
 		/>
 	</target>
 
-	<target name="modules-integration-bundle-postgresql11-jdk8">
+	<target name="modules-integration-bundle-postgresql121-jdk8">
 		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
 
 		<run-modules-integration-test
 			database.type="postgresql"
-			database.version="11"
+			database.version="12.1"
 			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
 			test.fix.pack.base.url="${test.fix.pack.base.url}"
 			test.license.xml.url="${test.license.xml.url}"
@@ -5813,12 +5868,12 @@ log.sanitizer.enabled=false</echo>
 		/>
 	</target>
 
-	<target name="modules-integration-bundle-postgresql121-jdk8">
+	<target name="modules-integration-bundle-postgresql134-jdk8">
 		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
 
 		<run-modules-integration-test
 			database.type="postgresql"
-			database.version="12.1"
+			database.version="13.4"
 			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
 			test.fix.pack.base.url="${test.fix.pack.base.url}"
 			test.license.xml.url="${test.license.xml.url}"
@@ -5974,20 +6029,20 @@ log.sanitizer.enabled=false</echo>
 		<run-modules-integration-test database.type="oracle" database.version="19.3.0.0.0" />
 	</target>
 
-	<target name="modules-integration-postgresql11-jdk8">
-		<run-modules-integration-test database.type="postgresql" database.version="11" />
-	</target>
-
-	<target name="modules-integration-postgresql11-jdk11_open">
-		<run-modules-integration-test database.type="postgresql" database.version="11" />
-	</target>
-
 	<target name="modules-integration-postgresql121-jdk8">
 		<run-modules-integration-test database.type="postgresql" database.version="12.1" />
 	</target>
 
 	<target name="modules-integration-postgresql121-jdk11_open">
 		<run-modules-integration-test database.type="postgresql" database.version="12.1" />
+	</target>
+
+	<target name="modules-integration-postgresql134-jdk8">
+		<run-modules-integration-test database.type="postgresql" database.version="13.4" />
+	</target>
+
+	<target name="modules-integration-postgresql134-jdk11_open">
+		<run-modules-integration-test database.type="postgresql" database.version="13.4" />
 	</target>
 
 	<target name="modules-integration-project-templates-jdk8">
@@ -6247,7 +6302,7 @@ ${output.content}</echo>
 
 						<trycatch property="junit.failure.message">
 							<try>
-								<for keepgoing="true" list="patching-tool-auto-discovery,patching-tool-info" param="patchingtool.test.target">
+								<for keepgoing="true" list="patching-tool-auto-discovery" param="patchingtool.test.target">
 									<sequential>
 										<ant antfile="${project.dir}/build-test-patching-tool.xml" target="@{patchingtool.test.target}" />
 									</sequential>

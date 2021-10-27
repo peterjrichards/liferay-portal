@@ -17,7 +17,9 @@ package com.liferay.change.tracking.web.internal.portlet.action;
 import com.liferay.change.tracking.constants.CTPortletKeys;
 import com.liferay.change.tracking.exception.CTStagingEnabledException;
 import com.liferay.change.tracking.model.CTCollection;
+import com.liferay.change.tracking.model.CTPreferences;
 import com.liferay.change.tracking.service.CTCollectionLocalService;
+import com.liferay.change.tracking.service.CTPreferencesLocalService;
 import com.liferay.change.tracking.service.CTPreferencesService;
 import com.liferay.change.tracking.web.internal.scheduler.PublishScheduler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -41,8 +43,6 @@ import javax.portlet.ActionResponse;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -55,7 +55,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 @Component(
 	immediate = true,
 	property = {
-		"javax.portlet.name=" + CTPortletKeys.PUBLICATIONS_CONFIGURATION,
+		"javax.portlet.name=" + CTPortletKeys.PUBLICATIONS,
 		"mvc.command.name=/change_tracking/update_global_publications_configuration"
 	},
 	service = MVCActionCommand.class
@@ -71,8 +71,21 @@ public class UpdateGlobalPublicationsConfigurationMVCActionCommand
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		PortletURL redirectURL = PortletURLFactoryUtil.create(
+			actionRequest, CTPortletKeys.PUBLICATIONS,
+			PortletRequest.RENDER_PHASE);
+
 		boolean enablePublications = ParamUtil.getBoolean(
 			actionRequest, "enablePublications");
+
+		CTPreferences ctPreferences =
+			_ctPreferencesLocalService.fetchCTPreferences(
+				themeDisplay.getCompanyId(), 0);
+
+		if ((ctPreferences != null) || !enablePublications) {
+			redirectURL.setParameter(
+				"mvcRenderCommandName", "/change_tracking/view_settings");
+		}
 
 		try {
 			_ctPreferencesService.enablePublications(
@@ -80,6 +93,11 @@ public class UpdateGlobalPublicationsConfigurationMVCActionCommand
 		}
 		catch (CTStagingEnabledException ctStagingEnabledException) {
 			SessionErrors.add(actionRequest, "stagingEnabled");
+
+			redirectURL.setParameter(
+				"mvcRenderCommandName", "/change_tracking/view_settings");
+
+			sendRedirect(actionRequest, actionResponse, redirectURL.toString());
 
 			return;
 		}
@@ -97,36 +115,21 @@ public class UpdateGlobalPublicationsConfigurationMVCActionCommand
 			}
 		}
 
-		HttpServletRequest httpServletRequest = _portal.getHttpServletRequest(
-			actionRequest);
+		hideDefaultSuccessMessage(actionRequest);
 
-		boolean redirectToOverview = ParamUtil.getBoolean(
-			actionRequest, "redirectToOverview");
+		SessionMessages.add(
+			_portal.getHttpServletRequest(actionRequest), "requestProcessed",
+			_language.get(
+				themeDisplay.getLocale(), "the-configuration-has-been-saved"));
 
-		if (redirectToOverview) {
-			hideDefaultSuccessMessage(actionRequest);
-
-			SessionMessages.add(
-				httpServletRequest, "requestProcessed",
-				_language.get(
-					httpServletRequest, "the-configuration-has-been-saved"));
-
-			PortletURL redirectURL = PortletURLFactoryUtil.create(
-				actionRequest, CTPortletKeys.PUBLICATIONS,
-				PortletRequest.RENDER_PHASE);
-
-			sendRedirect(actionRequest, actionResponse, redirectURL.toString());
-		}
-		else {
-			SessionMessages.add(
-				actionRequest, "requestProcessed",
-				_language.get(
-					httpServletRequest, "the-configuration-has-been-saved"));
-		}
+		sendRedirect(actionRequest, actionResponse, redirectURL.toString());
 	}
 
 	@Reference
 	private CTCollectionLocalService _ctCollectionLocalService;
+
+	@Reference
+	private CTPreferencesLocalService _ctPreferencesLocalService;
 
 	@Reference
 	private CTPreferencesService _ctPreferencesService;

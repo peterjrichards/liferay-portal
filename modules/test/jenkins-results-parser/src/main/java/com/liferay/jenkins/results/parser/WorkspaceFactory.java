@@ -14,8 +14,6 @@
 
 package com.liferay.jenkins.results.parser;
 
-import java.lang.reflect.Proxy;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +46,13 @@ public class WorkspaceFactory {
 			return workspace;
 		}
 
-		if (primaryRepositoryName.matches("liferay-portal(-ee)?")) {
+		if (primaryRepositoryName.matches("com-liferay-.*")) {
+			workspace = new SubrepositoryWorkspace(workspaceJSONObject);
+		}
+		else if (primaryRepositoryName.matches("liferay-plugins(-ee)?")) {
+			workspace = new PluginsWorkspace(workspaceJSONObject);
+		}
+		else if (primaryRepositoryName.matches("liferay-portal(-ee)?")) {
 			workspace = new PortalWorkspace(workspaceJSONObject);
 		}
 		else {
@@ -57,13 +61,17 @@ public class WorkspaceFactory {
 
 		_workspaces.put(primaryRepositoryDirName, workspace);
 
-		return (Workspace)Proxy.newProxyInstance(
-			Workspace.class.getClassLoader(), new Class<?>[] {Workspace.class},
-			new MethodLogger(workspace));
+		return workspace;
 	}
 
 	public static Workspace newWorkspace(
 		String repositoryName, String upstreamBranchName) {
+
+		return newWorkspace(repositoryName, upstreamBranchName, null);
+	}
+
+	public static Workspace newWorkspace(
+		String repositoryName, String upstreamBranchName, String jobName) {
 
 		String gitDirectoryName = JenkinsResultsParserUtil.getGitDirectoryName(
 			repositoryName, upstreamBranchName);
@@ -86,21 +94,28 @@ public class WorkspaceFactory {
 			return workspace;
 		}
 
-		if (repositoryName.matches("liferay-portal(-ee)?")) {
-			workspace = new PortalWorkspace(repositoryName, upstreamBranchName);
+		if (repositoryName.matches("com-liferay-.*")) {
+			workspace = new SubrepositoryWorkspace(
+				repositoryName, upstreamBranchName, jobName);
+		}
+		else if (repositoryName.matches("liferay-plugins(-ee)?")) {
+			workspace = new PluginsWorkspace(
+				repositoryName, upstreamBranchName, jobName);
+		}
+		else if (repositoryName.matches("liferay-portal(-ee)?")) {
+			workspace = new PortalWorkspace(
+				repositoryName, upstreamBranchName, jobName);
 		}
 		else {
 			workspace = new DefaultWorkspace(
-				repositoryName, upstreamBranchName);
+				repositoryName, upstreamBranchName, jobName);
 		}
 
 		_workspaces.put(gitDirectoryName, workspace);
 
 		buildDatabase.putWorkspace(gitDirectoryName, workspace);
 
-		return (Workspace)Proxy.newProxyInstance(
-			Workspace.class.getClassLoader(), new Class<?>[] {Workspace.class},
-			new MethodLogger(workspace));
+		return workspace;
 	}
 
 	private static final Map<String, Workspace> _workspaces = new HashMap<>();

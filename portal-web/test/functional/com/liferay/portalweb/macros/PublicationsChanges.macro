@@ -82,7 +82,7 @@ definition {
 
 			Click(locator1 = "PublicationsChanges#PUBLICATIONS_CHANGE_TITLE");
 
-			Click(locator1 = "PublicationsChanges#PUBLICATIONS_ELLIPSIS");
+			Click(locator1 = "PublicationsChanges#PUBLICATIONS_CHANGE_ELLIPSIS");
 
 			MenuItem.click(menuItem = "Edit");
 		}
@@ -90,6 +90,56 @@ definition {
 
 	macro openCommentsSidebar {
 		Click.javaScriptClick(locator1 = "PublicationsChanges#COMMENT_BUTTON");
+	}
+
+	macro sortChanges {
+		Click(
+			key_name = "${sortName}",
+			locator1 = "PublicationsChanges#SORT_BUTTON");
+
+		if ("${sort}" == "descending") {
+			if (IsElementPresent(locator1 = "PublicationsChanges#SORTED_ASCENDING_ICON")) {
+				Click(locator1 = "PublicationsChanges#SORTED_ASCENDING_ICON");
+			}
+		}
+
+		if ("${sort}" == "ascending") {
+			if (IsElementPresent(locator1 = "PublicationsChanges#SORTED_DESCENDING_ICON")) {
+				Click(locator1 = "PublicationsChanges#SORTED_DESCENDING_ICON");
+			}
+		}
+	}
+
+	macro viewChangesResultNotPresent {
+		var key_changeCategory = "${changeCategory}";
+		var key_changeTitle = "${changeTitle}";
+
+		if (isSet(changeOrder)) {
+			var changeOrder = "${changeOrder}";
+		}
+		else {
+			var changeOrder = "1";
+		}
+
+		AssertElementNotPresent(
+			locator1 = "PublicationsChanges#PUBLICATIONS_CHANGE_TITLE",
+			value1 = "${changeTitle}");
+	}
+
+	macro viewChangesResultsOrder {
+		var changeOrder = "0";
+
+		for (var changeTitle : list "${changesList}") {
+			var changeOrder = ${changeOrder} + 1;
+
+			var key_changeCategory = "${changeCategory}";
+			var key_changeTitle = "${changeTitle}";
+
+			AssertTextEquals(
+				changeOrder = "${changeOrder}",
+				locator1 = "PublicationsChanges#PUBLICATIONS_CHANGE_TITLE",
+				value1 = "${changeTitle}");
+		}
 	}
 
 	macro viewChangesViaChangesStyle {
@@ -103,7 +153,7 @@ definition {
 		}
 
 		if ("${showAllItems}" == "true") {
-			Check.checkToggleSwitch(locator1 = "PublicationsSettings#SHOW_ALL_ITEMS_TOGGLE_SWITCH");
+			Check.checkToggleSwitch(locator1 = "PublicationsChanges#SHOW_ALL_ITEMS_TOGGLE_SWITCH");
 		}
 
 		Pause(locator1 = "3000");
@@ -144,7 +194,7 @@ definition {
 		Pause(locator1 = "3000");
 
 		if ("${showAllItems}" == "true") {
-			Check.checkToggleSwitch(locator1 = "PublicationsSettings#SHOW_ALL_ITEMS_TOGGLE_SWITCH");
+			Check.checkToggleSwitch(locator1 = "PublicationsChanges#SHOW_ALL_ITEMS_TOGGLE_SWITCH");
 		}
 
 		var key_changeCategory = "${changeCategory}";

@@ -21,6 +21,7 @@ import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.storage.StorageType;
 import com.liferay.dynamic.data.mapping.util.DDMUtil;
 import com.liferay.journal.configuration.JournalServiceConfiguration;
+import com.liferay.journal.web.internal.configuration.FFTranslationManagerAdminMode;
 import com.liferay.journal.web.internal.configuration.JournalWebConfiguration;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -35,8 +36,10 @@ import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +57,9 @@ public class JournalEditDDMStructuresDisplayContext {
 		_httpServletRequest = httpServletRequest;
 		_liferayPortletResponse = liferayPortletResponse;
 
+		_ffTranslationManagerAdminMode =
+			(FFTranslationManagerAdminMode)httpServletRequest.getAttribute(
+				FFTranslationManagerAdminMode.class.getName());
 		_journalWebConfiguration =
 			(JournalWebConfiguration)httpServletRequest.getAttribute(
 				JournalWebConfiguration.class.getName());
@@ -88,6 +94,14 @@ public class JournalEditDDMStructuresDisplayContext {
 					LiferayWindowState.EXCLUSIVE
 				).buildString()
 			).build());
+	}
+
+	public List<String> getAvailableLanguageIds() {
+		if (_ddmStructure == null) {
+			return StringUtil.asList(getDefaultLanguageId());
+		}
+
+		return Arrays.asList(_ddmStructure.getAvailableLanguageIds());
 	}
 
 	public Map<String, Object> getDataEngineLayoutBuilderHandlerContext() {
@@ -191,6 +205,10 @@ public class JournalEditDDMStructuresDisplayContext {
 		return storageType;
 	}
 
+	public boolean isFFTranslationManagerAdminModeEnabled() {
+		return _ffTranslationManagerAdminMode.enabled();
+	}
+
 	public boolean isStructureFieldIndexableEnable() {
 		return _journalWebConfiguration.structureFieldIndexableEnable();
 	}
@@ -200,6 +218,7 @@ public class JournalEditDDMStructuresDisplayContext {
 
 	private DDMStructure _ddmStructure;
 	private Long _ddmStructureId;
+	private final FFTranslationManagerAdminMode _ffTranslationManagerAdminMode;
 	private final HttpServletRequest _httpServletRequest;
 	private final JournalWebConfiguration _journalWebConfiguration;
 	private final LiferayPortletResponse _liferayPortletResponse;

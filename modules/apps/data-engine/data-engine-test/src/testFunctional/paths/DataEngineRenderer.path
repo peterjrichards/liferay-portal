@@ -61,6 +61,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SELECTOR_INPUT_BY_CONTENT_NAME</td>
+	<td>//label[normalize-space(text())='${key_fieldLabel}']/following-sibling::div//div[contains(@class,'input-group')]//input[contains(@value,'${key_contentName}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SELECTOR_INPUT_INDEXED</td>
 	<td>xpath=(//label[normalize-space(text())='${key_fieldLabel}']/following-sibling::div//div[contains(@class,'input-group')]//input[not(contains(@type,'hidden'))])[${key_index}]</td>
 	<td></td>
@@ -108,6 +113,11 @@
 <tr>
 	<td>SELECT_FROM_LIST_SELECTED_OPTION_INDEXED</td>
 	<td>xpath=(//label[normalize-space(text())='${key_fieldLabel}']//following-sibling::div[contains(@class,'form-builder-select-field')]//div[contains(@class,'option-selected')])[${index}]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SEPARATOR_STYLE</td>
+	<td>//div[contains(@class, 'separator') and contains(@style, '${key_styleValue}')]</td>
 	<td></td>
 </tr>
 <tr>

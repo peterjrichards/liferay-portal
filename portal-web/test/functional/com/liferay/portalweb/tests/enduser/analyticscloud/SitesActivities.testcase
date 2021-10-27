@@ -46,7 +46,7 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("Interation with page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 
@@ -84,7 +84,7 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("Interation with page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 
@@ -218,21 +218,19 @@ definition {
 		// AC Refactor ticket: LRAC-8770
 
 		task ("Site and blogs creation and connection with AC") {
-			ACUtils.addSiteAndPage();
-
 			ACUtils.createBlogsAndAddToPage(entryTitle = "Test 2");
 
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Interation with pages") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Test 2",
 				pageName = "AC Page",
 				siteName = "Site Name");
 
-			BlogsNavigator.gotoPG(entryTitle = "Test 2");
-
-			ACUtils.closeAllSessions();
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("AC launch and go to property menu") {
@@ -264,21 +262,19 @@ definition {
 		// AC Refactor ticket: LRAC-8772
 
 		task ("Site and blogs creation and connection with AC") {
-			ACUtils.addSiteAndPage();
-
 			ACUtils.createBlogsAndAddToPage(entryTitle = "Test 2");
 
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Interation with pages") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Test 2",
 				pageName = "AC Page",
 				siteName = "Site Name");
 
-			BlogsNavigator.gotoPG(entryTitle = "Test 2");
-
-			ACUtils.closeAllSessions();
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("AC launch and go to property menu") {
@@ -310,21 +306,19 @@ definition {
 		// AC Refactor ticket: LRAC-8771
 
 		task ("Site and blogs creation and connection with AC") {
-			ACUtils.addSiteAndPage();
-
 			ACUtils.createBlogsAndAddToPage(entryTitle = "Test 2");
 
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Interation with pages") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Test 2",
 				pageName = "AC Page",
 				siteName = "Site Name");
 
-			BlogsNavigator.gotoPG(entryTitle = "Test 2");
-
-			ACUtils.closeAllSessions();
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("AC launch and go to property menu") {
@@ -350,12 +344,18 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8279 | Test Summary: Site Activity Card: Can hover over a point on the graph to get detailed stats"
 	@priority = "5"
 	test CanHoverOverPointOnGraphGetStats {
+		var usernameList = "ac,liferay";
+
+		var emailList = "ac@liferay.com,liferay@liferay.com";
+
+		var nameList = "ac ac,liferay liferay";
+
 		task ("Connect Analytics Cloud to DXP") {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Add two new users") {
-			for (var name : list "ac,liferay") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
 					userEmailAddress = "${name}@liferay.com",
 					userFirstName = "${name}",
@@ -367,27 +367,18 @@ definition {
 		}
 
 		task ("Login with the users and open the site") {
-			for (var name : list "ac,liferay") {
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${name}@liferay.com",
-					userLoginFullName = "${name} ${name}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Access the page as a anonymous user") {
 			User.logoutPG();
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Close all sessions") {
@@ -422,12 +413,41 @@ definition {
 	}
 
 	@description = "Bug ID: LRAC-7996 | Automation ID: LRAC-8110 | Test Summary: Assert Sites Activity loads activity data properly when the time filter is set to 'Last 24 hours'"
-	@ignore = "true"
 	@priority = "5"
 	test CanLoadDataProperlyWhenTimeFilterIsLast24Hours {
-		ACTimeFilter.clickTimeFilterButton();
-		ACTimeFilter.setLast24Hours();
-		ACUtils.assertXAxisTimedGraph(parentName = "Beryl Commerce Activities");
+		task ("Connect Analytics Cloud to DXP") {
+			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+		}
+
+		task ("View the page") {
+			ACUtils.navigateToSitePage(
+				pageName = "AC Page",
+				siteName = "Site Name");
+		}
+
+		task ("Close sessions") {
+			ACUtils.closeAllSessionsAndWait();
+		}
+
+		task ("Launch AC and go to Sites overview") {
+			ACUtils.launchAC();
+
+			ACProperties.switchProperty(propertyName = "${propertyName}");
+		}
+
+		task ("Set time filter to 24h") {
+			ACNavigation.switchTab(tabName = "Overview");
+
+			ACTimeFilter.clickTimeFilterButton(cardName = "${propertyName} Activities");
+
+			ACTimeFilter.setLast24Hours();
+		}
+
+		task ("Assert that the activity was loaded properly") {
+			ACUtils.assertXAxisTimedGraph(parentName = "${propertyName} Activities");
+
+			ACIndividualsDashboard.viewRechartsBarOnIndividualsActivitiesChart();
+		}
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8280 | Test Summary: Anon and known visitors legend shown"
@@ -438,21 +458,17 @@ definition {
 		}
 
 		task ("Visits the site with known user") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Visits the site with anonymous user") {
 			User.logoutPG();
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Close sessions") {
@@ -499,11 +515,13 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("Interation with page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
+		}
 
-			ACUtils.closeAllSessions();
+		task ("Close all sessions") {
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("AC launch") {
@@ -553,18 +571,16 @@ definition {
 		}
 
 		task ("Interation with pages") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
-
-			Pause(locator1 = "5000");
-
-			ACUtils.closeAllSessions();
 		}
 
 		task ("AC launch") {
+			ACUtils.closeAllSessionsAndWait();
+
 			ACUtils.launchAC();
 
 			ACProperties.switchProperty(propertyName = "${propertyName}");
@@ -616,15 +632,13 @@ definition {
 		}
 
 		task ("Go to site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
 		task ("Close sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Switch to new property in AC and go to Sites") {
@@ -663,19 +677,18 @@ definition {
 
 		task ("Connect DXP to AC") {
 			ACUtils.createBlogsAndAddToPage();
+
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Go to page and get data") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
 		task ("Close all sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Go to AC and assert value and percentage of Site Visitors") {
@@ -710,24 +723,20 @@ definition {
 		// AC Refactor ticket: LRAC-8816
 
 		task ("Connect Analytics Cloud to DXP") {
-			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud();
+			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Visits the site with known user") {
 
 			// This test needs a data from a past time frame to generate a % diference
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Close sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Switch to new property in AC and go to Sites") {
@@ -771,15 +780,13 @@ definition {
 		}
 
 		task ("Go to page and get data") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
 		task ("Close all sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Go to AC and assert value and percentage of Site Visitors") {
@@ -821,15 +828,13 @@ definition {
 
 			// This test needs a data from a past time frame to generate a % diference
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
 		task ("Close all sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Go to AC and assert value and percentage of Site Visitors") {

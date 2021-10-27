@@ -14,9 +14,14 @@
 
 package com.liferay.jenkins.results.parser;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
+
+import java.nio.file.PathMatcher;
+
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.Map;
 
 import org.json.JSONObject;
 
@@ -25,52 +30,63 @@ import org.json.JSONObject;
  */
 public class PortalWorkspace extends BaseWorkspace {
 
-	@Override
-	public void setUp() {
-		WorkspaceGitRepository primaryWorkspaceGitRepository =
-			getPrimaryWorkspaceGitRepository();
+	public Job.BuildProfile getBuildProfile() {
+		String buildProfileString = jsonObject.optString(
+			"build_profile", "dxp");
 
-		primaryWorkspaceGitRepository.setUp();
+		return Job.BuildProfile.getByString(buildProfileString);
+	}
 
-		primaryWorkspaceGitRepository.writePropertiesFiles();
-
-		_setUpPortalProfile();
-
-		_updateBladeSamplesWorkspaceGitRepository();
-		_updatePluginsWorkspaceGitRepository();
-		_updatePortalPrivateWorkspaceGitRepository();
-		_updatePortalsPlutoWorkspaceGitRepository();
-		_updateReleaseWorkspaceGitRepository();
-
-		List<Callable<Object>> callables = new ArrayList<>();
-
-		for (final WorkspaceGitRepository workspaceGitRepository :
-				getWorkspaceGitRepositories()) {
-
-			if (workspaceGitRepository.equals(primaryWorkspaceGitRepository)) {
-				continue;
-			}
-
-			Callable<Object> callable = new Callable<Object>() {
-
-				@Override
-				public Object call() {
-					workspaceGitRepository.setUp();
-
-					workspaceGitRepository.writePropertiesFiles();
-
-					return null;
-				}
-
-			};
-
-			callables.add(callable);
+	public void setBuildProfile(Job.BuildProfile buildProfile) {
+		if (buildProfile == null) {
+			throw new RuntimeException("Invalid build profile " + buildProfile);
 		}
 
-		ParallelExecutor<Object> parallelExecutor = new ParallelExecutor<>(
-			callables, threadPoolExecutor);
+		jsonObject.put("build_profile", buildProfile.toString());
+	}
 
-		parallelExecutor.execute();
+	public void setOSBAsahGitHubURL(String osbAsahGitHubURL) {
+		_osbAsahGitHubURL = osbAsahGitHubURL;
+	}
+
+	public void setOSBFaroGitHubURL(String osbFaroGitHubURL) {
+		_osbFaroGitHubURL = osbFaroGitHubURL;
+	}
+
+	public void setPortalPrivateGitHubURL(String portalPrivateGitHubURL) {
+		_portalPrivateGitHubURL = portalPrivateGitHubURL;
+	}
+
+	@Override
+	public void setUp() {
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			getPortalWorkspaceGitRepository();
+
+		portalWorkspaceGitRepository.setUp();
+
+		_configureBladeSamplesWorkspaceGitRepository();
+		_configureLiferayFacesAlloyWorkspaceGitRepository();
+		_configureLiferayFacesBridgeImplWorkspaceGitRepository();
+		_configureLiferayFacesPortalWorkspaceGitRepository();
+		_configureLiferayFacesShowcaseWorkspaceGitRepository();
+		_configureOSBAsahWorkspaceGitRepository();
+		_configureOSBFaroWorkspaceGitRepository();
+		_configurePluginsWorkspaceGitRepository();
+		_configurePortalPrivateWorkspaceGitRepository();
+		_configurePortalsPlutoWorkspaceGitRepository();
+		_configureReleaseToolWorkspaceGitRepository();
+
+		super.setUp();
+
+		Job.BuildProfile buildProfile = getBuildProfile();
+
+		if (buildProfile == Job.BuildProfile.DXP) {
+			portalWorkspaceGitRepository.setUpPortalProfile();
+		}
+
+		portalWorkspaceGitRepository.setUpTCKHome();
+
+		updateOSBAsahModule();
 	}
 
 	protected PortalWorkspace(JSONObject jsonObject) {
@@ -83,46 +99,290 @@ public class PortalWorkspace extends BaseWorkspace {
 		super(primaryRepositoryName, upstreamBranchName);
 	}
 
-	private void _setUpPortalProfile() {
-		WorkspaceGitRepository primaryWorkspaceGitRepository =
-			getPrimaryWorkspaceGitRepository();
+	protected PortalWorkspace(
+		String primaryRepositoryName, String upstreamBranchName,
+		String jobName) {
 
-		if (!(primaryWorkspaceGitRepository instanceof
-				PortalWorkspaceGitRepository)) {
+		super(primaryRepositoryName, upstreamBranchName, jobName);
+	}
 
+	protected void copyOSBAsahRepositoryToModule() {
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			getPortalWorkspaceGitRepository();
+
+		File modulesDir = new File(
+			portalWorkspaceGitRepository.getDirectory(),
+			"modules/dxp/apps/osb/osb-asah");
+
+		if (!modulesDir.exists()) {
 			return;
 		}
 
-		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
-			(PortalWorkspaceGitRepository)primaryWorkspaceGitRepository;
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository("com-liferay-osb-asah-private");
 
-		portalWorkspaceGitRepository.setUpPortalProfile();
+		if (workspaceGitRepository == null) {
+			return;
+		}
+
+		List<PathMatcher> deleteExcludePathMatchers =
+			JenkinsResultsParserUtil.toPathMatchers(
+				JenkinsResultsParserUtil.combine(
+					JenkinsResultsParserUtil.getCanonicalPath(modulesDir),
+					File.separator),
+				".gradle/", ".gitrepo", "ci-merge", "gradle/");
+
+		try {
+			JenkinsResultsParserUtil.delete(
+				modulesDir, null, deleteExcludePathMatchers);
+		}
+		catch (IOException ioException) {
+			throw new RuntimeException(ioException);
+		}
+
+		List<PathMatcher> copyExcludePathMatchers =
+			JenkinsResultsParserUtil.toPathMatchers(
+				JenkinsResultsParserUtil.combine(
+					JenkinsResultsParserUtil.getCanonicalPath(
+						workspaceGitRepository.getDirectory()),
+					File.separator),
+				".git/", ".gradle/", "gradle/", "settings.gradle");
+
+		try {
+			JenkinsResultsParserUtil.copy(
+				workspaceGitRepository.getDirectory(), modulesDir, null,
+				copyExcludePathMatchers);
+		}
+		catch (IOException ioException) {
+			throw new RuntimeException(ioException);
+		}
+
+		try {
+			Map<String, String> parameters = new HashMap<>();
+
+			parameters.put("module.dir", "dxp/apps/osb/osb-asah");
+			parameters.put(
+				"portal.dir",
+				JenkinsResultsParserUtil.getCanonicalPath(
+					portalWorkspaceGitRepository.getDirectory()));
+
+			AntUtil.callTarget(
+				portalWorkspaceGitRepository.getDirectory(), "build-test.xml",
+				"clean-version-override", parameters);
+		}
+		catch (AntException antException) {
+			throw new RuntimeException(antException);
+		}
+
+		List<File> versionOverrideFiles = JenkinsResultsParserUtil.findFiles(
+			modulesDir,
+			JenkinsResultsParserUtil.combine(
+				".version-override-", modulesDir.getName(), ".properties"));
+
+		for (File versionOverrideFile : versionOverrideFiles) {
+			JenkinsResultsParserUtil.delete(versionOverrideFile);
+		}
+
+		GitWorkingDirectory gitWorkingDirectory =
+			portalWorkspaceGitRepository.getGitWorkingDirectory();
+
+		System.out.println(gitWorkingDirectory.status());
+
+		gitWorkingDirectory.commitFileToCurrentBranch(
+			"modules/dxp/apps/osb/osb-asah",
+			JenkinsResultsParserUtil.combine(
+				"Committing changes from ", workspaceGitRepository.getName(),
+				" at ", workspaceGitRepository.getSenderBranchSHA(),
+				" for testing on CI"));
 	}
 
-	private void _updateBladeSamplesWorkspaceGitRepository() {
+	protected PluginsWorkspaceGitRepository getPluginsWorkspaceGitRepository() {
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			getPortalWorkspaceGitRepository();
+
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository(
+				portalWorkspaceGitRepository.getPluginsRepositoryDirName());
+
+		if (!(workspaceGitRepository instanceof
+				PluginsWorkspaceGitRepository)) {
+
+			return null;
+		}
+
+		return (PluginsWorkspaceGitRepository)workspaceGitRepository;
+	}
+
+	protected PortalWorkspaceGitRepository getPortalWorkspaceGitRepository() {
+		WorkspaceGitRepository workspaceGitRepository =
+			getPrimaryWorkspaceGitRepository();
+
+		if (!(workspaceGitRepository instanceof PortalWorkspaceGitRepository)) {
+			throw new RuntimeException(
+				"The portal workspace Git repository is not set");
+		}
+
+		return (PortalWorkspaceGitRepository)workspaceGitRepository;
+	}
+
+	protected void updateOSBAsahModule() {
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			getPortalWorkspaceGitRepository();
+
+		File ciMergeFile = new File(
+			portalWorkspaceGitRepository.getDirectory(),
+			"modules/dxp/apps/osb/osb-asah/ci-merge");
+
+		if (!ciMergeFile.exists()) {
+			return;
+		}
+
+		copyOSBAsahRepositoryToModule();
+	}
+
+	private void _configureBladeSamplesWorkspaceGitRepository() {
 		_updateWorkspaceGitRepository(
 			"git-commit-blade-samples", "liferay-blade-samples");
 	}
 
-	private void _updatePluginsWorkspaceGitRepository() {
-		WorkspaceGitRepository primaryWorkspaceGitRepository =
-			getPrimaryWorkspaceGitRepository();
+	private void _configureLiferayFacesAlloyWorkspaceGitRepository() {
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			getPortalWorkspaceGitRepository();
 
-		if (!(primaryWorkspaceGitRepository instanceof
-				PortalWorkspaceGitRepository)) {
+		String gitHubURL =
+			portalWorkspaceGitRepository.getLiferayFacesAlloyURL();
 
+		if (JenkinsResultsParserUtil.isNullOrEmpty(gitHubURL)) {
 			return;
 		}
 
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository("liferay-faces-alloy");
+
+		if (workspaceGitRepository == null) {
+			return;
+		}
+
+		workspaceGitRepository.setGitHubURL(gitHubURL);
+	}
+
+	private void _configureLiferayFacesBridgeImplWorkspaceGitRepository() {
 		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
-			(PortalWorkspaceGitRepository)primaryWorkspaceGitRepository;
+			getPortalWorkspaceGitRepository();
+
+		String gitHubURL =
+			portalWorkspaceGitRepository.getLiferayFacesBridgeImplURL();
+
+		if (JenkinsResultsParserUtil.isNullOrEmpty(gitHubURL)) {
+			return;
+		}
+
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository("liferay-faces-bridge-impl");
+
+		if (workspaceGitRepository == null) {
+			return;
+		}
+
+		workspaceGitRepository.setGitHubURL(gitHubURL);
+	}
+
+	private void _configureLiferayFacesPortalWorkspaceGitRepository() {
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			getPortalWorkspaceGitRepository();
+
+		String gitHubURL =
+			portalWorkspaceGitRepository.getLiferayFacesPortalURL();
+
+		if (JenkinsResultsParserUtil.isNullOrEmpty(gitHubURL)) {
+			return;
+		}
+
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository("liferay-faces-portal");
+
+		if (workspaceGitRepository == null) {
+			return;
+		}
+
+		workspaceGitRepository.setGitHubURL(gitHubURL);
+	}
+
+	private void _configureLiferayFacesShowcaseWorkspaceGitRepository() {
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			getPortalWorkspaceGitRepository();
+
+		String gitHubURL =
+			portalWorkspaceGitRepository.getLiferayFacesShowcaseURL();
+
+		if (JenkinsResultsParserUtil.isNullOrEmpty(gitHubURL)) {
+			return;
+		}
+
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository("liferay-faces-showcase");
+
+		if (workspaceGitRepository == null) {
+			return;
+		}
+
+		workspaceGitRepository.setGitHubURL(gitHubURL);
+	}
+
+	private void _configureOSBAsahWorkspaceGitRepository() {
+		boolean updated = _updateWorkspaceGitRepository(
+			"modules/dxp/apps/osb/osb-asah/ci-merge",
+			"com-liferay-osb-asah-private");
+
+		if (updated || (_osbAsahGitHubURL == null)) {
+			return;
+		}
+
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository("com-liferay-osb-asah-private");
+
+		if (workspaceGitRepository == null) {
+			return;
+		}
+
+		workspaceGitRepository.setGitHubURL(_osbAsahGitHubURL);
+	}
+
+	private void _configureOSBFaroWorkspaceGitRepository() {
+		if (_osbFaroGitHubURL == null) {
+			return;
+		}
+
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository("com-liferay-osb-faro-private");
+
+		if (workspaceGitRepository == null) {
+			return;
+		}
+
+		workspaceGitRepository.setGitHubURL(_osbFaroGitHubURL);
+	}
+
+	private void _configurePluginsWorkspaceGitRepository() {
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			getPortalWorkspaceGitRepository();
 
 		_updateWorkspaceGitRepository(
 			"git-commit-plugins",
 			portalWorkspaceGitRepository.getPluginsRepositoryDirName());
+
+		PluginsWorkspaceGitRepository pluginsWorkspaceGitRepository =
+			getPluginsWorkspaceGitRepository();
+
+		if (pluginsWorkspaceGitRepository == null) {
+			return;
+		}
+
+		pluginsWorkspaceGitRepository.setPortalUpstreamBranchName(
+			portalWorkspaceGitRepository.getUpstreamBranchName());
 	}
 
-	private void _updatePortalPrivateWorkspaceGitRepository() {
+	private void _configurePortalPrivateWorkspaceGitRepository() {
 		WorkspaceGitRepository primaryWorkspaceGitRepository =
 			getPrimaryWorkspaceGitRepository();
 
@@ -135,29 +395,70 @@ public class PortalWorkspace extends BaseWorkspace {
 		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
 			(PortalWorkspaceGitRepository)primaryWorkspaceGitRepository;
 
+		String portalPrivateDirectoryName =
+			portalWorkspaceGitRepository.getPortalPrivateRepositoryDirName();
+
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository(portalPrivateDirectoryName);
+
+		if ((workspaceGitRepository == null) ||
+			(_portalPrivateGitHubURL == null)) {
+
+			return;
+		}
+
+		workspaceGitRepository.setGitHubURL(_portalPrivateGitHubURL);
+
 		_updateWorkspaceGitRepository(
-			"git-commit-portal-private",
-			portalWorkspaceGitRepository.getPortalPrivateRepositoryDirName());
+			"git-commit-portal-private", portalPrivateDirectoryName);
 	}
 
-	private void _updatePortalsPlutoWorkspaceGitRepository() {
+	private void _configurePortalsPlutoWorkspaceGitRepository() {
 		_updateWorkspaceGitRepository(
 			"git-commit-portals-pluto", "portals-pluto");
 	}
 
-	private void _updateReleaseWorkspaceGitRepository() {
+	private void _configureReleaseToolWorkspaceGitRepository() {
 		_updateWorkspaceGitRepository(
 			"git-commit/liferay-release-tool-ee", "liferay-release-tool-ee");
+
+		ReleaseToolWorkspaceGitRepository releaseToolWorkspaceGitRepository =
+			_getReleaseToolWorkspaceGitRepository();
+
+		if (releaseToolWorkspaceGitRepository == null) {
+			return;
+		}
+
+		PortalWorkspaceGitRepository portalWorkspaceGitRepository =
+			getPortalWorkspaceGitRepository();
+
+		releaseToolWorkspaceGitRepository.setPortalUpstreamBranchName(
+			portalWorkspaceGitRepository.getUpstreamBranchName());
 	}
 
-	private void _updateWorkspaceGitRepository(
+	private ReleaseToolWorkspaceGitRepository
+		_getReleaseToolWorkspaceGitRepository() {
+
+		WorkspaceGitRepository workspaceGitRepository =
+			getWorkspaceGitRepository("liferay-release-tool-ee");
+
+		if (!(workspaceGitRepository instanceof
+				ReleaseToolWorkspaceGitRepository)) {
+
+			return null;
+		}
+
+		return (ReleaseToolWorkspaceGitRepository)workspaceGitRepository;
+	}
+
+	private boolean _updateWorkspaceGitRepository(
 		String gitCommitFilePath, String gitRepositoryName) {
 
 		WorkspaceGitRepository workspaceGitRepository =
 			getWorkspaceGitRepository(gitRepositoryName);
 
 		if (workspaceGitRepository == null) {
-			return;
+			return false;
 		}
 
 		WorkspaceGitRepository primaryWorkspaceGitRepository =
@@ -166,17 +467,29 @@ public class PortalWorkspace extends BaseWorkspace {
 		String gitCommit = primaryWorkspaceGitRepository.getFileContent(
 			gitCommitFilePath);
 
+		if (JenkinsResultsParserUtil.isNullOrEmpty(gitCommit)) {
+			return false;
+		}
+
 		if (JenkinsResultsParserUtil.isSHA(gitCommit)) {
 			workspaceGitRepository.setSenderBranchSHA(gitCommit);
 
-			return;
+			return true;
 		}
 
-		if (GitUtil.isValidGitHubRefURL(gitCommit) ||
-			PullRequest.isValidGitHubPullRequestURL(gitCommit)) {
+		if (!GitUtil.isValidGitHubRefURL(gitCommit) &&
+			!PullRequest.isValidGitHubPullRequestURL(gitCommit)) {
 
-			workspaceGitRepository.setGitHubURL(gitCommit);
+			return false;
 		}
+
+		workspaceGitRepository.setGitHubURL(gitCommit);
+
+		return true;
 	}
+
+	private String _osbAsahGitHubURL;
+	private String _osbFaroGitHubURL;
+	private String _portalPrivateGitHubURL;
 
 }

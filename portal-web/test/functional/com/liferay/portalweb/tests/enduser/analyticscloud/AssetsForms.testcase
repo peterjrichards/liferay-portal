@@ -32,6 +32,8 @@ definition {
 			JSONGroup.deleteGroupByName(groupName = "Site Name");
 		}
 
+		JSONUser.tearDownNonAdminUsers();
+
 		ACUtils.tearDownAC();
 	}
 
@@ -44,23 +46,11 @@ definition {
 		// AC Refactor ticket: LRAC-9467
 
 		task ("Submit the form") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
 				pageName = "AC Page",
-				siteName = "Site Name");
-
-			FormPortlet.waitFormRenderer(text = "Submit");
-
-			FormFields.viewTextLabel(
-				fieldLabel = "Text",
-				fieldName = "Text");
-
-			FormFields.editText(
-				fieldName = "Text",
-				fieldValue = "Test Assets");
-
-			FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-			Pause(locator1 = "5000");
+				siteName = "Site Name",
+				submitText = "Test Assets");
 		}
 
 		task ("Close sessions") {
@@ -102,42 +92,39 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8423 | Test Summary: Forms audience card shows expected amount of known and anonymous individuals"
 	@priority = "5"
 	test AudienceCardShowsExpectedAmountKnowAndAnonymousIndividualsInForms {
+		var usernameList = "ac,ac2";
+
+		var emailList = "ac@liferay.com,ac2@liferay.com";
+
 		task ("Create users and connect to AC") {
-			for (var n : list "ac,ac2") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "${n}@liferay.com",
-					userFirstName = "${n}",
-					userLastName = "${n}",
-					userScreenName = "${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 			}
 
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Go to form and submit") {
-			for (var n : list "ac,ac2,unknown") {
-				if ("${n}" != "unknown") {
-					User.logoutAndLoginPG(
-						userLoginEmailAddress = "${n}@liferay.com",
-						userLoginFullName = "${n} ${n}");
-				}
+			ACUtils.navigateToSitePageWithUser(
+				actionType = "Submit Form",
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name",
+				submitText = "Test Assets");
+		}
 
-				if ("${n}" == "unknown") {
-					User.logoutPG();
-				}
+		task ("Download the document with anonymous user") {
+			User.logoutPG();
 
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				FormFields.editText(
-					fieldName = "Text",
-					fieldValue = "Test Assets");
-
-				FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-				Pause(locator1 = "10000");
-			}
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
+				pageName = "AC Page",
+				siteName = "Site Name",
+				submitText = "Test Assets");
 		}
 
 		task ("Close all sessions and go to AC") {
@@ -172,44 +159,43 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8424 | Test Summary: Forms audience card shows expected amount of segmented and unsegmented individuals"
 	@priority = "5"
 	test AudienceCardShowsExpectedAmountSegmentedAndUnsegmentedInForms {
-		task ("Create users and Sync") {
-			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+		var usernameList = "ac,ac2";
 
-			for (var n : list "ac,ac2") {
+		var emailList = "ac@liferay.com,ac2@liferay.com";
+
+		task ("Create users and connect to AC") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "${n}@liferay.com",
-					userFirstName = "${n}",
-					userLastName = "${n}",
-					userScreenName = "${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 			}
 
-			ACDXPSettings.syncNewContactData();
+			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
-		task ("Go to form and submit to get data for unsegmented individuals") {
-			for (var n : list "ac,ac2,unknown") {
-				if ("${n}" != "unknown") {
-					User.logoutAndLoginPG(
-						userLoginEmailAddress = "${n}@liferay.com",
-						userLoginFullName = "${n} ${n}");
-				}
+		task ("Go to form and submit") {
+			ACUtils.navigateToSitePageWithUser(
+				actionType = "Submit Form",
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name",
+				submitText = "Test Assets");
+		}
 
-				if ("${n}" == "unknown") {
-					User.logoutPG();
-				}
+		task ("Download the document with anonymous user") {
+			User.logoutPG();
 
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
+				pageName = "AC Page",
+				siteName = "Site Name",
+				submitText = "Test Assets");
+		}
 
-				FormFields.editText(
-					fieldName = "Text",
-					fieldValue = "Test Assets");
-
-				FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-				Pause(locator1 = "10000");
-			}
+		task ("Close all sessions") {
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Go to AC and create segment for the user") {
@@ -233,17 +219,11 @@ definition {
 
 			ACUtils.launchDXP(userEmailAddress = "ac@liferay.com");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
 				pageName = "AC Page",
-				siteName = "Site Name");
-
-			FormFields.editText(
-				fieldName = "Text",
-				fieldValue = "Test Assets");
-
-			FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-			Pause(locator1 = "10000");
+				siteName = "Site Name",
+				submitText = "Test Assets");
 		}
 
 		task ("Close all sessions and go to AC") {
@@ -274,9 +254,9 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8417 | Test Summary: Forms list is searchable"
 	@priority = "5"
 	test CanFormsListSearchable {
-		var formName = "Created Form Name,Created Form Name 1";
+		var formNameList = "Created Form Name,Created Form Name 1";
 
-		ACUtils.addSiteAndPage(layoutName = "AC Page 1");
+		ACUtils.addPage(layoutName = "AC Page 1");
 
 		ACUtils.createFormAndAddToPage(
 			formACTitle = "Created Form Name 1",
@@ -287,11 +267,10 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		for (var pageName : list "AC Page,AC Page 1") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Form",
 				pageName = "${pageName}",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		ACUtils.closeAllSessionsAndWait();
@@ -308,11 +287,11 @@ definition {
 
 		ACTimeFilter.setLast24Hours();
 
-		for (var formName : list "${formName}") {
+		for (var formName : list "${formNameList}") {
 			ACUtils.searchBar(searchItem = "${formName}");
-		}
 
-		ACUtils.viewNameList(nameList = "${formName}");
+			ACUtils.viewNameList(nameList = "${formName}");
+		}
 
 		ACUtils.searchBar(searchItem = "Should not be here");
 
@@ -339,23 +318,11 @@ definition {
 			userLoginFullName = "ac ac");
 
 		for (var n : list "1,2,3") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
 				pageName = "AC Page",
-				siteName = "Site Name");
-
-			FormPortlet.waitFormRenderer(text = "Submit");
-
-			FormFields.viewTextLabel(
-				fieldLabel = "Text",
-				fieldName = "Text");
-
-			FormFields.editText(
-				fieldName = "Text",
-				fieldValue = "Test Assets");
-
-			FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-			Pause(locator1 = "5000");
+				siteName = "Site Name",
+				submitText = "Test Segments");
 		}
 
 		ACUtils.closeAllSessionsAndWait();
@@ -403,27 +370,15 @@ definition {
 
 			// This test needs to add data from a past date to work propperly
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
 				pageName = "AC Page",
-				siteName = "Site Name");
-
-			FormPortlet.waitFormRenderer(text = "Submit");
-
-			FormFields.viewTextLabel(
-				fieldLabel = "Text",
-				fieldName = "Text");
-
-			FormFields.editText(
-				fieldName = "Text",
-				fieldValue = "Test Assets");
-
-			FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
+				siteName = "Site Name",
+				submitText = "Test Assets");
 		}
 
 		task ("Close sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Enter in forms asset page") {
@@ -480,27 +435,17 @@ definition {
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var name : list "1,2,3") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
+		ACUtils.navigateToSitePage(
+			actionType = "View Form",
+			documentTitleList = "1,2",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
-			Pause(locator1 = "5000");
-		}
-
-		FormPortlet.waitFormRenderer(text = "Submit");
-
-		FormFields.viewTextLabel(
-			fieldLabel = "Text",
-			fieldName = "Text");
-
-		FormFields.editText(
-			fieldName = "Text",
-			fieldValue = "Test Assets");
-
-		FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-		Pause(locator1 = "5000");
+		ACUtils.navigateToSitePage(
+			actionType = "Submit Form",
+			pageName = "AC Page",
+			siteName = "Site Name",
+			submitText = "Test Assets");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -547,21 +492,11 @@ definition {
 			// Use a macro to submit forms using diferent locations data
 			// Create a locations list that you can use later
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
 				pageName = "AC Page",
-				siteName = "Site Name");
-
-			FormFields.viewTextLabel(
-				fieldLabel = "Text",
-				fieldName = "Text");
-
-			FormFields.editText(
-				fieldName = "Text",
-				fieldValue = "Test Assets");
-
-			FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-			Pause(locator1 = "10000");
+				siteName = "Site Name",
+				submitText = "Test Assets");
 		}
 
 		task ("Close all sessions") {
@@ -598,23 +533,11 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("Form submit") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
 				pageName = "AC Page",
-				siteName = "Site Name");
-
-			FormPortlet.waitFormRenderer(text = "Submit");
-
-			FormFields.viewTextLabel(
-				fieldLabel = "Text",
-				fieldName = "Text");
-
-			FormFields.editText(
-				fieldName = "Text",
-				fieldValue = "Test Assets");
-
-			FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-			Pause(locator1 = "5000");
+				siteName = "Site Name",
+				submitText = "Test Assets");
 		}
 
 		task ("Close sessions") {
@@ -656,23 +579,11 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		task ("Submit the form") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
 				pageName = "AC Page",
-				siteName = "Site Name");
-
-			FormPortlet.waitFormRenderer(text = "Submit");
-
-			FormFields.viewTextLabel(
-				fieldLabel = "Text",
-				fieldName = "Text");
-
-			FormFields.editText(
-				fieldName = "Text",
-				fieldValue = "Test Assets");
-
-			FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-			Pause(locator1 = "5000");
+				siteName = "Site Name",
+				submitText = "Test Assets");
 		}
 
 		task ("Close sessions") {
@@ -709,11 +620,15 @@ definition {
 	@description = "Form known individuals shows which individuals interact with the form"
 	@priority = "5"
 	test KnownIndividualsShowsWhichIndividualsInteractWithForm {
-		Navigator.openURL();
+		var nameList = "ac ac,liferay liferay,dxp dxp";
+
+		var usernameList = "ac,liferay,dxp";
+
+		var emailList = "ac@liferay.com,liferay@liferay.com,dxp@liferay.com";
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var name : list "ac,liferay,dxp") {
+		for (var name : list "${usernameList}") {
 			JSONUser.addUser(
 				userEmailAddress = "${name}@liferay.com",
 				userFirstName = "${name}",
@@ -723,29 +638,12 @@ definition {
 
 		ACDXPSettings.syncNewContactData();
 
-		for (var name : list "ac,liferay,dxp") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "${name}@liferay.com",
-				userLoginFullName = "${name} ${name}");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			FormPortlet.waitFormRenderer(text = "Submit");
-
-			FormFields.viewTextLabel(
-				fieldLabel = "Text",
-				fieldName = "Text");
-
-			FormFields.editText(
-				fieldName = "Text",
-				fieldValue = "Test Assets");
-
-			FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-			Pause(locator1 = "10000");
-		}
+		ACUtils.navigateToSitePageWithUser(
+			actionType = "Submit Form",
+			emailList = "${emailList}",
+			pageName = "AC Page",
+			siteName = "Site Name",
+			submitText = "Test Assets");
 
 		ACUtils.closeAllSessionsAndWait();
 
@@ -769,11 +667,7 @@ definition {
 
 		ACTimeFilter.setLast24Hours();
 
-		for (var name : list "ac,liferay,dxp") {
-			AssertElementPresent(
-				key_userName = "${name} ${name}",
-				locator1 = "ACSegments#SEGMENT_MEMBERS");
-		}
+		ACUtils.viewNameList(nameList = "${nameList}");
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8120 | Test Summary: Assert forms list shows all of the forms in a list"
@@ -782,7 +676,7 @@ definition {
 		var formNameList = "Created Form Name,Created Form Name 1,Created Form Name 2,Created Form Name 3";
 
 		for (var n : list "1,2,3") {
-			ACUtils.addSiteAndPage(layoutName = "AC Page ${n}");
+			ACUtils.addPage(layoutName = "AC Page ${n}");
 		}
 
 		for (var n : list "1,2,3") {
@@ -796,23 +690,11 @@ definition {
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		for (var pageName : list "AC Page,AC Page 1,AC Page 2,AC Page 3") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "Submit Form",
 				pageName = "${pageName}",
-				siteName = "Site Name");
-
-			FormPortlet.waitFormRenderer(text = "Submit");
-
-			FormFields.viewTextLabel(
-				fieldLabel = "Text",
-				fieldName = "Text");
-
-			FormFields.editText(
-				fieldName = "Text",
-				fieldValue = "Test Assets");
-
-			FormPortlet.submitLocalizedSuccessfully(buttonName = "Submit");
-
-			Pause(locator1 = "5000");
+				siteName = "Site Name",
+				submitText = "Test Assets");
 		}
 
 		ACUtils.closeAllSessionsAndWait();
@@ -835,17 +717,13 @@ definition {
 	@description = "Forms visitor behavior card shows expected amount of views"
 	@priority = "5"
 	test VisitorBehaviorCardShowsExpectedAmountOfViews {
-		Navigator.openURL();
-
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		for (var n : list "1,2,3,4") {
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			Pause(locator1 = "100");
-		}
+		ACUtils.navigateToSitePage(
+			actionType = "View Form",
+			documentTitleList = "1,2,3,4",
+			pageName = "AC Page",
+			siteName = "Site Name");
 
 		ACUtils.closeAllSessionsAndWait();
 

@@ -900,64 +900,79 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 	protected void importFromLDAPByUser(LDAPImportContext ldapImportContext)
 		throws Exception {
 
-		byte[] cookie = new byte[0];
+		SafeLdapContext safeLdapContext = _safePortalLDAP.getSafeLdapContext(
+			ldapImportContext.getLdapServerId(),
+			ldapImportContext.getCompanyId());
 
-		while (cookie != null) {
-			List<SearchResult> searchResults = new ArrayList<>();
+		try {
+			byte[] cookie = new byte[0];
 
-			Properties userMappings = ldapImportContext.getUserMappings();
+			while (cookie != null) {
+				List<SearchResult> searchResults = new ArrayList<>();
 
-			String userMappingsScreenName = GetterUtil.getString(
-				userMappings.getProperty("screenName"));
+				Properties userMappings = ldapImportContext.getUserMappings();
 
-			userMappingsScreenName = StringUtil.toLowerCase(
-				userMappingsScreenName);
+				String userMappingsScreenName = GetterUtil.getString(
+					userMappings.getProperty("screenName"));
 
-			cookie = _safePortalLDAP.getUsers(
-				ldapImportContext.getLdapServerId(),
-				ldapImportContext.getCompanyId(),
-				ldapImportContext.getSafeLdapContext(), cookie, 0,
-				new String[] {userMappingsScreenName}, searchResults);
+				userMappingsScreenName = StringUtil.toLowerCase(
+					userMappingsScreenName);
 
-			for (SearchResult searchResult : searchResults) {
-				String fullUserDN = searchResult.getNameInNamespace();
+				cookie = _safePortalLDAP.getUsers(
+					ldapImportContext.getLdapServerId(),
+					ldapImportContext.getCompanyId(), safeLdapContext, cookie,
+					0, new String[] {userMappingsScreenName}, searchResults);
 
-				if (ldapImportContext.containsImportedUser(fullUserDN)) {
-					continue;
-				}
+				for (SearchResult searchResult : searchResults) {
+					String fullUserDN = searchResult.getNameInNamespace();
 
-				try {
-					Attributes userAttributes =
-						_safePortalLDAP.getUserAttributes(
-							ldapImportContext.getLdapServerId(),
-							ldapImportContext.getCompanyId(),
-							ldapImportContext.getSafeLdapContext(),
-							SafeLdapNameFactory.from(searchResult));
-
-					User user = importUser(
-						ldapImportContext, fullUserDN, userAttributes, null);
-
-					importGroups(ldapImportContext, userAttributes, user);
-				}
-				catch (GroupFriendlyURLException groupFriendlyURLException) {
-					int type = groupFriendlyURLException.getType();
-
-					if (type == GroupFriendlyURLException.DUPLICATE) {
-						_log.error(
-							"Unable to import user " + fullUserDN +
-								" because of a duplicate group friendly URL",
-							groupFriendlyURLException);
+					if (ldapImportContext.containsImportedUser(fullUserDN)) {
+						continue;
 					}
-					else {
+
+					try {
+						Attributes userAttributes =
+							_safePortalLDAP.getUserAttributes(
+								ldapImportContext.getLdapServerId(),
+								ldapImportContext.getCompanyId(),
+								ldapImportContext.getSafeLdapContext(),
+								SafeLdapNameFactory.from(searchResult));
+
+						User user = importUser(
+							ldapImportContext, fullUserDN, userAttributes,
+							null);
+
+						importGroups(ldapImportContext, userAttributes, user);
+					}
+					catch (GroupFriendlyURLException
+								groupFriendlyURLException) {
+
+						int type = groupFriendlyURLException.getType();
+
+						if (type == GroupFriendlyURLException.DUPLICATE) {
+							_log.error(
+								StringBundler.concat(
+									"Unable to import user ", fullUserDN,
+									" because of a duplicate group friendly ",
+									"URL"),
+								groupFriendlyURLException);
+						}
+						else {
+							_log.error(
+								"Unable to import user " + fullUserDN,
+								groupFriendlyURLException);
+						}
+					}
+					catch (Exception exception) {
 						_log.error(
-							"Unable to import user " + fullUserDN,
-							groupFriendlyURLException);
+							"Unable to import user " + fullUserDN, exception);
 					}
 				}
-				catch (Exception exception) {
-					_log.error(
-						"Unable to import user " + fullUserDN, exception);
-				}
+			}
+		}
+		finally {
+			if (safeLdapContext != null) {
+				safeLdapContext.close();
 			}
 		}
 	}

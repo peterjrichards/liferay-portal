@@ -1398,7 +1398,7 @@ definition {
 			productName = "U-Joint",
 			productQuantity = "1");
 
-		Refresh();
+		WaitForElementPresent(locator1 = "CommerceEntry#ACTIVE_ORDER_ID");
 
 		var orderId = selenium.getText("CommerceEntry#ACTIVE_ORDER_ID");
 
@@ -1496,6 +1496,8 @@ definition {
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		Button.clickSubmitButton();
+
+		Refresh();
 
 		for (var column : list "3;United States - Southwest,5;1") {
 			key_columnNumber = StringUtil.extractFirst("${column}",";");

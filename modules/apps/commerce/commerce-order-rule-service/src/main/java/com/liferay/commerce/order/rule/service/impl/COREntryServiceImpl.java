@@ -58,8 +58,7 @@ public class COREntryServiceImpl extends COREntryServiceBaseImpl {
 			_corEntryModelResourcePermission.getPortletResourcePermission();
 
 		portletResourcePermission.check(
-			getPermissionChecker(), null,
-			COREntryActionKeys.ADD_COMMERCE_ORDER_RULE);
+			getPermissionChecker(), null, COREntryActionKeys.ADD_COR_ENTRY);
 
 		return corEntryLocalService.addCOREntry(
 			externalReferenceCode, getUserId(), active, description,
@@ -78,6 +77,35 @@ public class COREntryServiceImpl extends COREntryServiceBaseImpl {
 	}
 
 	@Override
+	public COREntry fetchByExternalReferenceCode(
+			long companyId, String externalReferenceCode)
+		throws PortalException {
+
+		COREntry corEntry =
+			corEntryLocalService.fetchCOREntryByExternalReferenceCode(
+				companyId, externalReferenceCode);
+
+		if (corEntry != null) {
+			_corEntryModelResourcePermission.check(
+				getPermissionChecker(), corEntry, ActionKeys.VIEW);
+		}
+
+		return corEntry;
+	}
+
+	@Override
+	public COREntry fetchCOREntry(long corEntryId) throws PortalException {
+		COREntry corEntry = corEntryLocalService.fetchCOREntry(corEntryId);
+
+		if (corEntry != null) {
+			_corEntryModelResourcePermission.check(
+				getPermissionChecker(), corEntry, ActionKeys.VIEW);
+		}
+
+		return corEntry;
+	}
+
+	@Override
 	public List<COREntry> getCOREntries(
 			long companyId, boolean active, int start, int end)
 		throws PortalException {
@@ -86,8 +114,7 @@ public class COREntryServiceImpl extends COREntryServiceBaseImpl {
 			_corEntryModelResourcePermission.getPortletResourcePermission();
 
 		portletResourcePermission.check(
-			getPermissionChecker(), null,
-			COREntryActionKeys.VIEW_COMMERCE_ORDER_RULES);
+			getPermissionChecker(), null, COREntryActionKeys.VIEW_COR_ENTRIES);
 
 		return corEntryLocalService.getCOREntries(
 			companyId, active, start, end);
@@ -102,8 +129,7 @@ public class COREntryServiceImpl extends COREntryServiceBaseImpl {
 			_corEntryModelResourcePermission.getPortletResourcePermission();
 
 		portletResourcePermission.check(
-			getPermissionChecker(), null,
-			COREntryActionKeys.VIEW_COMMERCE_ORDER_RULES);
+			getPermissionChecker(), null, COREntryActionKeys.VIEW_COR_ENTRIES);
 
 		return corEntryLocalService.getCOREntries(
 			companyId, active, type, start, end);
@@ -118,10 +144,17 @@ public class COREntryServiceImpl extends COREntryServiceBaseImpl {
 			_corEntryModelResourcePermission.getPortletResourcePermission();
 
 		portletResourcePermission.check(
-			getPermissionChecker(), null,
-			COREntryActionKeys.VIEW_COMMERCE_ORDER_RULES);
+			getPermissionChecker(), null, COREntryActionKeys.VIEW_COR_ENTRIES);
 
 		return corEntryLocalService.getCOREntries(companyId, type, start, end);
+	}
+
+	@Override
+	public COREntry getCOREntry(long corEntryId) throws PortalException {
+		_corEntryModelResourcePermission.check(
+			getPermissionChecker(), corEntryId, ActionKeys.VIEW);
+
+		return corEntryLocalService.getCOREntry(corEntryId);
 	}
 
 	@Override
@@ -144,6 +177,18 @@ public class COREntryServiceImpl extends COREntryServiceBaseImpl {
 			expirationDateMonth, expirationDateDay, expirationDateYear,
 			expirationDateHour, expirationDateMinute, neverExpire, name,
 			priority, typeSettings, serviceContext);
+	}
+
+	@Override
+	public COREntry updateCOREntryExternalReferenceCode(
+			String externalReferenceCode, long corEntryId)
+		throws PortalException {
+
+		_corEntryModelResourcePermission.check(
+			getPermissionChecker(), corEntryId, ActionKeys.UPDATE);
+
+		return corEntryLocalService.updateCOREntryExternalReferenceCode(
+			externalReferenceCode, corEntryId);
 	}
 
 	private static volatile ModelResourcePermission<COREntry>

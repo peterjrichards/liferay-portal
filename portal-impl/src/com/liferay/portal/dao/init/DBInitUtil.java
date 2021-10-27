@@ -21,15 +21,17 @@ import com.liferay.portal.events.StartupHelperUtil;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.dao.jdbc.DataSourceFactoryUtil;
+import com.liferay.portal.kernel.dependency.manager.DependencyManagerSync;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.ReleaseConstants;
+import com.liferay.portal.kernel.module.util.ServiceLatch;
+import com.liferay.portal.kernel.module.util.SystemBundleUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.version.Version;
 import com.liferay.portal.spring.hibernate.DialectDetector;
 import com.liferay.portal.upgrade.PortalUpgradeProcess;
 import com.liferay.portal.util.PropsUtil;
@@ -96,10 +98,9 @@ public class DBInitUtil {
 			preparedStatement.setString(
 				3, ReleaseConstants.DEFAULT_SERVLET_CONTEXT_NAME);
 
-			Version latestSchemaVersion =
-				PortalUpgradeProcess.getLatestSchemaVersion();
-
-			preparedStatement.setString(4, latestSchemaVersion.toString());
+			preparedStatement.setString(
+				4,
+				String.valueOf(PortalUpgradeProcess.getLatestSchemaVersion()));
 
 			preparedStatement.setInt(5, ReleaseInfo.getBuildNumber());
 			preparedStatement.setBoolean(6, false);
@@ -151,6 +152,21 @@ public class DBInitUtil {
 		_addReleaseInfo(connection);
 
 		StartupHelperUtil.setDbNew(true);
+
+		ServiceLatch serviceLatch = SystemBundleUtil.newServiceLatch();
+
+		serviceLatch.waitFor(
+			DependencyManagerSync.class,
+			dependencyManagerSync -> dependencyManagerSync.registerSyncCallable(
+				() -> {
+					StartupHelperUtil.setDbNew(false);
+
+					return null;
+				}));
+
+		serviceLatch.openOn(
+			() -> {
+			});
 	}
 
 	private static boolean _hasDefaultReleaseWithTestString(

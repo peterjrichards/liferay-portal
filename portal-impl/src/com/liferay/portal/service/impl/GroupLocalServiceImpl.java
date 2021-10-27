@@ -154,6 +154,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ServiceProxyFactory;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.comparator.GroupIdComparator;
 import com.liferay.portal.kernel.util.comparator.GroupNameComparator;
@@ -1053,10 +1054,6 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 					deleteWorkflowDefinitionLink(workflowDefinitionLink);
 			}
 
-			// System Events
-
-			_systemEventLocalService.deleteSystemEvents(group.getGroupId());
-
 			// Group
 
 			if (!group.isStagingGroup() && group.isOrganization() &&
@@ -1118,6 +1115,10 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 
 				groupPersistence.remove(group);
 			}
+
+			// System Events
+
+			_systemEventLocalService.deleteSystemEvents(group.getGroupId());
 
 			return group;
 		}
@@ -3850,18 +3851,22 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 		Group group = groupPersistence.findByPrimaryKey(groupId);
 
 		UnicodeProperties oldTypeSettingsUnicodeProperties =
-			new UnicodeProperties(true);
-
-		oldTypeSettingsUnicodeProperties.fastLoad(group.getTypeSettings());
+			UnicodePropertiesBuilder.create(
+				true
+			).fastLoad(
+				group.getTypeSettings()
+			).build();
 
 		_validateGroupKeyChange(groupId, typeSettings);
 
 		group = groupPersistence.findByPrimaryKey(groupId);
 
-		UnicodeProperties typeSettingsUnicodeProperties = new UnicodeProperties(
-			true);
-
-		typeSettingsUnicodeProperties.fastLoad(typeSettings);
+		UnicodeProperties typeSettingsUnicodeProperties =
+			UnicodePropertiesBuilder.create(
+				true
+			).fastLoad(
+				typeSettings
+			).build();
 
 		if (GetterUtil.getBoolean(
 				typeSettingsUnicodeProperties.getProperty(
@@ -5290,10 +5295,12 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 			return;
 		}
 
-		UnicodeProperties typeSettingsUnicodeProperties = new UnicodeProperties(
-			true);
-
-		typeSettingsUnicodeProperties.fastLoad(typeSettings);
+		UnicodeProperties typeSettingsUnicodeProperties =
+			UnicodePropertiesBuilder.create(
+				true
+			).fastLoad(
+				typeSettings
+			).build();
 
 		String defaultLanguageId = typeSettingsUnicodeProperties.getProperty(
 			"languageId", LocaleUtil.toLanguageId(LocaleUtil.getDefault()));

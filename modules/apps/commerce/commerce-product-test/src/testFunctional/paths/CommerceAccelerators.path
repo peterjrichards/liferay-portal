@@ -374,6 +374,11 @@
 </tr>
 <!--MINICART-->
 <tr>
+	<td>MINI_CART_BUTTON_DATA_BADGE_COUNT</td>
+	<td>//div[contains(@class,'mini-cart')]/button[@data-badge-count="${key_itemCount}"]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>MINI_CART_EMPTY</td>
 	<td>//div[@class='empty-cart']</td>
 	<td></td>
@@ -384,8 +389,13 @@
 	<td></td>
 </tr>
 <tr>
-	<td>MINI_CART_ITEM_NAME</td>
+	<td>MINI_CART_ITEM_NAME_USING_SKU</td>
 	<td>//p[@class='item-sku' and contains(.,'${key_cartItemSKU}')]/../h5</td>
+	<td></td>
+</tr>
+<tr>
+	<td>MINI_CART_ITEM_NAME</td>
+	<td>//div[@class="mini-cart-item"]//h5[@class="item-name" and contains(.,'${key_cartItemName}')]</td>
 	<td></td>
 </tr>
 <tr>

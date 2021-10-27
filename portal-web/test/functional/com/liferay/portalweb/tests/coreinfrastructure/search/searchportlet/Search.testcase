@@ -385,7 +385,7 @@ definition {
 
 		Navigator.openURL();
 
-		ContentPages.clickPencil();
+		ContentPages.gotoPageEditor();
 
 		PageEditor.addWidget(
 			portletName = "Language Selector",
@@ -407,6 +407,46 @@ definition {
 
 			AssertElementNotPresent(locator1 = "Search#SEARCH_SUGGESTED_SPELLING");
 		}
+	}
+
+	@priority = "4"
+	test CannotViewTermsOfUseWhenEnterpriseSearchIsDisabled {
+		property custom.properties = "enterprise.product.enterprise.search.enabled=false${line.separator}enterprise.product.notification.enabled=true";
+		property test.run.environment = "EE";
+
+		SelectFrame(value1 = "relative=top");
+
+		AssertTextEquals(
+			locator1 = "Modal#HEADER",
+			value1 = "Terms of Use");
+
+		AssertTextNotEquals.assertNotPartialText(
+			locator1 = "Modal#BODY",
+			value1 = "Use of Liferay Enterprise Search (LES) apps and features is not covered by Liferay Support and other subscription benefits without an active LES add-on subscription. If you do not want to use or have access to LES, access can be disabled completely by following these steps");
+
+		Click(locator1 = "Button#DONE");
+
+		AssertElementNotPresent(locator1 = "Modal#MODAL");
+	}
+
+	@priority = "4"
+	test CanViewTermsOfUseWhenEnterpriseSearchIsEnabled {
+		property custom.properties = "enterprise.product.notification.enabled=true";
+		property test.run.environment = "EE";
+
+		SelectFrame(value1 = "relative=top");
+
+		AssertTextEquals(
+			locator1 = "Modal#HEADER",
+			value1 = "Terms of Use");
+
+		AssertTextEquals.assertPartialText(
+			locator1 = "Modal#BODY",
+			value1 = "Use of Liferay Enterprise Search (LES) apps and features is not covered by Liferay Support and other subscription benefits without an active LES add-on subscription. If you do not want to use or have access to LES, access can be disabled completely by following these steps");
+
+		Click(locator1 = "Button#DONE");
+
+		AssertElementNotPresent(locator1 = "Modal#MODAL");
 	}
 
 	@description = "This is a use case for LPS-115435."
@@ -1082,6 +1122,61 @@ definition {
 			searchTerm = "Entry Title");
 	}
 
+	test SearchCompanyScopedObject {
+		ObjectAdmin.addObjectViaAPI(
+			labelName = "Custom Object",
+			objectName = "CustomObject",
+			pluralLabelName = "Custom Objects",
+			scope = "company");
+
+		ObjectAdmin.addObjectFieldViaAPI(
+			fieldLabelName = "title",
+			fieldName = "title",
+			fieldType = "String",
+			isRequired = "false",
+			objectName = "CustomObject");
+
+		ObjectAdmin.publishObjectViaAPI(objectName = "CustomObject");
+
+		ObjectAdmin.addObjectSingleFieldEntryViaAPI(
+			fieldName = "title",
+			objectName = "CustomObject",
+			value = "apple");
+
+		Search.openSearchPage();
+
+		SearchPortlets.configureEmbeddedSearchBar(searchScope = "Everything");
+
+		SearchPortlets.searchEmbedded(searchTerm = "apple");
+
+		var objectEntryID = JSONObject.getObjectEntryId(
+			objectName = "CustomObject",
+			fieldName = "title",
+			entryValue = "apple");
+
+		SearchResultPortlet.viewSearchResults(
+			searchAssetTitle = "${objectEntryID}",
+			searchAssetType = "Custom Object");
+
+		Portlet.gotoPortletOptions(
+			portletName = "Type Facet",
+			portletOption = "Configuration");
+
+		SelectFrame(locator1 = "IFrame#CONFIGURATION");
+
+		AssertElementPresent(
+			assetType = "Custom Object",
+			locator1 = "Search#TYPE_FACET_CURRENT_ASSET_TYPE");
+
+		IFrame.closeFrame();
+
+		SearchFacetPortlet.checkFacet(facetValueName = "Custom Object");
+
+		SearchResultPortlet.viewSearchResults(
+			searchAssetTitle = "${objectEntryID}",
+			searchAssetType = "Custom Object");
+	}
+
 	@priority = "4"
 	test SearchContentPagesSmoke {
 		JSONGroup.addGroup(groupName = "Site Name");
@@ -1711,8 +1806,9 @@ definition {
 			webContentTitle = "WC Title");
 
 		var port = Elasticsearch.getServerPort();
+		var portalHostname = PropsUtil.get("portal.hostname");
 
-		var curl = "http://localhost:${port}/_search?q=entryClassName:com.liferay.journal.model.JournalArticle";
+		var curl = "http://${portalHostname}:${port}/_search?q=entryClassName:com.liferay.journal.model.JournalArticle";
 
 		var journalArticleDocumentType = JSONCurlUtil.get("${curl}");
 
@@ -1877,7 +1973,7 @@ definition {
 	@priority = "4"
 	test SearchWithFolderFacet {
 		for (var count : list "1,2") {
-			JSONDocument.addFolder(
+			JSONFolder.addFolder(
 				dmFolderDescription = "DM Folder Description ${count}",
 				dmFolderName = "DM Folder Name ${count}",
 				groupName = "Guest");

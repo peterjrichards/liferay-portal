@@ -650,7 +650,7 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 				baseModelSearchResult = searchKaleoTaskInstanceTokens(
 					assetTitle, taskNames, assetTypes, assetPrimaryKeys,
 					assigneeClassName, assigneeClassPKs, dueDateGT, dueDateLT,
-					completed, kaleoDefinitionId, kaleoInstanceIds,
+					completed, kaleoDefinitionId, kaleoInstanceIds, false,
 					searchByUserRoles, andOperator, start, end,
 					orderByComparator, serviceContext);
 
@@ -776,8 +776,9 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 				Long[] assetPrimaryKeys, String assigneeClassName,
 				Long[] assigneeClassPKs, Date dueDateGT, Date dueDateLT,
 				Boolean completed, Long kaleoDefinitionId,
-				Long[] kaleoInstanceIds, Boolean searchByUserRoles,
-				boolean andOperator, int start, int end,
+				Long[] kaleoInstanceIds, boolean searchByActiveWorkflowHandlers,
+				Boolean searchByUserRoles, boolean andOperator, int start,
+				int end,
 				OrderByComparator<KaleoTaskInstanceToken> orderByComparator,
 				ServiceContext serviceContext)
 		throws PortalException {
@@ -808,6 +809,9 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 						kaleoInstanceIds);
 					kaleoTaskInstanceTokenQuery.setOrderByComparator(
 						orderByComparator);
+					kaleoTaskInstanceTokenQuery.
+						setSearchByActiveWorkflowHandlers(
+							searchByActiveWorkflowHandlers);
 					kaleoTaskInstanceTokenQuery.setSearchByUserRoles(
 						searchByUserRoles);
 					kaleoTaskInstanceTokenQuery.setStart(start);

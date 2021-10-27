@@ -32,8 +32,8 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 public interface CSDiagramSettingImageConfiguration {
 
 	@Meta.AD(
-		deflt = "[id*=MTEXT] > text", name = "image-css-selectors",
-		required = false
+		deflt = "#Livello_Testi > text,[id*=MTEXT] > text",
+		name = "image-css-selectors", required = false
 	)
 	public String[] imageCSSSelectors();
 
@@ -45,5 +45,8 @@ public interface CSDiagramSettingImageConfiguration {
 
 	@Meta.AD(deflt = "5242880", name = "image-max-size", required = false)
 	public long imageMaxSize();
+
+	@Meta.AD(deflt = "1", name = "radius", required = false)
+	public double radius();
 
 }

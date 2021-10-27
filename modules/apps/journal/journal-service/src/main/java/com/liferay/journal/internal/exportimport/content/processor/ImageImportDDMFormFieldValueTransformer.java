@@ -157,9 +157,7 @@ public class ImageImportDDMFormFieldValueTransformer
 	}
 
 	protected String toJSON(FileEntry fileEntry, String type, String alt) {
-		JournalArticle article = (JournalArticle)_stagedModel;
-
-		JSONObject jsonObject = JSONUtil.put(
+		return JSONUtil.put(
 			"alt", alt
 		).put(
 			"fileEntryId", fileEntry.getFileEntryId()
@@ -168,16 +166,19 @@ public class ImageImportDDMFormFieldValueTransformer
 		).put(
 			"name", fileEntry.getFileName()
 		).put(
-			"resourcePrimKey", article.getResourcePrimKey()
+			"resourcePrimKey",
+			() -> {
+				JournalArticle article = (JournalArticle)_stagedModel;
+
+				return article.getResourcePrimKey();
+			}
 		).put(
 			"title", fileEntry.getTitle()
 		).put(
 			"type", type
 		).put(
 			"uuid", fileEntry.getUuid()
-		);
-
-		return jsonObject.toString();
+		).toString();
 	}
 
 	private void _setContent(String content) {

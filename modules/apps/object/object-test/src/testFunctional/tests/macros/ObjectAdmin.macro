@@ -18,26 +18,33 @@ definition {
 	}
 
 	macro addObjectBoleanFieldEntryViaUI {
-		LexiconEntry.gotoAdd();
-
-		Click.clickAtNotVisible(locator1 = "ObjectAdmin#ENTRY_BOOLEAN_CHECKBOX");
-
-		Button.clickSave();
+		ObjectAdmin.goToCustomObject(objectName = "${objectName}");
 
 		LexiconEntry.gotoAdd();
 
 		WaitForPageLoad();
 
+		if ("${value}" == "true") {
+			Click.clickAtNotVisible(locator1 = "ObjectAdmin#ENTRY_BOOLEAN_CHECKBOX");
+		}
+
 		Button.clickSave();
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Object",
-			panel = "Control Panel",
-			portlet = "Custom Objects");
+		WaitForElementNotPresent(
+			key_text = "Save",
+			locator1 = "Button#ANY");
+	}
 
+	macro addObjectDoubleFieldEntryViaUI {
 		LexiconEntry.gotoAdd();
 
+		Type(
+			locator1 = "ObjectAdmin#ENTRY_DOUBLE_VALUE_FIELD",
+			value1 = "${entryValue}");
+
 		Button.clickSave();
+
+		WaitForPageLoad();
 	}
 
 	macro addObjectFieldViaAPI {
@@ -45,6 +52,8 @@ definition {
 			fieldLabelName = "${fieldLabelName}",
 			fieldName = "${fieldName}",
 			fieldType = "${fieldType}",
+			indexed = "${indexed}",
+			indexedAsKeyword = "${indexedAsKeyword}",
 			isRequired = "${isRequired}",
 			objectName = "${objectName}",
 			picklistName = "${picklistName}",
@@ -82,6 +91,66 @@ definition {
 		Button.clickSave();
 	}
 
+	macro addObjectLayoutViaAPI {
+		JSONObject.addObjectLayout(
+			layoutName = "${layoutName}",
+			objectName = "${objectName}",
+			userEmailAddress = "${userEmailAddress}",
+			userPassword = "${userPassword}");
+	}
+
+	macro addObjectPicklistFieldEntryViaUI {
+		LexiconEntry.gotoAdd();
+
+		Click(locator1 = "ObjectAdmin#ENTRY_CHOOSE_OPTION");
+
+		Click(
+			key_picklistOption = "${picklistOption}",
+			locator1 = "ObjectAdmin#ENTRY_PICKLIST_OPTION");
+
+		Button.clickSave();
+
+		WaitForElementNotPresent(
+			key_text = "Save",
+			locator1 = "Button#ANY");
+	}
+
+	macro addObjectRelationshipViaAPI {
+		JSONObject.addObjectRelationship(
+			deletionType = "${deletionType}",
+			objectName_1 = "${objectName_1}",
+			objectName_2 = "${objectName_2}",
+			relationshipLabel = "${relationshipLabel}",
+			relationshipName = "${relationshipName}",
+			relationshipType = "${relationshipType}",
+			userEmailAddress = "${userEmailAddress}",
+			userPassword = "${userPassword}");
+	}
+
+	macro addObjectRelationshipViaUI {
+		LexiconEntry.gotoAdd();
+
+		Type(
+			locator1 = "ObjectAdmin#LABEL_OBJECT_RELATIONSHIP",
+			value1 = "${label}");
+
+		if (isSet(type)) {
+			Click(locator1 = "ObjectAdmin#RELATIONSHIPS_TYPE_FORM");
+
+			Click(
+				key_type = "${type}",
+				locator1 = "ObjectAdmin#SELECT_RELATIONSHIPS_TYPE_OPTION");
+		}
+
+		if (isSet(object)) {
+			Select(
+				locator1 = "ObjectAdmin#SELECT_OBJECT_RELATIONSHIP",
+				value1 = "${object}");
+		}
+
+		Button.clickSave();
+	}
+
 	macro addObjectSingleFieldEntryViaAPI {
 		JSONObject.addObjectSingleFieldEntry(
 			fieldName = "${fieldName}",
@@ -91,13 +160,35 @@ definition {
 			value = "${value}");
 	}
 
+	macro addObjectStringFieldEntryViaUI {
+		LexiconEntry.gotoAdd();
+
+		Type(
+			locator1 = "ObjectAdmin#ENTRY_STRING_VALUE_FIELD",
+			value1 = "${entryValue}");
+
+		Button.clickSave();
+
+		WaitForPageLoad();
+	}
+
 	macro addObjectViaAPI {
 		JSONObject.addObject(
 			labelName = "${labelName}",
 			objectName = "${objectName}",
+			panelCategoryKey = "${panelCategoryKey}",
 			pluralLabelName = "${pluralLabelName}",
+			scope = "${scope}",
 			userEmailAddress = "${userEmailAddress}",
 			userPassword = "${userPassword}");
+	}
+
+	macro assertAddEntryModalIsNotPresent {
+		AssertElementNotPresent(locator1 = "ObjectAdmin#ENTRY_STRING_VALUE_FIELD");
+
+		AssertElementNotPresent(locator1 = "ObjectAdmin#ADD_ENTRY_SAVE_BUTTON");
+
+		AssertElementNotPresent(locator1 = "ObjectAdmin#ADD_ENTRY_CANCEL_BUTTON");
 	}
 
 	macro assertFieldsTableColumnsAreDisplayed {
@@ -187,8 +278,59 @@ definition {
 			locator1 = "ObjectAdmin#OBJECT_STATUS");
 	}
 
+	macro assertRelationshipsTypeDescription {
+		AssertTextEquals(
+			key_type = "${type}",
+			locator1 = "ObjectAdmin#RELATIONSHIPS_TYPE_DESCRIPTION",
+			value1 = "${description}");
+	}
+
 	macro assertTypeFieldRequired {
 		AssertElementPresent(locator1 = "ObjectAdmin#TYPE_FIELD_REQUIRED");
+	}
+
+	macro assertUpdateEntryModalIsNotPresent {
+		AssertElementNotPresent(
+			locator1 = "ObjectAdmin#ENTRY_STRING_VALUE_FIELD",
+			value1 = "${value}");
+
+		AssertElementNotPresent(locator1 = "ObjectAdmin#ADD_ENTRY_SAVE_BUTTON");
+
+		AssertElementNotPresent(locator1 = "ObjectAdmin#ADD_ENTRY_CANCEL_BUTTON");
+	}
+
+	macro cancelAddingObjectStringFieldEntryViaUI {
+		LexiconEntry.gotoAdd();
+
+		Type(
+			locator1 = "ObjectAdmin#ENTRY_STRING_VALUE_FIELD",
+			value1 = "${entryValue}");
+
+		Button.clickCancel();
+	}
+
+	macro cancelUpdatingObjectStringFieldEntryViaUI {
+		Type(
+			locator1 = "ObjectAdmin#ENTRY_STRING_VALUE_FIELD",
+			value1 = "${entryValue}");
+
+		Button.clickCancel();
+	}
+
+	macro changeLabelLanguage {
+		Click(locator1 = "ObjectAdmin#DROPDOWN_LANGUAGEM");
+
+		Click(
+			key_newLanguage = "${newLanguage}",
+			locator1 = "ObjectAdmin#SELECT_LANGUAGE");
+	}
+
+	macro changePluralLabelLanguage {
+		Click(locator1 = "ObjectAdmin#DROPDOWN_LANGUAGEM_PLURAL_LABEL");
+
+		Click(
+			key_newLanguage = "${newLanguage}",
+			locator1 = "ObjectAdmin#SELECT_LANGUAGE");
 	}
 
 	macro clickFieldsSearchableSectionRadioOption {
@@ -260,6 +402,10 @@ definition {
 		Navigator.openSpecificURL(url = "/group/guest/~/control_panel/manage?p_p_id=com_liferay_object_web_internal_object_definitions_portlet_ObjectDefinitionsPortlet_${objectID}");
 	}
 
+	macro goToDetailsTab {
+		Click(locator1 = "ObjectAdmin#OBJECT_DETAILS_TAB");
+	}
+
 	macro goToFieldsDetails {
 		Click(
 			key_label = "${label}",
@@ -272,8 +418,16 @@ definition {
 		Click(locator1 = "ObjectAdmin#OBJECT_FIELDS_TAB");
 	}
 
+	macro gotoRelationshipsTab {
+		Click(locator1 = "ObjectAdmin#OBJECT_RELATIONSHIPS_TAB");
+	}
+
 	macro openObjectAdmin {
 		Navigator.openSpecificURL(url = "/group/guest/~/control_panel/manage?p_p_id=com_liferay_object_web_internal_object_definitions_portlet_ObjectDefinitionsPortlet");
+	}
+
+	macro openWorkflowProcessBuilderConfiguration {
+		Navigator.openSpecificURL(url = "/group/control_panel/manage?p_p_id=com_liferay_portal_workflow_web_portlet_ControlPanelWorkflowPortlet&p_p_lifecycle=0&p_p_state=maximized&p_p_mode=view&_com_liferay_portal_workflow_web_portlet_ControlPanelWorkflowPortlet_tab=configuration");
 	}
 
 	macro publishObjectViaAPI {

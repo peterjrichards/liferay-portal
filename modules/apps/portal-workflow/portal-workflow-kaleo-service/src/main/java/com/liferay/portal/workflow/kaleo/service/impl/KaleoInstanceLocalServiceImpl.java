@@ -342,7 +342,7 @@ public class KaleoInstanceLocalServiceImpl
 			BaseModelSearchResult<KaleoInstance> baseModelSearchResult =
 				searchKaleoInstances(
 					userId, assetClassName, assetTitle, assetDescription,
-					nodeName, kaleoDefinitionName, completed, start, end,
+					nodeName, kaleoDefinitionName, completed, false, start, end,
 					orderByComparator, serviceContext);
 
 			return baseModelSearchResult.getBaseModels();
@@ -364,14 +364,15 @@ public class KaleoInstanceLocalServiceImpl
 
 		return _kaleoInstanceTokenLocalService.searchCount(
 			userId, assetClassName, assetTitle, assetDescription, nodeName,
-			kaleoDefinitionName, completed, serviceContext);
+			kaleoDefinitionName, completed, false, serviceContext);
 	}
 
 	@Override
 	public BaseModelSearchResult<KaleoInstance> searchKaleoInstances(
 			Long userId, String assetClassName, String assetTitle,
 			String assetDescription, String nodeName,
-			String kaleoDefinitionName, Boolean completed, int start, int end,
+			String kaleoDefinitionName, Boolean completed,
+			boolean searchByActiveWorkflowHandlers, int start, int end,
 			OrderByComparator<KaleoInstance> orderByComparator,
 			ServiceContext serviceContext)
 		throws PortalException {
@@ -380,8 +381,9 @@ public class KaleoInstanceLocalServiceImpl
 
 		Hits hits = _kaleoInstanceTokenLocalService.search(
 			userId, assetClassName, assetTitle, assetDescription, nodeName,
-			kaleoDefinitionName, completed, start, end,
-			getSortsFromComparator(orderByComparator), serviceContext);
+			kaleoDefinitionName, completed, searchByActiveWorkflowHandlers,
+			start, end, getSortsFromComparator(orderByComparator),
+			serviceContext);
 
 		for (Document document : hits.getDocs()) {
 			long kaleoInstanceId = GetterUtil.getLong(

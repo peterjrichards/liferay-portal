@@ -69,16 +69,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>COLLECTION_ITEM_AVERAGE_STAR</td>
-	<td>//div[@class='row'][${key_rowPosition}]/div[contains(@class,'col')][${key_colPosition}]//div[contains(@class,'ratings-stars')]//*[name()='svg'][contains(@class,'ratings-stars-average-icon')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>COLLECTION_ITEM_AVERAGE_STAR_RESULT</td>
-	<td>//div[@class='row'][${key_rowPosition}]/div[contains(@class,'col')][${key_colPosition}]//div[contains(@class,'ratings-stars')]//span[contains(@class,'ratings-stars-average-text')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>COLLECTION_ITEM_CONTENT</td>
 	<td>//div[contains(@class,'page-editor__topper') and contains(.,'${key_fragmentName}')]//div[contains(@class,'page-editor__collection')]/div[@class='row'][${key_rowPosition}]/div[contains(@class,'col')][${key_colPosition}]//*[contains(@class,'content') and contains(.,'${key_entryContent}')]</td>
 	<td></td>
@@ -149,13 +139,28 @@
 	<td></td>
 </tr>
 <tr>
-	<td>COLLECTION_ITEM_RATING_STAR_DISABLE</td>
-	<td>//div[@class='row'][${key_rowPosition}]/div[contains(@class,'col')][${key_colPosition}]//div[contains(@class,'ratings-stars')]//button[@title='Ratings are disabled in Staging']</td>
+	<td>COLLECTION_ITEM_PAGINATION_NEXT_BUTTON_NUMERIC</td>
+	<td>//button[contains(@class, 'page-link') and contains(@aria-label,'Next')]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>COLLECTION_ITEM_RATING_STAR_EMPTY</td>
-	<td>//div[@class='row'][${key_rowPosition}]/div[contains(@class,'col')][${key_colPosition}]//div[contains(@class,'ratings-stars')]//button[contains(@title,'Vote')]</td>
+	<td>COLLECTION_ITEM_PAGINATION_NUMBER_BUTTON</td>
+	<td>//button[contains(@class, 'page-link') and contains(text(), '${key_pageNumber}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COLLECTION_ITEM_PAGINATION_PREVIOUS_BUTTON_NUMERIC</td>
+	<td>//button[contains(@class, 'page-link') and contains(@aria-label,'Previous')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COLLECTION_ITEM_NEXT_BUTTON</td>
+	<td>//button[contains(@class,'font-weight-semi-bold ml-3 text-secondary btn btn-unstyled')]//span[contains(text(), 'Next')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COLLECTION_ITEM_PREVIOUS_BUTTON</td>
+	<td>//button[contains(@class,'font-weight-semi-bold mr-3 text-secondary btn btn-unstyled')]//span[contains(text(), 'Previous')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -172,31 +177,6 @@
 <tr>
 	<td>COLLECTION_ITEM_VIEW_COLLECTION_OPTIONS</td>
 	<td>//button[contains(@aria-label,'View Collection Options')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>COLLECTION_ITEM_YOUR_RATING_STAR</td>
-	<td>//div[@class='row'][${key_rowPosition}]/div[contains(@class,'col')][${key_colPosition}]//div[contains(@class,'ratings-stars')]//button[contains(@class,'dropdown-toggle')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>COLLECTION_ITEM_YOUR_RATING_STAR_COUNT</td>
-	<td>//div[contains(@class,'ratings-stars-dropdown show')]//button[contains(.,'Rate this ${key_ratingStarCount} out of 5')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>COLLECTION_ITEM_YOUR_RATING_STAR_RESULT</td>
-	<td>//div[@class='row'][${key_rowPosition}]/div[contains(@class,'col')][${key_colPosition}]//div[contains(@class,'ratings-stars')]//button[contains(@title,'You have rated this ${key_ratingStarCount} out of 5')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>COLLECTION_ITEM_YOUR_RATING_STAR_DELETE</td>
-	<td>//div[contains(@class,'ratings-stars-dropdown show')]//button[contains(@class,'dropdown-item') and contains(.,'Delete')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>COLLECTION_ITEM_YOUR_RATING_STAR_DELETE_DISABLE</td>
-	<td>//div[contains(@class,'ratings-stars-dropdown show')]//button[contains(@class,'dropdown-item disabled') and contains(.,'Delete')]</td>
 	<td></td>
 </tr>
 <!--COLLECTION_FILTER-->
@@ -234,16 +214,6 @@
 <tr>
 	<td>CONTENT_PAGE_DISABLED_POPOVER</td>
 	<td>//div[contains(@class,'clay-popover')][not(contains(@class,'sr-only'))]//div[@class='popover-body']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>CONTENT_PAGE_IMAGE_CONTENT</td>
-	<td>//div[contains(@style,'${key_imageFileName}')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>CONTENT_PAGE_TEXT_CONTENT</td>
-	<td>//div[contains(@class,'widget-content')]/p | //div[contains(@class,'asset-summary')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -323,22 +293,6 @@
 	<td>//section[contains(@id,'content')]</td>
 	<td></td>
 </tr>
-<!--EDITABLE_FIELD_TOOLBAR-->
-<tr>
-	<td>EDITABLE_FIELD_TOOLBAR_MAPPED_BUTTON</td>
-	<td>//div[contains(@class,'form-group') and contains(.,'${key_mappedField}')]//button[@*='Map' and contains(@class,'active')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>EDITABLE_FIELD_TOOLBAR_MAP_BUTTON_SPECIFIC</td>
-	<td>//div[contains(@class,'form-group') and contains(.,'${key_mappedField}')]//button[@*='Map']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>EDITABLE_FIELD_TOOLBAR_LAYOUT_BACKGROUND_IMAGE_BUTTON</td>
-	<td>//button[@data-panel-id='layout_background_image']</td>
-	<td></td>
-</tr>
 <!--EXPERIENCE-->
 <tr>
 	<td>EXPERIENCE_BUTTON_NAME</td>
@@ -407,18 +361,49 @@
 </tr>
 <!--FRAGMENT_SIDEBAR-->
 <tr>
-	<td>FRAGMENT_SIDEBAR_BACK</td>
-	<td>//button[*[name()='svg'][contains(@class,'lexicon-icon-angle-left')]]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>FRAGMENT_SIDEBAR_BODY</td>
 	<td>//div[contains(@class,'page-editor__sidebar')][contains(@class,'theme-adapter-forms')]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>FRAGMENT_SIDEBAR_TAB_COLLAPSED</td>
-	<td>//button[@*='${key_tabName}' and contains(@aria-pressed,'false')]</td>
+	<td>FRAGMENT_SIDEBAR_LOADED</td>
+	<td>//div[contains(@class,'sidebar')]/div[contains(@class,'buttons')]/button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FRAGMENT_SIDEBAR_COLLECTION_PANEL</td>
+	<td>//*[contains(@class,'collapse-icon')][normalize-space()='${key_collectionName}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FRAGMENT_SIDEBAR_COLLECTION_PANEL_COLLAPSED</td>
+	<td>//*[contains(@class,'sheet-subtitle collapsed')][normalize-space()='${key_collectionName}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FRAGMENT_SIDEBAR_COLLECTION_PANEL_EXPANDED</td>
+	<td>//*[contains(@class,'collapse-icon sheet-subtitle')][normalize-space()='${key_collectionName}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FRAGMENT_SIDEBAR_TAB_BUTTON</td>
+	<td>//div[contains(@class,'page-editor__sidebar__buttons')]//*[@*='${key_tabName}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FRAGMENT_SIDEBAR_TAB_BUTTON_ACTIVE</td>
+	<td>//button[contains(@title,'${key_tabName}')][contains(@aria-pressed,'true')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FRAGMENT_SIDEBAR_TITLE</td>
+	<td>//div[contains(@class,'content--open')]//h1[contains(@class,'page-editor__sidebar__panel-header') and contains(.,'${key_sidebarButton}')]</td>
+	<td></td>
+</tr>
+<!--COMMENTS_PANEL-->
+<tr>
+	<td>FRAGMENT_SIDEBAR_BACK</td>
+	<td>//button[*[name()='svg'][contains(@class,'lexicon-icon-angle-left')]]</td>
 	<td></td>
 </tr>
 <tr>
@@ -472,11 +457,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>FRAGMENT_SIDEBAR_LOADED</td>
-	<td>//div[contains(@class,'sidebar')]/div[contains(@class,'buttons')]/button</td>
-	<td></td>
-</tr>
-<tr>
 	<td>FRAGMENT_SIDEBAR_REPLY_COMMENTS_EDITOR</td>
 	<td>//div[contains(@class,'alloy-editor-container') and contains(@id,'pageEditorCommentReplyEditor')]/div[contains(@data-placeholder,'Type your comment here.')]</td>
 	<td></td>
@@ -507,21 +487,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>FRAGMENT_SIDEBAR_COLLECTION_PANEL</td>
-	<td>//*[contains(@class,'collapse-icon')][normalize-space()='${key_collectionName}']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FRAGMENT_SIDEBAR_COLLECTION_PANEL_COLLAPSED</td>
-	<td>//*[contains(@class,'sheet-subtitle collapsed')][normalize-space()='${key_collectionName}']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FRAGMENT_SIDEBAR_COLLECTION_PANEL_EXPANDED</td>
-	<td>//*[contains(@class,'collapse-icon sheet-subtitle')][normalize-space()='${key_collectionName}']</td>
-	<td></td>
-</tr>
-<tr>
 	<td>FRAGMENT_SIDEBAR_CENTER_TEXT</td>
 	<td>//div[contains(@class,'text-center')]/h1</td>
 	<td></td>
@@ -529,11 +494,6 @@
 <tr>
 	<td>FRAGMENT_SIDEBAR_SECONDARY_TEXT</td>
 	<td>//*[contains(@class,'text-secondary')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FRAGMENT_SIDEBAR_SECTION_TITLE</td>
-	<td>//div[contains(@class,'page-editor')]/div/h1</td>
 	<td></td>
 </tr>
 <tr>
@@ -551,35 +511,21 @@
 	<td>//label/input[@type='checkbox']</td>
 	<td></td>
 </tr>
+<!--MAPPING_PANEL-->
 <tr>
-	<td>FRAGMENT_SIDEBAR_TAB_BUTTON</td>
-	<td>//div[contains(@class,'page-editor__sidebar__buttons')]//*[@*='${key_tabName}']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FRAGMENT_SIDEBAR_TAB_BUTTON_ACTIVE</td>
-	<td>//button[contains(@title,'${key_tabName}')][contains(@aria-pressed,'true')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FRAGMENT_SIDEBAR_TYPE_LABEL</td>
+	<td>MAPPING_PANEL_TYPE_LABEL</td>
 	<td>//p[contains(@class,'type-label')]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>FRAGMENT_SIDEBAR_SUB_TYPE_LABEL</td>
+	<td>MAPPING_PANEL_SUB_TYPE_LABEL</td>
 	<td>xpath=(//p[contains(@class,'type-label')])[2]</td>
 	<td></td>
 </tr>
-<tr>
-	<td>FRAGMENT_SIDEBAR_TITLE</td>
-	<td>//div[contains(@class,'content--open')]//h1[contains(@class,'page-editor__sidebar__panel-header') and contains(.,'${key_sidebarButton}')]</td>
-	<td></td>
-</tr>
-<!--FRAGMENTS_AND_WIDGETS-->
+<!--FRAGMENTS_AND_WIDGETS_PANEL-->
 <tr>
 	<td>FRAGMENTS_AND_WIDGETS_DISPLAY_STYLE_BUTTON</td>
-	<td>//div[contains(@class,'fragments-widgets-panel')]//button[contains(@class,'tooltip')][*[name()='svg'][contains(@class,'icon-${key_displayStyle}')]]</td>
+	<td>//div[contains(@class,'fragments-widgets-panel')]//button[contains(@class,'tooltip')][*[name()='svg'][contains(@class,'icon-${key_switchTo}')]]</td>
 	<td></td>
 </tr>
 <tr>
@@ -610,6 +556,11 @@
 <tr>
 	<td>FRAGMENTS_AND_WIDGETS_SEARCH_RESULTS</td>
 	<td>//li[contains(@class,'page-editor__fragments-widgets__tab-list-item')][normalize-space()='${key_fragmentName}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FRAGMENTS_AND_WIDGETS_SEARCH_FIELD</td>
+	<td>//div[contains(@class,'page-editor__sidebar')]//div[@role='search']//input[contains(@placeholder,'Search')]</td>
 	<td></td>
 </tr>
 <!--FOOTER_FRAGMENT-->
@@ -646,9 +597,9 @@
 	<td></td>
 </tr>
 <tr>
-<td>GRID_COLUMN_EMPTY</td>
-<td>xpath=(//div[contains(@class,'page-editor__topper__bar') and contains(.,'Grid')]//following-sibling::div[contains(@class,'page-editor__topper__content')])[${key_position}]//div[contains(@class,'page-editor__row')][contains(@class,'empty')]</td>
-<td></td>
+	<td>GRID_COLUMN_EMPTY</td>
+	<td>xpath=(//div[contains(@class,'page-editor__topper__bar') and contains(.,'Grid')]//following-sibling::div[contains(@class,'page-editor__topper__content')])[${key_position}]//div[contains(@class,'page-editor__row')][contains(@class,'empty')]</td>
+	<td></td>
 </tr>
 <tr>
 	<td>GRID_COLUMN_NESTED_ELEMENT</td>
@@ -663,11 +614,6 @@
 <tr>
 	<td>GRID_COLUMN_RESIZER</td>
 	<td>//div[contains(@class,'page-editor__col')][${key_position}]//button[contains(@class,'page-editor__col__resizer')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>LAYOUT_ELEMENTS_HEADER</td>
-	<td>xpath=(//div[contains(@class,'page-editor__topper__bar') and contains(.,'${key_elementType}')]//li[contains(@class,'title')])[${key_position}]</td>
 	<td></td>
 </tr>
 <!--LAYOUT_ELEMENTS_CONFIGURATION-->
@@ -813,11 +759,26 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PREVIEW_WITH_DROPDOWN_MENU</td>
+	<td>//span[(text())='-- None --']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PREVIEW_WITH_CUSTOM_OBJECT_ITEM</td>
+	<td>//li[contains(@data-value,'${key_objectLabel}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PREVIEW_WITH_OTHER_ITEM</td>
+	<td>//button[contains(text(), 'Select Other Item')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>UNDO_HISTORY</td>
 	<td>//button[contains(@aria-label,'History')]</td>
 	<td></td>
 </tr>
-<!--PAGE_CONTENTS-->
+<!--PAGE_CONTENTS_PANEL-->
 <tr>
 	<td>PAGE_CONTENTS_CONTENT_FILTER_TOGGLE</td>
 	<td>//div[contains(@class,'page-contents__content-filter')]//button[contains(@class,'dropdown-toggle')]</td>
@@ -903,12 +864,6 @@
 <tr>
 	<td>NAV_ITEM_BUTTON</td>
 	<td>//div[contains(@class,'page-structure')]//button[contains(@class,'nav-link')][normalize-space()='${key_navItem}']</td>
-	<td></td>
-</tr>
-<!--WIDGETS-->
-<tr>
-	<td>WIDGETS_APPLICATION_SEARCH_FIELD</td>
-	<td>//div[contains(@class,'page-editor__sidebar')]//div[@role='search']//input[contains(@placeholder,'Search')]</td>
 	<td></td>
 </tr>
 </tbody>

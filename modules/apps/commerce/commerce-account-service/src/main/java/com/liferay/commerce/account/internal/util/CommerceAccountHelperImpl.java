@@ -27,6 +27,7 @@ import com.liferay.commerce.account.model.impl.CommerceAccountImpl;
 import com.liferay.commerce.account.service.CommerceAccountLocalService;
 import com.liferay.commerce.account.service.CommerceAccountService;
 import com.liferay.commerce.account.util.CommerceAccountHelper;
+import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -137,9 +138,14 @@ public class CommerceAccountHelperImpl implements CommerceAccountHelper {
 			long commerceChannelGroupId, HttpServletRequest httpServletRequest)
 		throws PortalException {
 
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.getCommerceChannelByGroupId(
+				commerceChannelGroupId);
+
 		CommerceAccount commerceAccount = CommerceAccountImpl.fromAccountEntry(
 			_currentAccountEntryManager.getCurrentAccountEntry(
-				commerceChannelGroupId, _portal.getUserId(httpServletRequest)));
+				commerceChannel.getSiteGroupId(),
+				_portal.getUserId(httpServletRequest)));
 
 		if ((commerceAccount == null) || !commerceAccount.isActive()) {
 			commerceAccount = _getSingleCommerceAccount(
@@ -189,8 +195,12 @@ public class CommerceAccountHelperImpl implements CommerceAccountHelper {
 				httpServletRequest.getSession());
 		}
 
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.getCommerceChannelByGroupId(
+				commerceChannelGroupId);
+
 		_currentAccountEntryManager.setCurrentAccountEntry(
-			commerceAccountId, commerceChannelGroupId,
+			commerceAccountId, commerceChannel.getSiteGroupId(),
 			_portal.getUserId(httpServletRequest));
 	}
 

@@ -15,6 +15,7 @@
 package com.liferay.portal.search.elasticsearch7.internal;
 
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.events.StartupHelperUtil;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -23,6 +24,7 @@ import com.liferay.portal.kernel.search.IndexSearcher;
 import com.liferay.portal.kernel.search.IndexWriter;
 import com.liferay.portal.kernel.search.SearchEngine;
 import com.liferay.portal.kernel.search.SearchException;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortalRunMode;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -37,6 +39,8 @@ import com.liferay.portal.search.engine.adapter.cluster.HealthClusterRequest;
 import com.liferay.portal.search.engine.adapter.cluster.HealthClusterResponse;
 import com.liferay.portal.search.engine.adapter.index.CloseIndexRequest;
 import com.liferay.portal.search.engine.adapter.index.CloseIndexResponse;
+import com.liferay.portal.search.engine.adapter.index.GetIndexIndexRequest;
+import com.liferay.portal.search.engine.adapter.index.GetIndexIndexResponse;
 import com.liferay.portal.search.engine.adapter.snapshot.CreateSnapshotRepositoryRequest;
 import com.liferay.portal.search.engine.adapter.snapshot.CreateSnapshotRequest;
 import com.liferay.portal.search.engine.adapter.snapshot.CreateSnapshotResponse;
@@ -49,6 +53,8 @@ import com.liferay.portal.search.engine.adapter.snapshot.SnapshotRepositoryDetai
 import com.liferay.portal.search.engine.adapter.snapshot.SnapshotState;
 import com.liferay.portal.search.index.IndexNameBuilder;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -102,6 +108,33 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 		}
 
 		return backupName;
+	}
+
+	@Override
+	public Collection<Long> getIndexedCompanyIds() {
+		Collection<Long> companyIds = new ArrayList<>();
+
+		String firstIndexName = _indexNameBuilder.getIndexName(0);
+
+		String prefix = firstIndexName.substring(
+			0, firstIndexName.length() - 1);
+
+		GetIndexIndexResponse getIndexIndexResponse =
+			_searchEngineAdapter.execute(
+				new GetIndexIndexRequest(prefix + StringPool.STAR));
+
+		for (String indexName : getIndexIndexResponse.getIndexNames()) {
+			long companyId = GetterUtil.getLong(
+				StringUtil.removeSubstring(indexName, prefix));
+
+			if (companyId == 0) {
+				continue;
+			}
+
+			companyIds.add(companyId);
+		}
+
+		return companyIds;
 	}
 
 	@Override
@@ -224,6 +257,12 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 	@Activate
 	protected void activate(Map<String, Object> properties) {
 		setVendor(MapUtil.getString(properties, "search.engine.impl"));
+
+		if (StartupHelperUtil.isDBNew()) {
+			for (long companyId : getIndexedCompanyIds()) {
+				removeCompany(companyId);
+			}
+		}
 	}
 
 	protected void createBackupRepository() {

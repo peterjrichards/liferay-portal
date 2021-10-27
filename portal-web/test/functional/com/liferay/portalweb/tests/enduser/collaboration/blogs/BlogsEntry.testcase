@@ -125,33 +125,92 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136760. It checks that content can be added in code view."
-	@ignore = "true"
 	@priority = "2"
 	test CanAddContentInCodeView {
-		property portal.acceptance = "false";
+		JSONLayout.addPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page");
 
-		// TODO LPS-136760 CanAddContentInCodeView pending implementation
+		JSONLayout.addWidgetToPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page",
+			widgetName = "Blogs");
 
+		BlogsNavigator.openToAddEntry(
+			layoutName = "Blogs Page",
+			siteURLKey = "guest");
+
+		Blogs.addEntryWithHTML(
+			entryContent = '''<h2>Blogs Entry Content</h2>''',
+			entrySubtitle = "Blogs Entry Subtitle",
+			entryTitle = "Blogs Entry Title",
+			skipNavigation = "true");
+
+		BlogsNavigator.openToBlogEntry(
+			entryTitle = "Blogs Entry Title",
+			layoutName = "Blogs Page",
+			siteURLKey = "guest");
+
+		BlogsEntry.viewEntryPG(
+			entryContentHTML = "Blogs Entry Content",
+			entryTitle = "Blogs Entry Title");
 	}
 
 	@description = "This is a test for LPS-136762. It checks that content can be added in full screen mode."
-	@ignore = "true"
 	@priority = "2"
 	test CanAddContentInFullScreenMode {
-		property portal.acceptance = "false";
+		JSONLayout.addPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page");
 
-		// TODO LPS-136762 CanAddContentInFullScreenMode pending implementation
+		JSONLayout.addWidgetToPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page",
+			widgetName = "Blogs");
 
+		BlogsNavigator.openToAddEntry(
+			layoutName = "Blogs Page",
+			siteURLKey = "guest");
+
+		BlogsEntry.addTitle(entryTitle = "Blogs Entry Title");
+
+		BlogsEntry.addEntryContentViaCodeView(
+			entryContent = "Blogs Entry Content",
+			viewMode = "Fullscreen");
+
+		Button.clickPublish();
+
+		Navigator.gotoSitePage(
+			pageName = "Blogs Page",
+			siteName = "Guest");
+
+		BlogsEntry.viewEntryPG(
+			entryContent = "Blogs Entry Content",
+			entryTitle = "Blogs Entry Title");
 	}
 
 	@description = "This is a test for LPS-136763. It checks that 400 characters can be added to the description."
-	@ignore = "true"
 	@priority = "3"
 	test CanAddDescriptionWith400Characters {
-		property portal.acceptance = "false";
+		JSONLayout.addPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page");
 
-		// TODO LPS-136763 CanAddDescriptionWith400Characters pending implementation
+		JSONLayout.addWidgetToPublicLayout(
+			column = "1",
+			groupName = "Guest",
+			layoutName = "Blogs Page",
+			widgetName = "Blogs");
 
+		JSONBlog.addEntry(
+			entryContent = "|||||||||1|||||||||2|||||||||3|||||||||4|||||||||5|||||||||6|||||||||7|||||||||8|||||||||9||||||||10||||||||11||||||||12||||||||13||||||||14||||||||15||||||||16||||||||17||||||||18||||||||19||||||||20||||||||21||||||||22||||||||23||||||||24||||||||25||||||||26||||||||27||||||||28||||||||29||||||||30||||||||31||||||||32||||||||33||||||||34||||||||35||||||||36||||||||37||||||||38||||||||39||||||||40",
+			entryTitle = "Blogs Entry Title");
+
+		Navigator.gotoPage(pageName = "Blogs Page");
+
+		BlogsEntry.viewPG(
+			entryContent = "|||||||||1|||||||||2|||||||||3|||||||||4|||||||||5|||||||||6|||||||||7|||||||||8|||||||||9||||||||10||||||||11||||||||12||||||||13||||||||14||||||||15||||||||16||||||||17||||||||18||||||||19||||||||20||||||||21||||||||22||||||||23||||||||24||||||||25||||||||26||||||||27||||||||28||||||||29||||||||30||||||||31||||||||32||||||||33||||||||34||||||||35||||||||36||||||||37||||||||38||||||||39||||||||40",
+			entryTitle = "Blogs Entry Title");
 	}
 
 	@description = "This test checks that HTML is rendered in the blog content field."
@@ -186,13 +245,37 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136761. It checks that special characters can be added to a custom abstract"
-	@ignore = "true"
 	@priority = "3"
 	test CanAddSpecialCharactersToCustomAbstract {
-		property portal.acceptance = "false";
+		JSONLayout.addPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page");
 
-		// TODO LPS-136761 CanAddSpecialCharactersToCustomAbstract pending implementation
+		JSONLayout.addWidgetToPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page",
+			widgetName = "Blogs");
 
+		BlogsNavigator.openToAddEntry(
+			layoutName = "Blogs Page",
+			siteURLKey = "guest");
+
+		BlogsEntry.addTitle(entryTitle = "Blogs Entry Title");
+
+		BlogsEntry.addContent(entryContent = "Blogs Entry Content");
+
+		Panel.expandPanel(panel = "Configuration");
+
+		BlogsEntry.addCustomAbstract(entryAbstractDescription = '''~!@#$%^&*''');
+
+		Button.clickPublish();
+
+		Navigator.gotoPage(pageName = "Blogs Page");
+
+		BlogsEntry.viewAbstractDisplay(
+			entryAbstractDescription = '''~!@#$%^&*''',
+			entryContent = "Blogs Entry Content",
+			entryTitle = "Blogs Entry Title");
 	}
 
 	@description = "This is the same case as BlogsPage#CanAddTitleWithoutEscapingCharacters, but due to LPS-130537 we should ensure both contexts are covered."
@@ -364,10 +447,6 @@ definition {
 	test CanAddWithTrackbackURL {
 		property custom.properties = "blogs.trackback.enabled=true";
 
-		JSONBlog.addEntry(
-			entryContent = "Blogs Entry1 Content",
-			entryTitle = "Blogs Entry1 Title");
-
 		JSONLayout.addPublicLayout(
 			groupName = "Guest",
 			layoutName = "Blogs Page");
@@ -378,7 +457,15 @@ definition {
 			layoutName = "Blogs Page",
 			widgetName = "Blogs");
 
-		Refresh();
+		BlogsNavigator.openToAddEntry(
+			layoutName = "Blogs Page",
+			siteURLKey = "guest");
+
+		BlogsEntry.addEntryContent(
+			entryContent = "Blogs Entry1 Content",
+			entryTitle = "Blogs Entry1 Title");
+
+		PortletEntry.publish();
 
 		Navigator.gotoPage(pageName = "Blogs Page");
 
@@ -757,13 +844,38 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136764. It checks that Javascript cannot be executed in the content field."
-	@ignore = "true"
 	@priority = "3"
 	test CannotExecuteXSSInContent {
-		property portal.acceptance = "false";
+		JSONLayout.addPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page");
 
-		// TODO LPS-136764 CannotExecuteXSSInContent pending implementation
+		JSONLayout.addWidgetToPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page",
+			widgetName = "Blogs");
 
+		BlogsNavigator.openToAddEntry(
+			layoutName = "Blogs Page",
+			siteURLKey = "guest");
+
+		BlogsEntry.addTitle(entryTitle = "Blogs Entry Title");
+
+		BlogsEntry.addContent(
+			entryContent = '''<script>alert(123);</script>''',
+			javascript = "true");
+
+		Button.clickPublish();
+
+		Navigator.gotoPage(pageName = "Blogs Page");
+
+		AssertAlertNotPresent();
+
+		BlogsNavigator.gotoEntryPG(
+			entryContent = '''<script>alert(123);</script>''',
+			entryTitle = "Blogs Entry Title");
+
+		AssertAlertNotPresent();
 	}
 
 	@description = "This is a test for LPS-136773. It checks that XSS cannot be executed in the cover image caption."
@@ -777,13 +889,27 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136765. It checks that Javascript cannot be executed in the custom abstract."
-	@ignore = "true"
 	@priority = "3"
 	test CannotExecuteXSSInCustomAbstract {
-		property portal.acceptance = "false";
+		JSONLayout.addPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page");
 
-		// TODO LPS-136765 CannotExecuteXSSInCustomAbstract pending implementation
+		JSONLayout.addWidgetToPublicLayout(
+			groupName = "Guest",
+			layoutName = "Blogs Page",
+			widgetName = "Blogs");
 
+		BlogsNavigator.openBlogsAdmin(siteURLKey = "guest");
+
+		Blogs.addWithCustomAbstract(
+			entryAbstractDescription = '''<script>alert(123);</script>''',
+			entryContent = "Blogs Entry Content",
+			entryTitle = "Blogs Entry Title");
+
+		Navigator.gotoPage(pageName = "Blogs Page");
+
+		AssertAlertNotPresent();
 	}
 
 	@description = "This is a test for LPS-136788. It checks that a user cannot rate a post when it is disabled in the configuration."

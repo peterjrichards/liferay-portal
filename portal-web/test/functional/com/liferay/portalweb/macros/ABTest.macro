@@ -1,5 +1,13 @@
 definition {
 
+	macro changeExperienceABTest {
+		WaitForElementPresent(locator1 = "ABTest#CHANGE_EXPERIENCE");
+
+		Select(
+			locator1 = "ABTest#CHANGE_EXPERIENCE",
+			value1 = "${experience}");
+	}
+
 	macro checkAnalyticsCloudInfo {
 		if (IsElementPresent(locator1 = "ABTest#REVIEW_AND_RUN_TEST_BUTTON")) {
 			ABTest.runTest();
@@ -101,9 +109,15 @@ definition {
 	macro editOrDeleteABTest {
 		Click(locator1 = "ABTest#KEBAB_AB_TEST");
 
-		Click(
+		ClickNoError(
 			locator1 = "ABTest#KEBAB_OPTIONS_AB_TEST",
 			value = "${value}");
+
+		if ("${value}" == "Delete") {
+			AssertConfirm.assertConfirmationNoError(value1 = "Are you sure you want to delete this? It will be deleted immediately.");
+
+			Alert.viewSuccessMessage();
+		}
 	}
 
 	macro editVariantName {
@@ -128,6 +142,13 @@ definition {
 		}
 	}
 
+	macro openABTestPanel {
+		if (IsVisible(locator1 = "ABTest#AB_TEST_SIDE_BAR")) {
+			Click(locator1 = "ABTest#AB_TEST_BUTTON");
+		}
+		Click(locator1 = "ABTest#AB_TEST_BUTTON");
+	}
+
 	macro runTest {
 		Click(locator1 = "ABTest#REVIEW_AND_RUN_TEST_BUTTON");
 
@@ -139,7 +160,13 @@ definition {
 	}
 
 	macro selectElementID {
-		Click(locator1 = "ABTest#SELECT_CLICKABLE_ELEMENT_BUTTON");
+		if (!(isSet(key_index))) {
+			key_index = "1";
+		}
+
+		Click(
+			key_value = "Select Clickable Element",
+			locator1 = "ABTest#SECONDARY_BUTTON");
 
 		Click(locator1 = "ABTest#SELECT_CLICKABLE_ELEMENT");
 
@@ -156,6 +183,25 @@ definition {
 		AssertTextEquals(
 			locator1 = "ABTest#LABEL_ITEM_STATUS",
 			value1 = "${status}");
+	}
+
+	macro takeElementID {
+		if (!(isSet(key_index))) {
+			key_index = "1";
+		}
+
+		Click(
+			key_value = "Select Clickable Element",
+			locator1 = "ABTest#SECONDARY_BUTTON");
+
+		Click(locator1 = "ABTest#SELECT_CLICKABLE_ELEMENT");
+
+		var idelement = selenium.getAttribute(locator1 = "//div//div[contains(@class,'text-truncate')]@title");
+		var idelement = StringUtil.substring("${idelement}","1","19");
+
+		Click(locator1 = "ABTest#X_BUTTON_TARGET_ID_ELEMENT");
+
+		return "${idelement}";
 	}
 
 	macro terminateTest {
@@ -195,8 +241,8 @@ definition {
 
 			AssertElementPresent(
 				key_index = "${index}",
-				locator1 = "ABTest#VARIANT_NAME",
-				name = "${variantNames}");
+				key_name = "${variantNames}",
+				locator1 = "ABTest#VALUES_IN_LIST");
 		}
 	}
 

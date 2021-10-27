@@ -14,6 +14,7 @@
 
 package com.liferay.portal.service.impl;
 
+import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.expando.kernel.service.ExpandoRowLocalService;
 import com.liferay.exportimport.kernel.staging.MergeLayoutPrototypesThreadLocal;
 import com.liferay.layout.admin.kernel.model.LayoutTypePortletConstants;
@@ -106,6 +107,7 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.comparator.LayoutComparator;
 import com.liferay.portal.kernel.util.comparator.LayoutPriorityComparator;
@@ -249,9 +251,9 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		String friendlyURL = friendlyURLMap.get(LocaleUtil.getSiteDefault());
 
 		UnicodeProperties typeSettingsUnicodeProperties =
-			new UnicodeProperties();
-
-		typeSettingsUnicodeProperties.fastLoad(typeSettings);
+			UnicodePropertiesBuilder.fastLoad(
+				typeSettings
+			).build();
 
 		int priority = Integer.MAX_VALUE;
 
@@ -776,7 +778,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		// Asset
 
-		assetEntryLocalService.deleteEntry(
+		_assetEntryLocalService.deleteEntry(
 			Layout.class.getName(), layout.getPlid());
 
 		// Ratings
@@ -2454,7 +2456,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			String[] assetTagNames)
 		throws PortalException {
 
-		assetEntryLocalService.updateEntry(
+		_assetEntryLocalService.updateEntry(
 			userId, layout.getGroupId(), layout.getCreateDate(),
 			layout.getModifiedDate(), Layout.class.getName(), layout.getPlid(),
 			layout.getUuid(), 0, assetCategoryIds, assetTagNames, true, false,
@@ -2756,9 +2758,9 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		Date date = new Date();
 
 		UnicodeProperties typeSettingsUnicodeProperties =
-			new UnicodeProperties();
-
-		typeSettingsUnicodeProperties.fastLoad(typeSettings);
+			UnicodePropertiesBuilder.fastLoad(
+				typeSettings
+			).build();
 
 		Layout layout = layoutPersistence.findByG_P_L(
 			groupId, privateLayout, layoutId);
@@ -3288,7 +3290,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		// Asset
 
 		if (status == WorkflowConstants.STATUS_APPROVED) {
-			assetEntryLocalService.updateEntry(
+			_assetEntryLocalService.updateEntry(
 				Layout.class.getName(), layout.getPlid(),
 				layout.getStatusDate(), null, true, false);
 		}
@@ -3878,6 +3880,9 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		new CentralizedThreadLocal<>(
 			LayoutLocalServiceImpl.class + "._virtualLayoutTargetGroupId",
 			() -> GroupConstants.DEFAULT_LIVE_GROUP_ID);
+
+	@BeanReference(type = AssetEntryLocalService.class)
+	private AssetEntryLocalService _assetEntryLocalService;
 
 	@BeanReference(type = ClassNameLocalService.class)
 	private ClassNameLocalService _classNameLocalService;

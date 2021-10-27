@@ -243,6 +243,10 @@ public abstract class BaseCartItemResourceImpl
 			existingCartItem.setProductId(cartItem.getProductId());
 		}
 
+		if (cartItem.getProductURLs() != null) {
+			existingCartItem.setProductURLs(cartItem.getProductURLs());
+		}
+
 		if (cartItem.getQuantity() != null) {
 			existingCartItem.setQuantity(cartItem.getQuantity());
 		}
@@ -590,9 +594,7 @@ public abstract class BaseCartItemResourceImpl
 				contextAcceptLanguage.getPreferredLocale(), entityModel);
 		}
 		catch (Exception exception) {
-			if (_log.isDebugEnabled()) {
-				_log.debug("Invalid filter " + filterString, exception);
-			}
+			_log.error("Invalid filter " + filterString, exception);
 		}
 
 		return null;

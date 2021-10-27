@@ -273,7 +273,7 @@ components:
 info:
     description:
         "A Java client JAR is available for use with the group ID 'com.liferay', artifact ID
-        'com.liferay.object.admin.rest.client', and version '1.0.2'."
+        'com.liferay.object.admin.rest.client', and version '1.0.5'."
     license:
         name: "Apache 2.0"
         url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -375,6 +375,16 @@ paths:
             operationId: getObjectDefinitionsPage
             parameters:
                 - in: query
+                  name: aggregationTerms
+                  schema:
+                      items:
+                          type: string
+                      type: array
+                - in: query
+                  name: filter
+                  schema:
+                      type: string
+                - in: query
                   name: page
                   schema:
                       type: integer
@@ -384,6 +394,10 @@ paths:
                       type: integer
                 - in: query
                   name: search
+                  schema:
+                      type: string
+                - in: query
+                  name: sort
                   schema:
                       type: string
                 - in: header

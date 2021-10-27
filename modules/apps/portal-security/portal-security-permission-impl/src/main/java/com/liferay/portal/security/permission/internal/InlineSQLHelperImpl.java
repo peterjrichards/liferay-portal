@@ -470,10 +470,16 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 						permissionChecker, modelClassName, classPKColumn,
 						groupIds);
 
-				if (contributorPermissionPredicate != null) {
+				permissionPredicate =
 					permissionPredicate = permissionPredicate.or(
-						contributorPermissionPredicate.withParentheses());
-				}
+						() -> {
+							if (contributorPermissionPredicate != null) {
+								return contributorPermissionPredicate.
+									withParentheses();
+							}
+
+							return null;
+						});
 			}
 		}
 
@@ -577,13 +583,12 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 			resourcePermissionSQL = bridgeJoin.concat(resourcePermissionSQL);
 		}
 
-		StringBundler sb = new StringBundler(9);
+		StringBundler sb = new StringBundler(8);
 
 		long[] roleIds = getRoleIds(groupIds);
 
 		if (roleIds.length > 0) {
-			sb.append(StringPool.OPEN_PARENTHESIS);
-			sb.append("ResourcePermission.roleId IN (");
+			sb.append("(ResourcePermission.roleId IN (");
 			sb.append(StringUtil.merge(roleIds));
 			sb.append(StringPool.CLOSE_PARENTHESIS);
 		}

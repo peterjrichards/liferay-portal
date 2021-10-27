@@ -16,6 +16,7 @@ package com.liferay.dynamic.data.mapping.internal.util;
 
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.document.library.util.DLURLHelper;
+import com.liferay.dynamic.data.mapping.form.field.type.constants.DDMFormFieldTypeConstants;
 import com.liferay.dynamic.data.mapping.io.DDMFormDeserializer;
 import com.liferay.dynamic.data.mapping.io.DDMFormDeserializerDeserializeRequest;
 import com.liferay.dynamic.data.mapping.io.DDMFormDeserializerDeserializeResponse;
@@ -838,6 +839,15 @@ public class DDMImpl implements DDM {
 				"localizationMap", localizationMapJSONObject
 			);
 
+			if (Objects.equals(
+					ddmFormField.getType(),
+					DDMFormFieldTypeConstants.DDM_IMAGE)) {
+
+				jsonObject.put(
+					"requiredDescription",
+					ddmFormField.getProperty("requiredDescription"));
+			}
+
 			ddmFormFieldsJSONArray.put(jsonObject);
 		}
 
@@ -1133,13 +1143,11 @@ public class DDMImpl implements DDM {
 			byte[] bytes = getImageBytes(uploadRequest, fieldNameValue);
 
 			if (ArrayUtil.isNotEmpty(bytes)) {
-				JSONObject jsonObject = JSONUtil.put(
+				return JSONUtil.put(
 					"alt", uploadRequest.getParameter(fieldNameValue + "Alt")
 				).put(
 					"data", UnicodeFormatter.bytesToHex(bytes)
-				);
-
-				return jsonObject.toString();
+				).toString();
 			}
 		}
 		catch (Exception exception) {

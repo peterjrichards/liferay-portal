@@ -118,16 +118,18 @@ definition {
 			Navigator.gotoBack();
 
 			AssertCssValue(
+				fragmentName = "button",
 				id = "link",
-				key_fragmentName = "Button",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "background-color",
 				value1 = "rgba(0, 255, 0, 1)");
 
 			AssertCssValue(
+				fragmentName = "heading",
 				id = "element-text",
-				key_fragmentName = "Heading",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "font-size",
 				value1 = "32px");
 
@@ -159,7 +161,7 @@ definition {
 		}
 
 		task ("Change to default style book via Look and Feel") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			PageEditor.gotoTab(tabName = "Page Design Options");
 
@@ -189,16 +191,18 @@ definition {
 			Navigator.gotoBack();
 
 			AssertCssValue(
+				fragmentName = "button",
 				id = "link",
-				key_fragmentName = "Button",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "background-color",
 				value1 = "rgba(11, 95, 255, 1)");
 
 			AssertCssValue(
+				fragmentName = "heading",
 				id = "element-text",
-				key_fragmentName = "Heading",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "font-size",
 				value1 = "26px");
 
@@ -289,16 +293,18 @@ definition {
 			StyleBooks.selectStyleBookViaPageDesignOptions(styleBookName = "Test Style Book Name");
 
 			AssertCssValue(
+				fragmentName = "button",
 				id = "link",
-				key_fragmentName = "Button",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "background-color",
 				value1 = "rgba(0, 255, 0, 1)");
 
 			AssertCssValue(
+				fragmentName = "heading",
 				id = "element-text",
-				key_fragmentName = "Heading",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "font-size",
 				value1 = "32px");
 
@@ -330,7 +336,7 @@ definition {
 		}
 
 		task ("Change to the default style book via Page Design Options panel") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			PageEditor.gotoTab(tabName = "Page Design Options");
 
@@ -343,16 +349,18 @@ definition {
 			StyleBooks.selectStyleBookViaPageDesignOptions(styleBookName = "Inherited from Master");
 
 			AssertCssValue(
+				fragmentName = "button",
 				id = "link",
-				key_fragmentName = "Button",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "background-color",
 				value1 = "rgba(11, 95, 255, 1)");
 
 			AssertCssValue(
+				fragmentName = "heading",
 				id = "element-text",
-				key_fragmentName = "Heading",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "font-size",
 				value1 = "26px");
 
@@ -694,16 +702,18 @@ definition {
 			StyleBooks.selectStyleBookViaPageDesignOptions(styleBookName = "Test Style Book Name");
 
 			AssertCssValue(
+				fragmentName = "button",
 				id = "link",
-				key_fragmentName = "Button",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "background-color",
 				value1 = "rgba(0, 255, 0, 1)");
 
 			AssertCssValue(
+				fragmentName = "heading",
 				id = "element-text",
-				key_fragmentName = "Heading",
-				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD",
+				index = "1",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "font-size",
 				value1 = "32px");
 

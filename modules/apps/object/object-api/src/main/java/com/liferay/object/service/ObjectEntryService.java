@@ -67,6 +67,10 @@ public interface ObjectEntryService extends BaseService {
 	public ObjectEntry deleteObjectEntry(long objectEntryId)
 		throws PortalException;
 
+	public ObjectEntry deleteObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws PortalException;
+
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ObjectEntry fetchObjectEntry(long objectEntryId)
 		throws PortalException;
@@ -75,12 +79,22 @@ public interface ObjectEntryService extends BaseService {
 	public ObjectEntry getObjectEntry(long objectEntryId)
 		throws PortalException;
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public ObjectEntry getObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws PortalException;
+
 	/**
 	 * Returns the OSGi service identifier.
 	 *
 	 * @return the OSGi service identifier
 	 */
 	public String getOSGiServiceIdentifier();
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public boolean hasModelResourcePermission(
+			ObjectEntry objectEntry, String actionId)
+		throws PortalException;
 
 	public ObjectEntry updateObjectEntry(
 			long objectEntryId, Map<String, Serializable> values,

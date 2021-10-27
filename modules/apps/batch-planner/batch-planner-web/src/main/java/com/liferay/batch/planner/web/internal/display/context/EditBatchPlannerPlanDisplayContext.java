@@ -14,8 +14,11 @@
 
 package com.liferay.batch.planner.web.internal.display.context;
 
+import com.liferay.batch.engine.BatchEngineTaskContentType;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.SelectOption;
+import com.liferay.petra.string.StringPool;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +37,21 @@ public class EditBatchPlannerPlanDisplayContext {
 		_headlessEndpoints = Collections.unmodifiableMap(headlessEndpoints);
 	}
 
+	public List<SelectOption> getExternalTypeSelectOptions() {
+		List<SelectOption> selectOptions = new ArrayList<>();
+
+		for (BatchEngineTaskContentType batchEngineTaskContentType :
+				BatchEngineTaskContentType.values()) {
+
+			selectOptions.add(
+				new SelectOption(
+					batchEngineTaskContentType.toString(),
+					batchEngineTaskContentType.toString()));
+		}
+
+		return selectOptions;
+	}
+
 	public Map<String, String> getHeadlessEndpoints() {
 		return _headlessEndpoints;
 	}
@@ -43,12 +61,18 @@ public class EditBatchPlannerPlanDisplayContext {
 
 		Stream<Map.Entry<String, String>> stream = entries.stream();
 
-		return stream.map(
-			stringStringEntry -> new SelectOption(
-				stringStringEntry.getKey(), stringStringEntry.getValue())
-		).collect(
-			Collectors.toList()
-		);
+		List<SelectOption> selectOptions = new ArrayList<>();
+
+		selectOptions.add(new SelectOption(StringPool.BLANK, StringPool.BLANK));
+
+		selectOptions.addAll(
+			stream.map(
+				entry -> new SelectOption(entry.getKey(), entry.getValue())
+			).collect(
+				Collectors.toList()
+			));
+
+		return selectOptions;
 	}
 
 	private final Map<String, String> _headlessEndpoints;

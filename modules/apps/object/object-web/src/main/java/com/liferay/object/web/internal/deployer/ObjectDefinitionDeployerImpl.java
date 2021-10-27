@@ -105,8 +105,7 @@ public class ObjectDefinitionDeployerImpl implements ObjectDefinitionDeployer {
 				ClayDataSetDisplayView.class,
 				new ObjectEntriesTableClayDataSetDisplayView(
 					_clayTableSchemaBuilderFactory, objectDefinition,
-					_objectFieldLocalService.getObjectFields(
-						objectDefinition.getObjectDefinitionId())),
+					_objectFieldLocalService),
 				HashMapDictionaryBuilder.put(
 					"clay.data.set.display.name",
 					objectDefinition.getPortletId()
@@ -139,6 +138,7 @@ public class ObjectDefinitionDeployerImpl implements ObjectDefinitionDeployer {
 				new ObjectEntryInfoItemFieldValuesProvider(
 					_assetDisplayPageFriendlyURLProvider,
 					_infoItemFieldReaderFieldSetProvider, _jsonFactory,
+					_listTypeEntryLocalService, _objectEntryLocalService,
 					_objectFieldLocalService, _templateInfoItemFieldSetProvider,
 					_userLocalService),
 				HashMapDictionaryBuilder.<String, Object>put(
@@ -149,6 +149,7 @@ public class ObjectDefinitionDeployerImpl implements ObjectDefinitionDeployer {
 				new ObjectEntryInfoItemFormProvider(
 					objectDefinition, _infoItemFieldReaderFieldSetProvider,
 					_objectDefinitionLocalService, _objectFieldLocalService,
+					_objectRelationshipLocalService,
 					_templateInfoItemFieldSetProvider),
 				HashMapDictionaryBuilder.<String, Object>put(
 					Constants.SERVICE_RANKING, 10
@@ -170,8 +171,9 @@ public class ObjectDefinitionDeployerImpl implements ObjectDefinitionDeployer {
 				InfoItemRenderer.class,
 				new ObjectEntryRowInfoItemRenderer(
 					_assetDisplayPageFriendlyURLProvider,
-					_objectDefinitionLocalService, _objectEntryLocalService,
-					_objectFieldLocalService, _servletContext),
+					_listTypeEntryLocalService, _objectDefinitionLocalService,
+					_objectEntryLocalService, _objectFieldLocalService,
+					_servletContext),
 				HashMapDictionaryBuilder.<String, Object>put(
 					Constants.SERVICE_RANKING, 100
 				).put(

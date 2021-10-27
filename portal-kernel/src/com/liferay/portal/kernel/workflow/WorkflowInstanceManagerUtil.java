@@ -156,14 +156,15 @@ public class WorkflowInstanceManagerUtil {
 			searchWorkflowInstances(
 				long companyId, Long userId, String assetClassName,
 				String assetTitle, String assetDescription, String nodeName,
-				String kaleoDefinitionName, Boolean completed, int start,
-				int end, OrderByComparator<WorkflowInstance> orderByComparator)
+				String kaleoDefinitionName, Boolean completed,
+				boolean searchByActiveWorkflowHandlers, int start, int end,
+				OrderByComparator<WorkflowInstance> orderByComparator)
 		throws WorkflowException {
 
 		return _workflowInstanceManager.searchWorkflowInstances(
 			companyId, userId, assetClassName, assetTitle, assetDescription,
-			nodeName, kaleoDefinitionName, completed, start, end,
-			orderByComparator);
+			nodeName, kaleoDefinitionName, completed,
+			searchByActiveWorkflowHandlers, start, end, orderByComparator);
 	}
 
 	public static WorkflowInstance signalWorkflowInstance(

@@ -15,7 +15,6 @@
 package com.liferay.object.service.impl;
 
 import com.liferay.list.type.service.ListTypeEntryLocalService;
-import com.liferay.object.constants.ObjectRelationshipConstants;
 import com.liferay.object.deployer.ObjectDefinitionDeployer;
 import com.liferay.object.exception.DuplicateObjectDefinitionException;
 import com.liferay.object.exception.NoSuchObjectFieldException;
@@ -26,15 +25,16 @@ import com.liferay.object.exception.ObjectDefinitionPluralLabelException;
 import com.liferay.object.exception.ObjectDefinitionScopeException;
 import com.liferay.object.exception.ObjectDefinitionStatusException;
 import com.liferay.object.exception.ObjectDefinitionVersionException;
+import com.liferay.object.exception.ObjectFieldRelationshipTypeException;
 import com.liferay.object.exception.RequiredObjectDefinitionException;
 import com.liferay.object.internal.deployer.ObjectDefinitionDeployerImpl;
 import com.liferay.object.internal.petra.sql.dsl.DynamicObjectDefinitionTable;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.ObjectField;
-import com.liferay.object.model.ObjectRelationship;
 import com.liferay.object.model.impl.ObjectDefinitionImpl;
 import com.liferay.object.scope.ObjectScopeProviderRegistry;
+import com.liferay.object.service.ObjectDefinitionLocalServiceUtil;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
@@ -47,8 +47,9 @@ import com.liferay.petra.sql.dsl.Table;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
-import com.liferay.portal.kernel.cluster.Clusterable;
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.cluster.ClusterExecutorUtil;
+import com.liferay.portal.kernel.cluster.ClusterRequest;
+import com.liferay.portal.kernel.dependency.manager.DependencyManagerSyncUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -63,18 +64,18 @@ import com.liferay.portal.kernel.security.permission.ResourceActions;
 import com.liferay.portal.kernel.service.PersistedModelLocalServiceRegistry;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourceLocalService;
-import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.WorkflowInstanceLinkLocalService;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.MethodHandler;
+import com.liferay.portal.kernel.util.MethodKey;
 import com.liferay.portal.kernel.util.PortalRunMode;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TextFormatter;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.search.batch.DynamicQueryBatchIndexingActionableFactory;
 import com.liferay.portal.search.spi.model.query.contributor.ModelPreFilterContributor;
 import com.liferay.portal.search.spi.model.registrar.ModelSearchRegistrarHelper;
@@ -313,19 +314,15 @@ public class ObjectDefinitionLocalServiceImpl
 			_dropTable(objectDefinition.getDBTableName());
 			_dropTable(objectDefinition.getExtensionDBTableName());
 
-			TransactionCommitCallbackUtil.registerCallback(
-				() -> {
-					objectDefinitionLocalService.undeployObjectDefinition(
-						objectDefinition);
+			undeployObjectDefinition(objectDefinition);
 
-					return null;
-				});
+			_registerTransactionCallbackForCluster(
+				_undeployObjectDefinitionMethodKey, objectDefinition);
 		}
 
 		return objectDefinition;
 	}
 
-	@Clusterable
 	@Override
 	public void deployObjectDefinition(ObjectDefinition objectDefinition) {
 		if (objectDefinition.isSystem()) {
@@ -416,15 +413,10 @@ public class ObjectDefinitionLocalServiceImpl
 		_createTable(
 			objectDefinition.getExtensionDBTableName(), objectDefinition);
 
-		ObjectDefinition finalObjectDefinition = objectDefinition;
+		deployObjectDefinition(objectDefinition);
 
-		TransactionCommitCallbackUtil.registerCallback(
-			() -> {
-				objectDefinitionLocalService.deployObjectDefinition(
-					finalObjectDefinition);
-
-				return null;
-			});
+		_registerTransactionCallbackForCluster(
+			_deployObjectDefinitionMethodKey, objectDefinition);
 
 		return objectDefinition;
 	}
@@ -487,10 +479,14 @@ public class ObjectDefinitionLocalServiceImpl
 
 			});
 
-		_objectDefinitionDeployerServiceTracker.open();
+		DependencyManagerSyncUtil.registerSyncCallable(
+			() -> {
+				_objectDefinitionDeployerServiceTracker.open();
+
+				return null;
+			});
 	}
 
-	@Clusterable
 	@Override
 	public void undeployObjectDefinition(ObjectDefinition objectDefinition) {
 		if (objectDefinition.isSystem()) {
@@ -537,7 +533,8 @@ public class ObjectDefinitionLocalServiceImpl
 			objectDefinitionPersistence.fetchByPrimaryKey(objectDefinitionId);
 
 		if (objectDefinition.isSystem()) {
-			throw new ObjectDefinitionStatusException();
+			throw new ObjectDefinitionStatusException(
+				"Object definition " + objectDefinition);
 		}
 
 		return _updateObjectDefinition(
@@ -619,7 +616,7 @@ public class ObjectDefinitionLocalServiceImpl
 		objectDefinition.setCompanyId(user.getCompanyId());
 		objectDefinition.setUserId(user.getUserId());
 		objectDefinition.setUserName(user.getFullName());
-		objectDefinition.setActive(false);
+		objectDefinition.setActive(system);
 		objectDefinition.setDBTableName(dbTableName);
 		objectDefinition.setClassName(
 			_getClassName(
@@ -687,22 +684,6 @@ public class ObjectDefinitionLocalServiceImpl
 				dbTableName);
 
 		runSQL(dynamicObjectDefinitionTable.getCreateTableSQL());
-	}
-
-	private void _deleteWorkflowInstanceLinks(ObjectDefinition objectDefinition)
-		throws PortalException {
-
-		List<ObjectEntry> objectEntries =
-			_objectEntryPersistence.findByODI_NotS(
-				objectDefinition.getObjectDefinitionId(),
-				WorkflowConstants.STATUS_APPROVED);
-
-		for (ObjectEntry objectEntry : objectEntries) {
-			_workflowInstanceLinkLocalService.deleteWorkflowInstanceLinks(
-				objectEntry.getCompanyId(), objectEntry.getNonzeroGroupId(),
-				objectDefinition.getClassName(),
-				objectEntry.getObjectEntryId());
-		}
 	}
 
 	private void _dropTable(String dbTableName) {
@@ -798,20 +779,23 @@ public class ObjectDefinitionLocalServiceImpl
 		return false;
 	}
 
-	private void _startWorkflowInstanceLinks(ObjectDefinition objectDefinition)
-		throws PortalException {
+	private void _registerTransactionCallbackForCluster(
+		MethodKey methodKey, ObjectDefinition objectDefinition) {
 
-		List<ObjectEntry> objectEntries =
-			_objectEntryPersistence.findByODI_NotS(
-				objectDefinition.getObjectDefinitionId(),
-				WorkflowConstants.STATUS_APPROVED);
+		if (ClusterExecutorUtil.isEnabled()) {
+			TransactionCommitCallbackUtil.registerCallback(
+				() -> {
+					ClusterRequest clusterRequest =
+						ClusterRequest.createMulticastRequest(
+							new MethodHandler(methodKey, objectDefinition),
+							true);
 
-		for (ObjectEntry objectEntry : objectEntries) {
-			WorkflowHandlerRegistryUtil.startWorkflowInstance(
-				objectEntry.getCompanyId(), objectEntry.getNonzeroGroupId(),
-				objectEntry.getUserId(), objectDefinition.getClassName(),
-				objectEntry.getObjectEntryId(), objectEntry,
-				ServiceContextThreadLocal.getServiceContext());
+					clusterRequest.setFireAndForget(true);
+
+					ClusterExecutorUtil.execute(clusterRequest);
+
+					return null;
+				});
 		}
 	}
 
@@ -842,16 +826,12 @@ public class ObjectDefinitionLocalServiceImpl
 
 		if (objectDefinition.isApproved()) {
 			if (!active && originalActive) {
-				_deleteWorkflowInstanceLinks(objectDefinition);
-
 				objectDefinitionLocalService.undeployObjectDefinition(
 					objectDefinition);
 			}
 			else if (active) {
 				objectDefinitionLocalService.deployObjectDefinition(
 					objectDefinition);
-
-				_startWorkflowInstanceLinks(objectDefinition);
 			}
 
 			return objectDefinitionPersistence.update(objectDefinition);
@@ -896,34 +876,6 @@ public class ObjectDefinitionLocalServiceImpl
 		if (active && !objectDefinition.isApproved()) {
 			throw new ObjectDefinitionActiveException(
 				"Object definitions must be published before being activated");
-		}
-
-		if (active || !objectDefinition.isActive()) {
-			return;
-		}
-
-		List<ObjectRelationship> objectRelationships =
-			_objectRelationshipLocalService.getObjectRelationships(
-				objectDefinition.getObjectDefinitionId(), QueryUtil.ALL_POS,
-				QueryUtil.ALL_POS);
-
-		for (ObjectRelationship objectRelationship : objectRelationships) {
-			ObjectDefinition objectDefinition2 =
-				objectDefinitionPersistence.fetchByPrimaryKey(
-					objectRelationship.getObjectDefinitionId2());
-
-			if ((Objects.equals(
-					objectRelationship.getType(),
-					ObjectRelationshipConstants.TYPE_ONE_TO_MANY) ||
-				 Objects.equals(
-					 objectRelationship.getType(),
-					 ObjectRelationshipConstants.TYPE_ONE_TO_ONE)) &&
-				objectDefinition2.isActive()) {
-
-				throw new ObjectDefinitionActiveException(
-					"This object definition has a relationship with another " +
-						"active object definition");
-			}
 		}
 	}
 
@@ -1018,6 +970,12 @@ public class ObjectDefinitionLocalServiceImpl
 
 			throw new NoSuchObjectFieldException();
 		}
+
+		if (Validator.isNotNull(objectField.getRelationshipType())) {
+			throw new ObjectFieldRelationshipTypeException(
+				"Description and title object fields cannot have a " +
+					"relationship type");
+		}
 	}
 
 	private void _validatePluralLabel(Map<Locale, String> pluralLabelMap)
@@ -1066,6 +1024,15 @@ public class ObjectDefinitionLocalServiceImpl
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ObjectDefinitionLocalServiceImpl.class);
+
+	private static final MethodKey _deployObjectDefinitionMethodKey =
+		new MethodKey(
+			ObjectDefinitionLocalServiceUtil.class, "deployObjectDefinition",
+			ObjectDefinition.class);
+	private static final MethodKey _undeployObjectDefinitionMethodKey =
+		new MethodKey(
+			ObjectDefinitionLocalServiceUtil.class, "undeployObjectDefinition",
+			ObjectDefinition.class);
 
 	private BundleContext _bundleContext;
 

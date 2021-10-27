@@ -102,6 +102,21 @@ public class ObjectEntryServiceImpl extends ObjectEntryServiceBaseImpl {
 	}
 
 	@Override
+	public ObjectEntry deleteObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws PortalException {
+
+		ObjectEntry objectEntry = objectEntryLocalService.getObjectEntry(
+			externalReferenceCode, companyId, groupId);
+
+		_checkModelResourcePermission(
+			objectEntry.getObjectDefinitionId(), objectEntry.getObjectEntryId(),
+			ActionKeys.DELETE);
+
+		return objectEntryLocalService.deleteObjectEntry(objectEntry);
+	}
+
+	@Override
 	public ObjectEntry fetchObjectEntry(long objectEntryId)
 		throws PortalException {
 
@@ -129,6 +144,41 @@ public class ObjectEntryServiceImpl extends ObjectEntryServiceBaseImpl {
 			ActionKeys.VIEW);
 
 		return objectEntry;
+	}
+
+	@Override
+	public ObjectEntry getObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws PortalException {
+
+		ObjectEntry objectEntry = objectEntryLocalService.getObjectEntry(
+			externalReferenceCode, companyId, groupId);
+
+		_checkModelResourcePermission(
+			objectEntry.getObjectDefinitionId(), objectEntry.getObjectEntryId(),
+			ActionKeys.VIEW);
+
+		return objectEntry;
+	}
+
+	@Override
+	public boolean hasModelResourcePermission(
+			ObjectEntry objectEntry, String actionId)
+		throws PortalException {
+
+		if (objectEntry == null) {
+			return false;
+		}
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.getObjectDefinition(
+				objectEntry.getObjectDefinitionId());
+
+		ModelResourcePermission<ObjectEntry> modelResourcePermission =
+			_modelResourcePermissions.get(objectDefinition.getClassName());
+
+		return modelResourcePermission.contains(
+			getPermissionChecker(), objectEntry, actionId);
 	}
 
 	@Override

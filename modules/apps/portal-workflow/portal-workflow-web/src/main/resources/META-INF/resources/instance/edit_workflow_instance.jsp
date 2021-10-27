@@ -50,9 +50,9 @@ renderResponse.setTitle(workflowInstanceEditDisplayContext.getHeaderTitle());
 				<clay:col
 					md="7"
 				>
-					<aui:field-wrapper label="state">
+					<aui:field-wrapper label="status">
 						<aui:fieldset>
-							<%= HtmlUtil.escape(workflowInstanceEditDisplayContext.getWorkflowInstanceState()) %>
+							<%= workflowInstanceEditDisplayContext.getStatus() %>
 						</aui:fieldset>
 					</aui:field-wrapper>
 				</clay:col>

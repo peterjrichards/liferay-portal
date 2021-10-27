@@ -26,7 +26,6 @@ import com.liferay.petra.io.delta.DeltaUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.lock.Lock;
 import com.liferay.portal.kernel.log.Log;
@@ -162,7 +161,7 @@ public class SyncHelperImpl implements SyncHelper {
 
 		// SYNC-1253
 
-		StringBundler sb = new StringBundler(13);
+		StringBundler sb = new StringBundler(9);
 
 		if (throwable instanceof InvocationTargetException) {
 			throwable = throwable.getCause();
@@ -176,20 +175,14 @@ public class SyncHelperImpl implements SyncHelper {
 
 		sb.append(StringPool.QUOTE);
 		sb.append(throwableMessage);
-		sb.append(StringPool.QUOTE);
-		sb.append(StringPool.COMMA_AND_SPACE);
-		sb.append("\"error\": ");
-
-		JSONObject errorJSONObject = JSONUtil.put(
-			"message", throwableMessage
-		).put(
-			"type", ClassUtil.getClassName(throwable)
-		);
-
-		sb.append(errorJSONObject.toString());
-
-		sb.append(StringPool.COMMA_AND_SPACE);
-		sb.append("\"throwable\": \"");
+		sb.append("\", \"error\": ");
+		sb.append(
+			JSONUtil.put(
+				"message", throwableMessage
+			).put(
+				"type", ClassUtil.getClassName(throwable)
+			).toString());
+		sb.append(", \"throwable\": \"");
 		sb.append(throwable.toString());
 		sb.append(StringPool.QUOTE);
 
@@ -197,8 +190,7 @@ public class SyncHelperImpl implements SyncHelper {
 			return StringUtil.unquote(sb.toString());
 		}
 
-		sb.append(StringPool.COMMA_AND_SPACE);
-		sb.append("\"rootCause\": ");
+		sb.append(", \"rootCause\": ");
 
 		Throwable rootCauseThrowable = throwable;
 

@@ -293,12 +293,16 @@ public class ExportTranslationDisplayContext {
 		TranslationInfoItemFieldValuesExporter
 			translationInfoItemFieldValuesExporter) {
 
-		InfoLocalizedValue<String> labelInfoLocalizedValue =
-			translationInfoItemFieldValuesExporter.getLabelInfoLocalizedValue();
-
 		return JSONUtil.put(
 			"displayName",
-			labelInfoLocalizedValue.getValue(_themeDisplay.getLocale())
+			() -> {
+				InfoLocalizedValue<String> labelInfoLocalizedValue =
+					translationInfoItemFieldValuesExporter.
+						getLabelInfoLocalizedValue();
+
+				return labelInfoLocalizedValue.getValue(
+					_themeDisplay.getLocale());
+			}
 		).put(
 			"mimeType", translationInfoItemFieldValuesExporter.getMimeType()
 		);
@@ -323,16 +327,17 @@ public class ExportTranslationDisplayContext {
 	}
 
 	private JSONArray _getLocalesJSONArray(
-		Locale currentLocale, Collection<Locale> locales) {
+		Locale locale, Collection<Locale> locales) {
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
 		locales.forEach(
-			locale -> jsonArray.put(
+			currentLocale -> jsonArray.put(
 				JSONUtil.put(
-					"displayName", getDisplayName(currentLocale, locale)
+					"displayName",
+					LocaleUtil.getLocaleDisplayName(currentLocale, locale)
 				).put(
-					"languageId", LocaleUtil.toLanguageId(locale)
+					"languageId", LocaleUtil.toLanguageId(currentLocale)
 				)));
 
 		return jsonArray;

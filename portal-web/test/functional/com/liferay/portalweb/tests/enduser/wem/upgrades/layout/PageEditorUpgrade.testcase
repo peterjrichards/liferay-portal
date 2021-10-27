@@ -52,19 +52,19 @@ definition {
 				pageName = "Test Fragment Content Page",
 				siteName = "Test Site Name");
 
-			AssertTextEquals(
-				key_fragmentName = "heading",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Heading Example");
+			ContentPages.viewFragmentText(
+				fragmentName = "heading",
+				id = "element-text",
+				text = "Heading Example");
 
-			AssertTextEquals.assertPartialText(
-				key_fragmentName = "card",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Card Title Example");
+			ContentPages.viewFragmentText(
+				contributed = "false",
+				fragmentName = "card",
+				text = "Card Title Example");
 		}
 
 		task ("View the outer Container styles in edit mode") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			AssertElementNotPresent(
 				key_contentDisplay = "",
@@ -170,19 +170,19 @@ definition {
 				pageName = "Test Fragment Content Page",
 				siteName = "Test Site Name");
 
-			AssertTextEquals(
-				key_fragmentName = "heading",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Heading Example");
+			ContentPages.viewFragmentText(
+				fragmentName = "heading",
+				id = "element-text",
+				text = "Heading Example");
 
-			AssertTextEquals.assertPartialText(
-				key_fragmentName = "card",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Card Title Example");
+			ContentPages.viewFragmentText(
+				contributed = "false",
+				fragmentName = "card",
+				text = "Card Title Example");
 		}
 
 		task ("View the Container styles in edit mode") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			AssertElementNotPresent(
 				key_contentDisplay = "",
@@ -276,19 +276,19 @@ definition {
 				pageName = "Test Fragment Content Page",
 				siteName = "Test Site Name");
 
-			AssertTextEquals(
-				key_fragmentName = "heading",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Heading Example");
+			ContentPages.viewFragmentText(
+				fragmentName = "heading",
+				id = "element-text",
+				text = "Heading Example");
 
-			AssertTextEquals.assertPartialText(
-				key_fragmentName = "card",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Card Title Example");
+			ContentPages.viewFragmentText(
+				contributed = "false",
+				fragmentName = "card",
+				text = "Card Title Example");
 		}
 
 		task ("View the outer Container styles in edit mode") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			AssertElementNotPresent(
 				key_contentDisplay = "",
@@ -394,19 +394,19 @@ definition {
 				pageName = "Test Fragment Content Page",
 				siteName = "Test Site Name");
 
-			AssertTextEquals(
-				key_fragmentName = "heading",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Heading Example");
+			ContentPages.viewFragmentText(
+				fragmentName = "heading",
+				id = "element-text",
+				text = "Heading Example");
 
-			AssertTextEquals.assertPartialText(
-				key_fragmentName = "card",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Card Title Example");
+			ContentPages.viewFragmentText(
+				contributed = "false",
+				fragmentName = "card",
+				text = "Card Title Example");
 		}
 
 		task ("View the Container styles in edit mode") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
 			AssertElementNotPresent(
 				key_contentDisplay = "",
@@ -549,30 +549,21 @@ definition {
 		}
 
 		task ("View the edited inline content at edit mode") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
-			PageEditor.viewFragmentEditableText(
-				contributed = "false",
-				editableText = "Edited Banner Title",
-				fragmentName = "Element",
-				id = "01-title");
+			var n = "1";
 
-			PageEditor.viewFragmentEditableText(
-				contributed = "false",
-				editableText = "Edited Banner Subtitle",
-				fragmentName = "Element",
-				id = "02-subtitle");
+			for (var text : list "Edited Banner Title,Edited Banner Subtitle,Edited Banner Link") {
+				ContentPages.viewFragmentText(
+					contributed = "false",
+					fragmentName = "banner",
+					position = "${n}",
+					text = "${text}");
 
-			PageEditor.viewFragmentEditableText(
-				contributed = "false",
-				editableText = "Edited Banner Link",
-				fragmentName = "Element",
-				id = "03-link");
+				var n = ${n} + 1;
+			}
 
-			AssertVisible(
-				key_fragmentName = "Element",
-				key_imageName = "Document_1.jpg",
-				locator1 = "Fragment#FRAGMENT_CONTENT_BACKGROUND_IMAGE");
+			ContentPages.viewFragmentBackgroundImage(image = "Document_1.jpg");
 		}
 	}
 
@@ -596,27 +587,15 @@ definition {
 		}
 
 		task ("View the edited inline content at edit mode") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
-			PageEditor.viewFragmentEditableText(
-				editableText = "Edited Banner Title",
-				fragmentName = "Element",
-				id = "01-title");
+			PageEditor.viewFragment(fragmentName = "Element");
 
-			PageEditor.viewFragmentEditableText(
-				editableText = "Edited Banner Subtitle",
-				fragmentName = "Element",
-				id = "02-subtitle");
+			for (var text : list "Edited Banner Title,Edited Banner Subtitle,Edited Banner Link") {
+				AssertVisible(locator1 = "//div[contains(@class,'banner')]//*[normalize-space(text())='${text}']");
+			}
 
-			PageEditor.viewFragmentEditableText(
-				editableText = "Edited Banner Link",
-				fragmentName = "Element",
-				id = "03-link");
-
-			AssertVisible(
-				key_fragmentName = "Element",
-				key_imageName = "Document_1.jpg",
-				locator1 = "Fragment#FRAGMENT_CONTENT_BACKGROUND_IMAGE");
+			AssertVisible(locator1 = "//div[contains(@class,'banner')][contains(@style,'Document_1.jpg')]");
 		}
 	}
 
@@ -640,30 +619,23 @@ definition {
 		}
 
 		task ("View the edited inline content at edit mode") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
-			PageEditor.viewFragmentEditableText(
-				contributed = "false",
-				editableText = "Edited Banner Title",
-				fragmentName = "Element",
-				id = "01-title");
+			PageEditor.viewFragment(fragmentName = "Element");
 
-			PageEditor.viewFragmentEditableText(
-				contributed = "false",
-				editableText = "Edited Banner Subtitle",
-				fragmentName = "Element",
-				id = "02-subtitle");
+			var n = "1";
 
-			PageEditor.viewFragmentEditableText(
-				contributed = "false",
-				editableText = "Edited Banner Link",
-				fragmentName = "Element",
-				id = "03-link");
+			for (var text : list "Edited Banner Title,Edited Banner Subtitle,Edited Banner Link") {
+				ContentPages.viewFragmentText(
+					contributed = "false",
+					fragmentName = "banner",
+					position = "${n}",
+					text = "${text}");
 
-			AssertVisible(
-				key_fragmentName = "Element",
-				key_imageName = "Document_1.jpg",
-				locator1 = "Fragment#FRAGMENT_CONTENT_BACKGROUND_IMAGE");
+				var n = ${n} + 1;
+			}
+
+			ContentPages.viewFragmentBackgroundImage(image = "Document_1.jpg");
 		}
 	}
 
@@ -687,27 +659,15 @@ definition {
 		}
 
 		task ("View the edited inline content at edit mode") {
-			ContentPages.clickPencil();
+			ContentPages.gotoPageEditor();
 
-			PageEditor.viewFragmentEditableText(
-				editableText = "Edited Banner Title",
-				fragmentName = "Element",
-				id = "01-title");
+			PageEditor.viewFragment(fragmentName = "Element");
 
-			PageEditor.viewFragmentEditableText(
-				editableText = "Edited Banner Subtitle",
-				fragmentName = "Element",
-				id = "02-subtitle");
+			for (var text : list "Edited Banner Title,Edited Banner Subtitle,Edited Banner Link") {
+				AssertVisible(locator1 = "//div[contains(@class,'banner')]//*[normalize-space(text())='${text}']");
+			}
 
-			PageEditor.viewFragmentEditableText(
-				editableText = "Edited Banner Link",
-				fragmentName = "Element",
-				id = "03-link");
-
-			AssertVisible(
-				key_fragmentName = "Element",
-				key_imageName = "Document_1.jpg",
-				locator1 = "Fragment#FRAGMENT_CONTENT_BACKGROUND_IMAGE");
+			AssertVisible(locator1 = "//div[contains(@class,'banner')][contains(@style,'Document_1.jpg')]");
 		}
 	}
 

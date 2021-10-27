@@ -14,6 +14,7 @@
 
 package com.liferay.search.experiences.rest.client.resource.v1_0;
 
+import com.liferay.search.experiences.rest.client.dto.v1_0.SXPBlueprint;
 import com.liferay.search.experiences.rest.client.dto.v1_0.SearchResponse;
 import com.liferay.search.experiences.rest.client.http.HttpInvoker;
 import com.liferay.search.experiences.rest.client.pagination.Pagination;
@@ -39,12 +40,12 @@ public interface SearchResponseResource {
 		return new Builder();
 	}
 
-	public SearchResponse getSearch(
-			String query, String sxpBlueprint, Pagination pagination)
+	public SearchResponse postSearch(
+			String query, Pagination pagination, SXPBlueprint sxpBlueprint)
 		throws Exception;
 
-	public HttpInvoker.HttpResponse getSearchHttpResponse(
-			String query, String sxpBlueprint, Pagination pagination)
+	public HttpInvoker.HttpResponse postSearchHttpResponse(
+			String query, Pagination pagination, SXPBlueprint sxpBlueprint)
 		throws Exception;
 
 	public static class Builder {
@@ -119,12 +120,12 @@ public interface SearchResponseResource {
 	public static class SearchResponseResourceImpl
 		implements SearchResponseResource {
 
-		public SearchResponse getSearch(
-				String query, String sxpBlueprint, Pagination pagination)
+		public SearchResponse postSearch(
+				String query, Pagination pagination, SXPBlueprint sxpBlueprint)
 			throws Exception {
 
-			HttpInvoker.HttpResponse httpResponse = getSearchHttpResponse(
-				query, sxpBlueprint, pagination);
+			HttpInvoker.HttpResponse httpResponse = postSearchHttpResponse(
+				query, pagination, sxpBlueprint);
 
 			String content = httpResponse.getContent();
 
@@ -163,11 +164,13 @@ public interface SearchResponseResource {
 			}
 		}
 
-		public HttpInvoker.HttpResponse getSearchHttpResponse(
-				String query, String sxpBlueprint, Pagination pagination)
+		public HttpInvoker.HttpResponse postSearchHttpResponse(
+				String query, Pagination pagination, SXPBlueprint sxpBlueprint)
 			throws Exception {
 
 			HttpInvoker httpInvoker = HttpInvoker.newHttpInvoker();
+
+			httpInvoker.body(sxpBlueprint.toString(), "application/json");
 
 			if (_builder._locale != null) {
 				httpInvoker.header(
@@ -186,15 +189,10 @@ public interface SearchResponseResource {
 				httpInvoker.parameter(entry.getKey(), entry.getValue());
 			}
 
-			httpInvoker.httpMethod(HttpInvoker.HttpMethod.GET);
+			httpInvoker.httpMethod(HttpInvoker.HttpMethod.POST);
 
 			if (query != null) {
 				httpInvoker.parameter("query", String.valueOf(query));
-			}
-
-			if (sxpBlueprint != null) {
-				httpInvoker.parameter(
-					"sxpBlueprint", String.valueOf(sxpBlueprint));
 			}
 
 			if (pagination != null) {

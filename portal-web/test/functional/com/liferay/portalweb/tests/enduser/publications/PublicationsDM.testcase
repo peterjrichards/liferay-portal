@@ -23,7 +23,7 @@ definition {
 			ApplicationsMenu.gotoPortlet(
 				category = "Publications",
 				panel = "Applications",
-				portlet = "Settings");
+				portlet = "Publications");
 
 			Publications.disablePublications();
 		}
@@ -89,7 +89,7 @@ definition {
 	test DeleteDMFolderWithMultipleFiles {
 		property test.assert.warning.exceptions = "true";
 
-		JSONDocument.addFolder(
+		JSONFolder.addFolder(
 			dmFolderDescription = "DM Folder 1 Description",
 			dmFolderName = "DM Folder 1 Name",
 			groupName = "Guest");
@@ -314,6 +314,8 @@ definition {
 	@description = "Assert Shortcut can add within Publications and publish to production."
 	@priority = "4"
 	test PublishWithShortcut {
+		property test.name.skip.portal.instance = "PublicationsDM#PublishWithShortcut";
+
 		JSONPublications.addPublication(publicationName = "Publication Name");
 
 		JSONPublications.selectPublication(publicationName = "Publication Name");

@@ -63,6 +63,20 @@ public class COREntryServiceUtil {
 		return getService().deleteCOREntry(corEntryId);
 	}
 
+	public static COREntry fetchByExternalReferenceCode(
+			long companyId, String externalReferenceCode)
+		throws PortalException {
+
+		return getService().fetchByExternalReferenceCode(
+			companyId, externalReferenceCode);
+	}
+
+	public static COREntry fetchCOREntry(long corEntryId)
+		throws PortalException {
+
+		return getService().fetchCOREntry(corEntryId);
+	}
+
 	public static List<COREntry> getCOREntries(
 			long companyId, boolean active, int start, int end)
 		throws PortalException {
@@ -82,6 +96,10 @@ public class COREntryServiceUtil {
 		throws PortalException {
 
 		return getService().getCOREntries(companyId, type, start, end);
+	}
+
+	public static COREntry getCOREntry(long corEntryId) throws PortalException {
+		return getService().getCOREntry(corEntryId);
 	}
 
 	/**
@@ -109,6 +127,14 @@ public class COREntryServiceUtil {
 			expirationDateMonth, expirationDateDay, expirationDateYear,
 			expirationDateHour, expirationDateMinute, neverExpire, name,
 			priority, typeSettings, serviceContext);
+	}
+
+	public static COREntry updateCOREntryExternalReferenceCode(
+			String externalReferenceCode, long corEntryId)
+		throws PortalException {
+
+		return getService().updateCOREntryExternalReferenceCode(
+			externalReferenceCode, corEntryId);
 	}
 
 	public static COREntryService getService() {

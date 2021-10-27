@@ -81,6 +81,25 @@ public class ObjectEntryServiceSoap {
 		}
 	}
 
+	public static com.liferay.object.model.ObjectEntrySoap deleteObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws RemoteException {
+
+		try {
+			com.liferay.object.model.ObjectEntry returnValue =
+				ObjectEntryServiceUtil.deleteObjectEntry(
+					externalReferenceCode, companyId, groupId);
+
+			return com.liferay.object.model.ObjectEntrySoap.toSoapModel(
+				returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
 	public static com.liferay.object.model.ObjectEntrySoap fetchObjectEntry(
 			long objectEntryId)
 		throws RemoteException {
@@ -109,6 +128,46 @@ public class ObjectEntryServiceSoap {
 
 			return com.liferay.object.model.ObjectEntrySoap.toSoapModel(
 				returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
+	public static com.liferay.object.model.ObjectEntrySoap getObjectEntry(
+			String externalReferenceCode, long companyId, long groupId)
+		throws RemoteException {
+
+		try {
+			com.liferay.object.model.ObjectEntry returnValue =
+				ObjectEntryServiceUtil.getObjectEntry(
+					externalReferenceCode, companyId, groupId);
+
+			return com.liferay.object.model.ObjectEntrySoap.toSoapModel(
+				returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
+	public static boolean hasModelResourcePermission(
+			com.liferay.object.model.ObjectEntrySoap objectEntry,
+			String actionId)
+		throws RemoteException {
+
+		try {
+			boolean returnValue =
+				ObjectEntryServiceUtil.hasModelResourcePermission(
+					com.liferay.object.model.impl.ObjectEntryModelImpl.toModel(
+						objectEntry),
+					actionId);
+
+			return returnValue;
 		}
 		catch (Exception exception) {
 			_log.error(exception, exception);

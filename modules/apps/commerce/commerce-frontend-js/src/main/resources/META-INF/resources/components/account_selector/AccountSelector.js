@@ -29,6 +29,7 @@ import AccountsListView from './views/AccountsListView';
 import OrdersListView from './views/OrdersListView';
 
 function AccountSelector({
+	accountEntryAllowedTypes,
 	alignmentPosition,
 	commerceChannelId,
 	createNewOrderURL,
@@ -102,6 +103,11 @@ function AccountSelector({
 			>
 				{currentView === VIEWS.ACCOUNTS_LIST && (
 					<AccountsListView
+						accountEntryAllowedTypes={
+							accountEntryAllowedTypes
+								? JSON.parse(accountEntryAllowedTypes)
+								: ''
+						}
 						changeAccount={changeAccount}
 						currentAccount={currentAccount}
 						disabled={!active}
@@ -126,16 +132,20 @@ function AccountSelector({
 }
 
 AccountSelector.propTypes = {
+	accountEntryAllowedTypes: PropTypes.string.isRequired,
 	alignmentPosition: PropTypes.number,
-	commerceChannelId: PropTypes.number.isRequired,
+	commerceChannelId: PropTypes.oneOfType([
+		PropTypes.number,
+		PropTypes.string,
+	]),
 	createNewOrderURL: PropTypes.string.isRequired,
 	currentCommerceAccount: PropTypes.shape({
-		id: PropTypes.number,
+		id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 		logoURL: PropTypes.string,
 		name: PropTypes.string,
 	}),
 	currentCommerceOrder: PropTypes.shape({
-		orderId: PropTypes.number,
+		orderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 		workflowStatusInfo: PropTypes.shape({
 			label_i18n: PropTypes.string,
 		}),

@@ -19,9 +19,13 @@ import com.liferay.batch.planner.model.BatchPlannerPlan;
 import com.liferay.batch.planner.service.base.BatchPlannerLogServiceBaseImpl;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
+import com.liferay.portal.kernel.util.OrderByComparator;
 
 import java.util.List;
 
@@ -59,36 +63,28 @@ public class BatchPlannerLogServiceImpl extends BatchPlannerLogServiceBaseImpl {
 		throws PortalException {
 
 		BatchPlannerLog batchPlannerLog =
-			batchPlannerLogPersistence.fetchByPrimaryKey(batchPlannerLogId);
+			batchPlannerLogPersistence.findByPrimaryKey(batchPlannerLogId);
 
 		_batchPlannerPlanModelResourcePermission.check(
 			getPermissionChecker(), batchPlannerLog.getBatchPlannerPlanId(),
 			ActionKeys.UPDATE);
 
-		return batchPlannerLogPersistence.remove(batchPlannerLogId);
+		return batchPlannerLogLocalService.deleteBatchPlannerLog(
+			batchPlannerLogId);
 	}
 
 	@Override
-	public List<BatchPlannerLog> getBatchPlannerLogs(long batchPlannerPlanId)
+	public BatchPlannerLog getBatchPlannerLog(long batchPlannerLogId)
 		throws PortalException {
 
-		_batchPlannerPlanModelResourcePermission.check(
-			getPermissionChecker(), batchPlannerPlanId, ActionKeys.VIEW);
-
-		return batchPlannerLogPersistence.findByBatchPlannerPlanId(
-			batchPlannerPlanId);
-	}
-
-	@Override
-	public List<BatchPlannerLog> getBatchPlannerLogs(
-			long batchPlannerPlanId, int start, int end)
-		throws PortalException {
+		BatchPlannerLog batchPlannerLog =
+			batchPlannerLogPersistence.fetchByPrimaryKey(batchPlannerLogId);
 
 		_batchPlannerPlanModelResourcePermission.check(
-			getPermissionChecker(), batchPlannerPlanId, ActionKeys.VIEW);
+			getPermissionChecker(), batchPlannerLog.getBatchPlannerPlanId(),
+			ActionKeys.VIEW);
 
-		return batchPlannerLogPersistence.findByBatchPlannerPlanId(
-			batchPlannerPlanId, start, end);
+		return batchPlannerLog;
 	}
 
 	public int getBatchPlannerLogsCount(long batchPlannerPlanId)
@@ -97,8 +93,78 @@ public class BatchPlannerLogServiceImpl extends BatchPlannerLogServiceBaseImpl {
 		_batchPlannerPlanModelResourcePermission.check(
 			getPermissionChecker(), batchPlannerPlanId, ActionKeys.VIEW);
 
-		return batchPlannerLogPersistence.countByBatchPlannerPlanId(
+		return batchPlannerLogLocalService.getBatchPlannerLogsCount(
 			batchPlannerPlanId);
+	}
+
+	@Override
+	public BatchPlannerLog getBatchPlannerPlanBatchPlannerLog(
+			long batchPlannerPlanId)
+		throws PortalException {
+
+		_batchPlannerPlanModelResourcePermission.check(
+			getPermissionChecker(), batchPlannerPlanId, ActionKeys.VIEW);
+
+		return batchPlannerLogLocalService.getBatchPlannerPlanBatchPlannerLog(
+			batchPlannerPlanId);
+	}
+
+	@Override
+	public List<BatchPlannerLog> getCompanyBatchPlannerLogs(
+			long companyId, boolean export, int start, int end,
+			OrderByComparator<BatchPlannerLog> orderByComparator)
+		throws PortalException {
+
+		checkPermission(companyId, ActionKeys.VIEW);
+
+		return batchPlannerLogLocalService.getCompanyBatchPlannerLogs(
+			companyId, export, start, end, orderByComparator);
+	}
+
+	@Override
+	public List<BatchPlannerLog> getCompanyBatchPlannerLogs(
+			long companyId, int start, int end,
+			OrderByComparator<BatchPlannerLog> orderByComparator)
+		throws PortalException {
+
+		checkPermission(companyId, ActionKeys.VIEW);
+
+		return batchPlannerLogLocalService.getCompanyBatchPlannerLogs(
+			companyId, start, end, orderByComparator);
+	}
+
+	@Override
+	public int getCompanyBatchPlannerLogsCount(long companyId)
+		throws PortalException {
+
+		checkPermission(companyId, ActionKeys.VIEW);
+
+		return batchPlannerLogLocalService.getCompanyBatchPlannerLogsCount(
+			companyId);
+	}
+
+	@Override
+	public int getCompanyBatchPlannerLogsCount(long companyId, boolean export)
+		throws PortalException {
+
+		checkPermission(companyId, ActionKeys.VIEW);
+
+		return batchPlannerLogLocalService.getCompanyBatchPlannerLogsCount(
+			companyId, export);
+	}
+
+	protected void checkPermission(long companyId, String actionKey)
+		throws PortalException {
+
+		PermissionChecker permissionChecker = getPermissionChecker();
+
+		if (!permissionChecker.hasPermission(
+				GroupConstants.DEFAULT_LIVE_GROUP_ID,
+				BatchPlannerPlan.class.getName(), companyId, actionKey)) {
+
+			throw new PrincipalException.MustHavePermission(
+				getUserId(), actionKey);
+		}
 	}
 
 	private static volatile ModelResourcePermission<BatchPlannerPlan>

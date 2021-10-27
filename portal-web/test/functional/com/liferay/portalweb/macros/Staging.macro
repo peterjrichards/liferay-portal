@@ -56,7 +56,7 @@ definition {
 		if (isSet(recycleBinNotification)) {
 			AssertTextPresent(
 				locator1 = "Message#ERROR_3_ALT",
-				value1 = "The recycle bin of this site will be automatically emptied before turning on local staging. Make sure to manually restore anything you don't want to delete permanently before you continue.");
+				value1 = "The recycle bin of this site will be automatically emptied before turning on local staging. Make sure to manually restore anything you do not want to delete permanently before you continue.");
 		}
 
 		if (isSet(remoteStaging)) {
@@ -1345,6 +1345,8 @@ definition {
 			Alert.viewSuccessMessage();
 		}
 		else {
+			WaitForElementNotPresent(locator1 = "Staging#PROCESS_IN_PROGRESS");
+
 			AssertTextEquals(
 				locator1 = "Staging#PROCESS_SUCCESSFUL",
 				value1 = "Successful");

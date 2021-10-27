@@ -46,8 +46,6 @@ if (priceDisplayType.equals(CommercePricingConstants.TAX_INCLUDED_IN_PRICE)) {
 	totalOrderCommerceMoney = commerceOrderPrice.getTotalWithTaxAmount();
 }
 
-List<CommerceOrderValidatorResult> commerceOrderValidatorResults = new ArrayList<>();
-
 CommerceAccount commerceAccount = commerceOrderContentDisplayContext.getCommerceAccount();
 
 if (commerceOrder != null) {
@@ -56,7 +54,21 @@ if (commerceOrder != null) {
 
 List<CommerceAddress> shippingAddresses = commerceOrderContentDisplayContext.getShippingCommerceAddresses(commerceAccount.getCommerceAccountId(), commerceAccount.getCompanyId());
 List<CommerceAddress> billingAddresses = commerceOrderContentDisplayContext.getBillingCommerceAddresses(commerceAccount.getCommerceAccountId(), commerceAccount.getCompanyId());
+
+List<String> errorMessages = (List<String>)request.getAttribute(CommerceWebKeys.COMMERCE_ORDER_ERROR_MESSAGES);
 %>
+
+<c:if test="<%= (errorMessages != null) && !errorMessages.isEmpty() %>">
+	<script>
+		Liferay.Util.openModal({
+			bodyHTML: '<%= errorMessages.get(0) %>',
+			title: '<liferay-ui:message key="warning" />',
+			center: true,
+			size: 'm',
+			status: 'warning',
+		});
+	</script>
+</c:if>
 
 <portlet:actionURL name="/commerce_open_order_content/edit_commerce_order" var="editCommerceOrderActionURL">
 	<portlet:param name="mvcRenderCommandName" value="/commerce_open_order_content/edit_commerce_order" />
@@ -70,6 +82,8 @@ List<CommerceAddress> billingAddresses = commerceOrderContentDisplayContext.getB
 	<liferay-ui:error exception="<%= CommerceOrderValidatorException.class %>">
 
 		<%
+		List<CommerceOrderValidatorResult> commerceOrderValidatorResults = new ArrayList<>();
+
 		CommerceOrderValidatorException commerceOrderValidatorException = (CommerceOrderValidatorException)errorException;
 
 		if (commerceOrderValidatorException != null) {
@@ -286,6 +300,32 @@ List<CommerceAddress> billingAddresses = commerceOrderContentDisplayContext.getB
 		showWhenSingleIcon="<%= true %>"
 		triggerCssClass="btn btn-lg btn-monospaced btn-primary position-fixed thumb-menu"
 	>
+
+		<%
+		PortletURL viewCommerceOrderImporterTypeURL = PortletURLBuilder.createRenderURL(
+			renderResponse
+		).setMVCRenderCommandName(
+			"/commerce_open_order_content/view_commerce_order_importer_type"
+		).setParameter(
+			"commerceOrderId", commerceOrder.getCommerceOrderId()
+		).setWindowState(
+			LiferayWindowState.POP_UP
+		).buildPortletURL();
+
+		for (CommerceOrderImporterType commerceOrderImporterType : commerceOrderContentDisplayContext.getCommerceImporterTypes(commerceOrder)) {
+			viewCommerceOrderImporterTypeURL.setParameter("commerceOrderImporterTypeKey", commerceOrderImporterType.getKey());
+		%>
+
+			<liferay-ui:icon
+				message="<%= commerceOrderImporterType.getLabel(locale) %>"
+				url="<%= viewCommerceOrderImporterTypeURL.toString() %>"
+				useDialog="<%= true %>"
+			/>
+
+		<%
+		}
+		%>
+
 		<liferay-ui:icon
 			message="print"
 			url='<%= "javascript:window.print();" %>'

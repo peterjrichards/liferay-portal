@@ -107,8 +107,9 @@ public interface WorkflowInstanceManager {
 			searchWorkflowInstances(
 				long companyId, Long userId, String assetClassName,
 				String assetTitle, String assetDescription, String nodeName,
-				String kaleoDefinitionName, Boolean completed, int start,
-				int end, OrderByComparator<WorkflowInstance> orderByComparator)
+				String kaleoDefinitionName, Boolean completed,
+				boolean searchByActiveWorkflowHandlers, int start, int end,
+				OrderByComparator<WorkflowInstance> orderByComparator)
 		throws WorkflowException {
 
 		throw new UnsupportedOperationException();

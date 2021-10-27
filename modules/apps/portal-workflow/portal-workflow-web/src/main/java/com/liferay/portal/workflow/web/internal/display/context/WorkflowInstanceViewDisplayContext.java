@@ -366,14 +366,6 @@ public class WorkflowInstanceViewDisplayContext
 		).buildString();
 	}
 
-	public String getStatus(WorkflowInstance workflowInstance) {
-		List<String> currentNodeNames = workflowInstance.getCurrentNodeNames();
-
-		return LanguageUtil.get(
-			workflowInstanceRequestHelper.getRequest(),
-			HtmlUtil.escape(currentNodeNames.get(0)));
-	}
-
 	public int getTotalItems() throws PortalException {
 		SearchContainer<WorkflowInstance> searchContainer =
 			getSearchContainer();
@@ -517,7 +509,7 @@ public class WorkflowInstanceViewDisplayContext
 			WorkflowInstanceManagerUtil.searchWorkflowInstances(
 				workflowInstanceRequestHelper.getCompanyId(), null,
 				getKeywords(), getKeywords(), getAssetType(getKeywords()),
-				getKeywords(), getKeywords(), getCompleted(), start, end,
+				getKeywords(), getKeywords(), getCompleted(), true, start, end,
 				orderByComparator);
 
 		return workflowModelSearchResult;

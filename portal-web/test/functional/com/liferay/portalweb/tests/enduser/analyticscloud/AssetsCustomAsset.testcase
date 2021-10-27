@@ -81,7 +81,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -126,7 +126,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -182,7 +182,7 @@ definition {
 				userLoginEmailAddress = "userea@liferay.com",
 				userLoginFullName = "userfn userln");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -239,11 +239,9 @@ definition {
 
 		task ("View the site page") {
 			for (var n : list "1,2,3,4") {
-				Navigator.gotoSitePage(
+				ACUtils.navigateToSitePage(
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
 			}
 		}
 
@@ -306,11 +304,9 @@ definition {
 
 		task ("View the site page") {
 			for (var n : list "1,2,3,4") {
-				Navigator.gotoSitePage(
+				ACUtils.navigateToSitePage(
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
 			}
 		}
 
@@ -364,9 +360,7 @@ definition {
 		var assetName = "Custom Asset Analytics Cloud,Custom Asset Analytics Cloud 2,Custom Asset Analytics Cloud 3";
 
 		for (var layoutName : list "AC Page 2,AC Page 3") {
-			JSONLayout.addPublicLayout(
-				groupName = "Site Name",
-				layoutName = "${layoutName}");
+			ACUtils.addPage(layoutName = "${layoutName}");
 		}
 
 		for (var n : list "2,3") {
@@ -388,11 +382,9 @@ definition {
 
 		for (var pageName : list "AC Page,AC Page 2,AC Page 3") {
 			for (var n : list "1,2,3") {
-				Navigator.gotoSitePage(
-					pageName = "${pageName}",
+				ACUtils.navigateToSitePage(
+					pageName = "AC Page",
 					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
 			}
 		}
 

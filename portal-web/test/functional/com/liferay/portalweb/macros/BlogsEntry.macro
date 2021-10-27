@@ -3,7 +3,15 @@ definition {
 	var entryAuthorFullName = "Test Test";
 
 	macro addContent {
-		AlloyEditor.addContent(content = "${entryContent}");
+		if (isSet(javascript)) {
+			Type(
+				key_editor = "content",
+				locator1 = "AlloyEditor#EDITOR",
+				value1 = "${entryContent}");
+		}
+		else {
+			AlloyEditor.addContent(content = "${entryContent}");
+		}
 	}
 
 	macro addContentWithInlineImage {
@@ -80,6 +88,32 @@ definition {
 					navTab = "${navTab}",
 					videoSourceURL = "${embedVideo}");
 			}
+		}
+	}
+
+	macro addEntryContentViaCodeView {
+		AlloyEditor.clickContentField();
+
+		Click(locator1 = "Button#EDITOR_SWITCH");
+
+		if ("${viewMode}" == "Dark Theme") {
+			Click(
+				key_text = "moon",
+				locator1 = "Icon#ANY");
+		}
+
+		if ("${viewMode}" == "Fullscreen") {
+			Click(
+				key_text = "expand",
+				locator1 = "Icon#ANY");
+		}
+
+		Type.typeAceEditor(
+			locator1 = "TextArea#ACE_EDITOR",
+			value1 = "${entryContent}");
+
+		if ("${viewMode}" == "Fullscreen") {
+			Button.clickDone();
 		}
 	}
 
@@ -1001,6 +1035,12 @@ definition {
 				value1 = "${entryContentBold}");
 		}
 
+		if (isSet(entryContentHTML)) {
+			AssertTextEquals.assertPartialText(
+				locator1 = "BlogsEntry#CONTENT_HTML_H2",
+				value1 = "${entryContentHTML}");
+		}
+
 		if (isSet(entryContentItalics)) {
 			AssertTextEquals.assertPartialText(
 				locator1 = "BlogsEntry#CONTENT_HTML_ITALICS",
@@ -1091,6 +1131,12 @@ definition {
 
 	macro viewNoEntryViaBlogsAggregatorPG {
 		AssertElementPresent(locator1 = "BlogsAggregator#NO_ENTRY_MESSAGE");
+	}
+
+	macro viewNoInlineImage {
+		AssertElementNotPresent(
+			key_uploadFileName = "${inlineImageName}",
+			locator1 = "BlogsEntry#CONTENT_INLINE_IMAGE");
 	}
 
 	macro viewNoPG {

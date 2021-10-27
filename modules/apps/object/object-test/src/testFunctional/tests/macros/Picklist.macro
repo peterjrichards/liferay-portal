@@ -18,11 +18,11 @@ definition {
 			locator1 = "Picklist#ADD_PICKLIST_ITEM_NAME",
 			value1 = "${picklistItemName}");
 
-		Type(
-			locator1 = "Picklist#ADD_PICKLIST_ITEM_KEY",
-			value1 = "${picklistItemKey}");
-
-		Click.javaScriptClick(locator1 = "Picklist#SAVE_BUTTON");
+		if (isSet(picklistItemKey)) {
+			Type(
+				locator1 = "Picklist#ADD_PICKLIST_ITEM_KEY",
+				value1 = "${picklistItemKey}");
+		}
 	}
 
 	macro addPicklistViaAPI {
@@ -42,10 +42,26 @@ definition {
 		Button.clickSave();
 	}
 
+	macro assertDisableKey {
+		IFrame.selectTopFrame();
+
+		SelectFrame(locator1 = "Picklist#IFRAME_PICKLIST_ITEM_MODAL");
+
+		AssertElementPresent(locator1 = "Picklist#DISABLE_PICKLIST_KEY");
+	}
+
 	macro assertPicklist {
 		var key_picklistName = "${picklistName}";
 
 		AssertElementPresent(locator1 = "Picklist#VIEW_PICKLIST");
+	}
+
+	macro assertPicklistDetails {
+		var key_title = "${title}";
+
+		SelectFrame(locator1 = "Picklist#IFRAME_PICKLIST_MODAL");
+
+		AssertElementPresent(locator1 = "Picklist#PICKLIST_DETAILS");
 	}
 
 	macro assertPicklistItem {
@@ -60,14 +76,58 @@ definition {
 		AssertElementPresent(locator1 = "Picklist#VIEW_PICKLIST_ITEM");
 	}
 
+	macro assertPicklistItemDetails {
+		IFrame.selectTopFrame();
+
+		SelectFrame(locator1 = "Picklist#IFRAME_PICKLIST_ITEM_MODAL");
+
+		AssertElementPresent(locator1 = "Picklist#PICKLIST_ITEM_DETAILS");
+	}
+
+	macro assertPicklistItemNotPresent {
+		var key_picklistItemName = "${picklistItemName}";
+
+		var key_picklistItemKey = "${picklistItemKey}";
+
+		AssertElementNotPresent(locator1 = "Picklist#VIEW_PICKLIST_ITEM");
+	}
+
+	macro assertPicklistMessage {
+		var key_picklistMessage = "${picklistMessage}";
+
+		AssertElementPresent(locator1 = "Picklist#PICKLIST_MESSAGE");
+	}
+
 	macro assertPicklistNotPresent {
 		var key_picklistName = "${picklistName}";
 
 		AssertElementNotPresent(locator1 = "Picklist#VIEW_PICKLIST");
 	}
 
+	macro assertRequiredKeyItem {
+		AssertElementPresent(locator1 = "Picklist#REQUIRED_KEY_ITEM");
+	}
+
+	macro cancelPicklist {
+		Click.javaScriptClick(locator1 = "Picklist#ADD_PICKLIST_BUTTON");
+
+		Type(
+			locator1 = "Picklist#ADD_PICKLIST_NAME",
+			value1 = "${picklistName}");
+
+		Picklist.cancelPicklistButton();
+	}
+
+	macro cancelPicklistButton {
+		Click(locator1 = "Picklist#CANCEL_PICKLIST");
+	}
+
 	macro cancelUpdatePicklist {
 		Click.javaScriptClick(locator1 = "Picklist#CANCEL_UPDATE_PICKLIST");
+	}
+
+	macro clickSaveButton {
+		Click.javaScriptClick(locator1 = "Picklist#SAVE_BUTTON");
 	}
 
 	macro deleteAllPicklistsViaAPI {
@@ -103,6 +163,22 @@ definition {
 		Click.javaScriptClick(
 			key_picklistOption = "${picklistOption}",
 			locator1 = "Picklist#PICKLIST_KEBAB_MENU_OPTION");
+	}
+
+	macro optionsPicklistItem {
+		var key_itemKey = "${itemKey}";
+
+		var key_picklistItemOption = "${picklistItemOption}";
+
+		SelectFrame(locator1 = "Picklist#IFRAME_PICKLIST_MODAL");
+
+		Click.javaScriptClick(locator1 = "Picklist#PICKLIST_ITEM_KEBAB_MENU");
+
+		Click.javaScriptClick(locator1 = "Picklist#PICKLIST_ITEM_KEBAB_MENU_OPTION");
+	}
+
+	macro selectPickilistModalFrame {
+		SelectFrame(locator1 = "Picklist#IFRAME_PICKLIST_MODAL");
 	}
 
 	macro updatePicklistName {

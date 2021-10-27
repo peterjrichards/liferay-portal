@@ -69,17 +69,15 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View DM",
+				documentTitleList = "DM AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			DMNavigator.gotoDocumentCP(dmDocumentTitle = "DM AC Title");
 		}
 
 		task ("Switch to new property in AC") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 
 			ACUtils.launchAC();
 
@@ -137,11 +135,9 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Switch to new property in AC") {
@@ -204,16 +200,14 @@ definition {
 			ACDXPSettings.syncNewContactData();
 		}
 
-		task ("View new pages in site as new user") {
+		task ("Sign in with the new user to visit the site pages") {
 			User.logoutAndLoginPG(
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Switch to new property in AC") {
@@ -267,11 +261,9 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Switch to new property in AC") {
@@ -316,6 +308,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9033 | Test Summary: Case Insensitive Search"
 	@priority = "5"
 	test CanCaseInsensitiveSearch {
+		var emailList = "randy.smith@liferay.com,maria.rau@liferay.com";
+
 		task ("Get site assigned property name") {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
@@ -326,6 +320,7 @@ definition {
 				userFirstName = "Randy",
 				userLastName = "Smith",
 				userScreenName = "Randysn");
+
 			JSONUser.addUser(
 				userEmailAddress = "maria.rau@liferay.com",
 				userFirstName = "Maria",
@@ -336,25 +331,10 @@ definition {
 		}
 
 		task ("Sign in with the new user to visit the site pages") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "randy.smith@liferay.com",
-				userLoginFullName = "Randy Smith");
-
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
-
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "maria.rau@liferay.com",
-				userLoginFullName = "Maria Rau");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Switch to new property in AC") {
@@ -375,6 +355,7 @@ definition {
 			ACUtils.searchBar(searchItem = "SMITH");
 
 			ACIndividualsDashboard.assertIndividualAttribute(key_individualAttribute = "Randy Smith");
+
 			ACIndividualsDashboard.assertIndividualAttributeNotPresent(key_individualAttribute = "Maria Rau");
 		}
 
@@ -382,6 +363,7 @@ definition {
 			ACUtils.searchBar(searchItem = "maria");
 
 			ACIndividualsDashboard.assertIndividualAttribute(key_individualAttribute = "Maria Rau");
+
 			ACIndividualsDashboard.assertIndividualAttributeNotPresent(key_individualAttribute = "Randy Smith");
 		}
 	}
@@ -389,36 +371,33 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9032 | Test Summary: Search and Clear Field"
 	@priority = "1"
 	test SearchAndClearField {
+		var usernameList = "user1,user2";
+
+		var emailList = "user1@liferay.com,user2@liferay.com";
+
+		var nameList = "user1 user1,user2 user2";
+
 		task ("Get site assigned property name") {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Add 2 new users and sync the Contact Data") {
-			for (var n : list "1,2") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "user${n}@liferay.com",
-					userFirstName = "user${n}",
-					userLastName = "user${n}",
-					userScreenName = "user${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 			}
 
 			ACDXPSettings.syncNewContactData();
 		}
 
-		task ("View the page as different users") {
-			for (var username : list "user1,user2") {
-				var fullName = "${username} ${username}";
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+		task ("Sign in with the new user to visit the site pages") {
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -439,13 +418,14 @@ definition {
 			ACUtils.searchBar(searchItem = "user2");
 
 			ACIndividualsDashboard.assertIndividualAttribute(key_individualAttribute = "user2 user2");
+
 			ACIndividualsDashboard.assertIndividualAttributeNotPresent(key_individualAttribute = "user1 user1");
 		}
 
 		task ("Clear the search result") {
 			ACUtils.clearSearchBar();
 
-			for (var individualAttribute : list "user1 user1,user2 user2") {
+			for (var individualAttribute : list "${nameList}") {
 				ACIndividualsDashboard.assertIndividualAttribute(key_individualAttribute = "${individualAttribute}");
 			}
 		}
@@ -476,7 +456,7 @@ definition {
 				userLoginEmailAddress = "randy.smith@liferay.com",
 				userLoginFullName = "Randy Smith");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -563,6 +543,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9026 | Test Summary: Search for an Individual in the individual List"
 	@priority = "4"
 	test SearchIndividualList {
+		var emailList = "randy.smith@liferay.com,maria.rau@liferay.com";
+
 		task ("Get site assigned property name") {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
@@ -588,25 +570,10 @@ definition {
 		}
 
 		task ("Sign in with the new user to visit the site pages") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "randy.smith@liferay.com",
-				userLoginFullName = "Randy Smith");
-
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
-
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "maria.rau@liferay.com",
-				userLoginFullName = "Maria Rau");
-
-			Navigator.gotoSitePage(
-				pageName = "AC Page",
-				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Switch to new property in AC") {
@@ -690,11 +657,11 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View DM",
+				documentTitleList = "DM AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			DMNavigator.gotoDocumentCP(dmDocumentTitle = "DM AC Title");
 		}
 
 		task ("Switch to new property in AC") {
@@ -742,9 +709,7 @@ definition {
 			Navigator.openSiteURL(siteName = "Site Name");
 
 			for (var layoutName : list "Movies,Sports") {
-				JSONLayout.addPublicLayout(
-					groupName = "Site Name",
-					layoutName = "${layoutName}");
+				ACUtils.addPage(layoutName = "${layoutName}");
 
 				ACUtils.createWCAndAddToPage(
 					layoutName = "${layoutName}",
@@ -768,7 +733,7 @@ definition {
 				userLoginFullName = "ac ac");
 
 			for (var pageName : list "Movies,Sports") {
-				Navigator.gotoSitePage(
+				ACUtils.navigateToSitePage(
 					pageName = "${pageName}",
 					siteName = "Site Name");
 			}
@@ -806,36 +771,31 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9029 | Test Summary: Sort Individuals List"
 	@priority = "3"
 	test SortIndividualList {
+		var usernameList = "user1,user2,user3";
+
+		var emailList = "user1@liferay.com,user2@liferay.com,user3@liferay.com";
+
 		task ("Get site assigned property name") {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Add 3 new users and sync the Contact Data") {
-			for (var n : list "1,2,3") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "user${n}@liferay.com",
-					userFirstName = "user${n}",
-					userLastName = "user${n}",
-					userScreenName = "user${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 			}
 
 			ACDXPSettings.syncNewContactData();
 		}
 
-		task ("View the page as different users") {
-			for (var username : list "user1,user2,user3") {
-				var fullName = "${username} ${username}";
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
-			}
+		task ("Sign in with the new user to visit the site pages") {
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "${emailList}",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Switch to new property in AC") {
@@ -870,35 +830,30 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9030 | Test Summary: Sorting a List Returns a User to the First Page"
 	@priority = "3"
 	test SortingReturnsUserToFirstPage {
+		var usernameList = "user1,user2,user3,user4,user5,user6,user7";
+
 		task ("Get site assigned property name") {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Add 7 new users and sync the Contact Data") {
-			for (var n : list "1,2,3,4,5,6,7") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "user${n}@liferay.com",
-					userFirstName = "user${n}",
-					userLastName = "user${n}",
-					userScreenName = "user${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 
 				ACDXPSettings.syncNewContactData();
 			}
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "user1,user2,user3,user4,user5,user6,user7") {
-				var fullName = "${username} ${username}";
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
+			for (var name : list "${usernameList}") {
+				ACUtils.navigateToSitePageWithUser(
+					emailList = "${name}@liferay.com",
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
 			}
 		}
 
@@ -952,35 +907,30 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9031 | Test Summary: Table Pagination"
 	@priority = "4"
 	test TablePagination {
+		var usernameList = "user1,user2,user3,user4,user5,user6";
+
 		task ("Get site assigned property name") {
 			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Add 6 new users and sync the Contact Data") {
-			for (var n : list "1,2,3,4,5,6") {
+			for (var name : list "${usernameList}") {
 				JSONUser.addUser(
-					userEmailAddress = "user${n}@liferay.com",
-					userFirstName = "user${n}",
-					userLastName = "user${n}",
-					userScreenName = "user${n}");
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 
 				ACDXPSettings.syncNewContactData();
 			}
 		}
 
 		task ("View the page as different users") {
-			for (var username : list "user1,user2,user3,user4,user5,user6") {
-				var fullName = "${username} ${username}";
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "${username}@liferay.com",
-					userLoginFullName = "${fullName}");
-
-				Navigator.gotoSitePage(
+			for (var name : list "${usernameList}") {
+				ACUtils.navigateToSitePageWithUser(
+					emailList = "${name}@liferay.com",
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
 			}
 		}
 

@@ -71,7 +71,7 @@ definition {
 			actual = "${plid2}",
 			expected = "${plid1}");
 
-		ContentPages.clickPencil();
+		ContentPages.gotoPageEditor();
 
 		AssertElementPresent(locator1 = "PageEditor#FRAGMENT_SIDEBAR_BODY");
 	}
@@ -1348,7 +1348,7 @@ definition {
 
 		PageEditor.viewFragment(fragmentName = "Web Content Display");
 
-		PageEditor.viewNoFragment(fragmentName = "Asset Publisher");
+		PageEditor.viewFragmentNotPresent(fragmentName = "Asset Publisher");
 	}
 
 }

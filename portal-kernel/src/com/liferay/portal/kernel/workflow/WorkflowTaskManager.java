@@ -181,9 +181,10 @@ public interface WorkflowTaskManager {
 			long companyId, long userId, String assetTitle, String[] taskNames,
 			String[] assetTypes, Long[] assetPrimaryKeys,
 			String assigneeClassName, Long[] assigneeIds, Date dueDateGT,
-			Date dueDateLT, Boolean completed, Boolean searchByUserRoles,
-			Long workflowDefinitionId, Long[] workflowInstanceIds,
-			Boolean andOperator, int start, int end,
+			Date dueDateLT, Boolean completed,
+			boolean searchByActivatedWorkflowHandlers,
+			Boolean searchByUserRoles, Long workflowDefinitionId,
+			Long[] workflowInstanceIds, Boolean andOperator, int start, int end,
 			OrderByComparator<WorkflowTask> orderByComparator)
 		throws WorkflowException {
 

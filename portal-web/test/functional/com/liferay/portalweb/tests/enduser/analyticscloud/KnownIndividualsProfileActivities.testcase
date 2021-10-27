@@ -38,6 +38,8 @@ definition {
 			JSONGroup.deleteGroupByName(groupName = "Site Name");
 		}
 
+		JSONUser.tearDownNonAdminUsers();
+
 		ACUtils.tearDownAC();
 	}
 
@@ -53,7 +55,7 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -106,11 +108,9 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			Pause(locator1 = "5000");
 		}
 
 		task ("Close sessions") {
@@ -159,25 +159,23 @@ definition {
 				interval = "W");
 		}
 
-		task ("View the format of recharts xAxis ticks is MMM d - MMM d") {
+		task ("View the format of recharts xAxis ticks is MMM d - MMM d or MMM d - d") {
 			var date = ACCards.getAxisTick(
 				axis = "xAxis",
 				cardName = "Individual Events");
 
-			ACUtils.assertDatePattern(
-				date = "${date}",
-				format = "MMM d - MMM d");
-		}
+			var dateLength = StringUtil.length("${date}");
 
-		task ("View the format of recharts xAxis ticks is MMM d - d") {
-			var date = ACCards.getAxisTick(
-				index = "2",
-				axis = "xAxis",
-				cardName = "Individual Events");
-
-			ACUtils.assertDatePattern(
-				date = "${date}",
-				format = "MMM d - d");
+			if ("${dateLength}" == "9" || "${dateLength}" == "10" || "${dateLength}" == "11") {
+				ACUtils.assertDatePattern(
+					date = "${date}",
+					format = "MMM d - d");
+			}
+			else {
+				ACUtils.assertDatePattern(
+					date = "${date}",
+					format = "MMM d - MMM d");
+			}
 		}
 
 		task ("Select the M in interval selector") {
@@ -223,7 +221,7 @@ definition {
 				userLoginEmailAddress = "ac@liferay.com",
 				userLoginFullName = "ac ac");
 
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -273,13 +271,11 @@ definition {
 		}
 
 		task ("Visit the document") {
-			for (var n : list "1,2,3,4") {
-				Navigator.gotoSitePage(
-					pageName = "AC Page",
-					siteName = "Site Name");
-
-				DMNavigator.gotoDocumentCP(dmDocumentTitle = "DM AC Title");
-			}
+			ACUtils.navigateToSitePage(
+				actionType = "View DM",
+				documentTitleList = "DM AC Title,DM AC Title,DM AC Title,DM AC Title",
+				pageName = "AC Page",
+				siteName = "Site Name");
 		}
 
 		task ("Close sessions") {

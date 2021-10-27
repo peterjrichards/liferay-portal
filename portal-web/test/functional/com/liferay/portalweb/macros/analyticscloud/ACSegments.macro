@@ -221,7 +221,7 @@ definition {
 			index = "${index}",
 			locator1 = "ACSegments#CRITERIA_ELLIPSIS");
 
-		MenuItem.click(menuItem = "Delete");
+		MenuItem.clickNoError(menuItem = "Delete");
 	}
 
 	macro deleteSegmentViaSegmentListInlineButton {
@@ -565,6 +565,12 @@ definition {
 		Click(locator1 = "ACSegments#SELECT_BUTTON");
 
 		ACSegments.searchSegment(findSegment = "${documentTitle}");
+
+		while (IsElementNotPresent(locator1 = "ACSegments#TABLE_CHECKBOX") && (maxIterations = "50")) {
+			ACUtils.clearSearchBar();
+
+			ACSegments.searchSegment(findSegment = "${documentTitle}");
+		}
 
 		Click(locator1 = "ACSegments#TABLE_CHECKBOX");
 

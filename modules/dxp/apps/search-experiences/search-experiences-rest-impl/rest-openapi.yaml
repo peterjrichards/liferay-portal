@@ -1,5 +1,93 @@
 components:
     schemas:
+        Clause:
+            properties:
+                additive:
+                    type: boolean
+                boost:
+                    format: float
+                    type: number
+                context:
+                    type: string
+                disabled:
+                    type: boolean
+                field:
+                    type: string
+                name:
+                    type: string
+                occur:
+                    type: string
+                parent:
+                    type: string
+                query:
+                    type: object
+                type:
+                    type: string
+                value:
+                    type: string
+            type: object
+        Condition:
+            properties:
+                in:
+                    properties:
+                        parameterName:
+                            type: string
+                        values:
+                            items:
+                                type: object
+                            type: array
+                    type: object
+                allConditions:
+                    items:
+                        $ref: "#/components/schemas/Condition"
+                    type: array
+                anyConditions:
+                    items:
+                        $ref: "#/components/schemas/Condition"
+                    type: array
+                contains:
+                    properties:
+                        parameterName:
+                            type: string
+                        value:
+                            type: object
+                        values:
+                            items:
+                                type: object
+                            type: array
+                    type: object
+                equals:
+                    properties:
+                        format:
+                            type: string
+                        parameterName:
+                            type: string
+                        value:
+                            type: object
+                    type: object
+                exists:
+                    properties:
+                        parameterName:
+                            type: string
+                    type: object
+                not:
+                    $ref: "#/components/schemas/Condition"
+                range:
+                    properties:
+                        format:
+                            type: string
+                        gt:
+                            type: object
+                        gte:
+                            type: object
+                        lt:
+                            type: object
+                        lte:
+                            type: object
+                        parameterName:
+                            type: string
+                    type: object
+            type: object
         DocumentField:
             properties:
                 values:
@@ -151,17 +239,33 @@ components:
                                         properties:
                                             clauses:
                                                 items:
-                                                    properties:
-                                                        context:
-                                                            type: string
-                                                        occur:
-                                                            type: string
-                                                        query:
-                                                            type: object
-                                                    type: object
+                                                    $ref: "#/components/schemas/Clause"
                                                 type: array
+                                            condition:
+                                                $ref: "#/components/schemas/Condition"
                                             enabled:
                                                 type: boolean
+                                            postFilterClauses:
+                                                items:
+                                                    $ref: "#/components/schemas/Clause"
+                                                type: array
+                                            rescores:
+                                                items:
+                                                    properties:
+                                                        query:
+                                                            type: object
+                                                        queryWeight:
+                                                            format: float
+                                                            type: number
+                                                        rescoreQueryWeight:
+                                                            format: float
+                                                            type: number
+                                                        scoreMode:
+                                                            type: string
+                                                        windowSize:
+                                                            type: integer
+                                                    type: object
+                                                type: array
                                         type: object
                                     type: array
                             type: object
@@ -242,15 +346,11 @@ info:
 openapi: "3.0.1"
 paths:
     "/search":
-        get:
-            operationId: getSearch
+        post:
+            operationId: postSearch
             parameters:
                 - in: query
                   name: query
-                  schema:
-                      type: string
-                - in: query
-                  name: sxpBlueprint
                   schema:
                       type: string
                 - in: query
@@ -261,6 +361,14 @@ paths:
                   name: pageSize
                   schema:
                       type: integer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/SXPBlueprint"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/SXPBlueprint"
             responses:
                 200:
                     content:

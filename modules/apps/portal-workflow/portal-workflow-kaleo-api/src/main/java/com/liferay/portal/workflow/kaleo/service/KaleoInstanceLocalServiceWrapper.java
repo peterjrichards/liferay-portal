@@ -483,8 +483,8 @@ public class KaleoInstanceLocalServiceWrapper
 				searchKaleoInstances(
 					Long userId, String assetClassName, String assetTitle,
 					String assetDescription, String nodeName,
-					String kaleoDefinitionName, Boolean completed, int start,
-					int end,
+					String kaleoDefinitionName, Boolean completed,
+					boolean searchByActiveWorkflowHandlers, int start, int end,
 					com.liferay.portal.kernel.util.OrderByComparator
 						<com.liferay.portal.workflow.kaleo.model.KaleoInstance>
 							orderByComparator,
@@ -494,8 +494,8 @@ public class KaleoInstanceLocalServiceWrapper
 
 		return _kaleoInstanceLocalService.searchKaleoInstances(
 			userId, assetClassName, assetTitle, assetDescription, nodeName,
-			kaleoDefinitionName, completed, start, end, orderByComparator,
-			serviceContext);
+			kaleoDefinitionName, completed, searchByActiveWorkflowHandlers,
+			start, end, orderByComparator, serviceContext);
 	}
 
 	/**

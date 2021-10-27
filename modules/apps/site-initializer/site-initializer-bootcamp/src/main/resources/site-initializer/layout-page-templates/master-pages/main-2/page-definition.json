@@ -4,8 +4,19 @@
 			{
 				"definition": {
 					"fragmentStyle": {
-						"borderWidth": "0"
+						"borderWidth": "0",
+						"paddingLeft": "2",
+						"paddingRight": "2"
 					},
+					"fragmentViewports": [
+						{
+							"fragmentViewportStyle": {
+								"paddingLeft": "2",
+								"paddingRight": "2"
+							},
+							"id": "tablet"
+						}
+					],
 					"layout": {
 						"borderWidth": 0,
 						"marginBottom": 0,
@@ -151,27 +162,6 @@
 								"key": "FEATURED_CONTENT-banner-slider"
 							},
 							{
-								"key": "FEATURED_CONTENT-banner"
-							},
-							{
-								"key": "FEATURED_CONTENT-banner-center"
-							},
-							{
-								"key": "FEATURED_CONTENT-banner-cover"
-							},
-							{
-								"key": "FEATURED_CONTENT-banner-cover-center"
-							},
-							{
-								"key": "FEATURED_CONTENT-features"
-							},
-							{
-								"key": "FEATURED_CONTENT-highlights"
-							},
-							{
-								"key": "FEATURED_CONTENT-center"
-							},
-							{
 								"key": "FOOTERS-footer-nav-dark"
 							},
 							{
@@ -194,8 +184,19 @@
 			{
 				"definition": {
 					"fragmentStyle": {
-						"borderWidth": "0"
+						"borderWidth": "0",
+						"paddingLeft": "2",
+						"paddingRight": "2"
 					},
+					"fragmentViewports": [
+						{
+							"fragmentViewportStyle": {
+								"paddingLeft": "0",
+								"paddingRight": "0"
+							},
+							"id": "tablet"
+						}
+					],
 					"layout": {
 						"borderWidth": 0,
 						"marginBottom": 0,

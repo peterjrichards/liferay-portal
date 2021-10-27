@@ -53,13 +53,9 @@ definition {
 		}
 
 		task ("View the page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
-		}
-
-		task ("Wait for sending request") {
-			Pause(locator1 = "5000");
 		}
 
 		task ("Get the ip country") {

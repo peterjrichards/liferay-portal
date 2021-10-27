@@ -19,7 +19,7 @@ definition {
 
 		Click(locator1 = "PublicationsChanges#PUBLICATIONS_CHANGE_TITLE");
 
-		AssertElementNotPresent(locator1 = "PublicationsChanges#PUBLICATIONS_ELLIPSIS");
+		AssertElementNotPresent(locator1 = "PublicationsChanges#PUBLICATIONS_CHANGE_ELLIPSIS");
 	}
 
 	macro assertEditorPermissions {
@@ -70,10 +70,6 @@ definition {
 			key_publicationName = "${publicationName}",
 			locator1 = "Publications#LIST_PUBLICATION_ELLIPSIS");
 
-		AssertElementPresent(
-			key_menuItem = "Publish",
-			locator1 = "MenuItem#ANY_MENU_ITEM");
-
 		ClickNoError(
 			key_menuItem = "Edit",
 			locator1 = "MenuItem#ANY_MENU_ITEM");
@@ -89,12 +85,12 @@ definition {
 			locator1 = "Publications#PUBLISHED_PUBLICATION_NAME");
 
 		Publications.inviteUsers(
-			publicationName = "${publicationName}",
+			publicationName = "New ${publicationName}",
 			userInvite = "userea2@liferay.com");
 
 		Publications.gotoReviewChanges(
 			gotoManagePublications = "true",
-			publicationName = "${publicationName}");
+			publicationName = "New ${publicationName}");
 
 		PublicationsChanges.openCommentsSidebar();
 
@@ -107,23 +103,19 @@ definition {
 
 		PublicationsChanges.deleteComment(commentValue = "It is not ready to Publish");
 
-		Publications.selectPublication(publicationName = "${publicationName}");
+		Publications.gotoPublish(
+			gotoManagePublications = "true",
+			publicationName = "New ${publicationName}");
 
-		// Workaround LPS-140292
+		Publications.publishPublication(publicationName = "New ${publicationName}");
 
-		/*Publications.publishPublication(publicationName = "${publicationName}");
-
-		Publications.viewPublicationPublished(publicationName = "${publicationName}");*/
+		Publications.viewPublicationPublished(publicationName = "New ${publicationName}");
 	}
 
 	macro assertPublisherPermissions {
 		Click(
 			key_publicationName = "${publicationName}",
 			locator1 = "Publications#LIST_PUBLICATION_ELLIPSIS");
-
-		AssertElementPresent(
-			key_menuItem = "Publish",
-			locator1 = "MenuItem#ANY_MENU_ITEM");
 
 		ClickNoError(
 			key_menuItem = "Invite Users",
@@ -170,13 +162,13 @@ definition {
 
 		PublicationsChanges.deleteComment(commentValue = "It is not ready to Publish");
 
-		Publications.selectPublication(publicationName = "${publicationName}");
+		Publications.gotoPublish(
+			gotoManagePublications = "true",
+			publicationName = "New ${publicationName}");
 
-		// Workaround LPS-140292
+		Publications.publishPublication(publicationName = "New ${publicationName}");
 
-		/*Publications.publishPublication(publicationName = "${publicationName}");
-
-		Publications.viewPublicationPublished(publicationName = "${publicationName}");*/
+		Publications.viewPublicationPublished(publicationName = "New ${publicationName}");
 	}
 
 	macro assertScheduledPublicationPublished {
@@ -300,11 +292,13 @@ definition {
 	}
 
 	macro disablePublications {
-		Uncheck.uncheckToggleSwitch(locator1 = "PublicationsSettings#PUBLICATIONS_TOGGLE_SWITCH");
+		Click.waitForMenuToggleJSClick(locator1 = "Publications#PUBLICATIONS_ELLIPSIS");
+
+		MenuItem.click(menuItem = "Settings");
+
+		Uncheck.uncheckToggleSwitch(locator1 = "Publications#PUBLICATIONS_TOGGLE_SWITCH");
 
 		Click(locator1 = "Button#SAVE");
-
-		Alert.viewSuccessMessage();
 	}
 
 	macro discardChanges {
@@ -328,7 +322,7 @@ definition {
 
 			Click(locator1 = "PublicationsChanges#PUBLICATIONS_CHANGE_TITLE");
 
-			Click(locator1 = "PublicationsChanges#PUBLICATIONS_ELLIPSIS");
+			Click(locator1 = "PublicationsChanges#PUBLICATIONS_CHANGE_ELLIPSIS");
 
 			MenuItem.click(menuItem = "Discard");
 		}
@@ -354,16 +348,9 @@ definition {
 	macro enablePublications {
 		Pause(locator1 = "2000");
 
-		Check.checkToggleSwitch(locator1 = "PublicationsSettings#PUBLICATIONS_TOGGLE_SWITCH");
+		Check.checkToggleSwitch(locator1 = "Publications#PUBLICATIONS_TOGGLE_SWITCH");
 
-		if (isSet(gotoOverview)) {
-			Click(locator1 = "PublicationsSettings#SAVE_AND_GO_TO_OVERVIEW_BUTTON");
-		}
-		else {
-			Click(locator1 = "Button#SUBMIT");
-		}
-
-		Alert.viewSuccessMessage();
+		Click(locator1 = "Button#SAVE");
 	}
 
 	macro gotoPublish {

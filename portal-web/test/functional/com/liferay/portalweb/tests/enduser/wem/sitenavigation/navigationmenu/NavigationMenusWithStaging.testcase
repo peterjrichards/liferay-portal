@@ -275,9 +275,7 @@ definition {
 
 			ControlMenu.viewHeaderTitle(headerTitle = "Document DPT");
 
-			AssertVisible(
-				key_imageName = "Document_1.jpg",
-				locator1 = "Fragment#FRAGMENT_SECTION_BACKGROUND_IMAGE");
+			ContentPages.viewFragmentBackgroundImage(image = "Document_1.jpg");
 
 			Click(
 				key_pageName = "Category Name",
@@ -285,9 +283,9 @@ definition {
 
 			ControlMenu.viewHeaderTitle(headerTitle = "Category DPT");
 
-			AssertTextEquals(
-				locator1 = "PageEditor#CONTENT_PAGE_TEXT_CONTENT",
-				value1 = "Category Name");
+			ContentPages.viewFragmentText(
+				fragmentName = "Content Display",
+				text = "Category Name");
 		}
 
 		task ("Publish to live") {
@@ -341,9 +339,7 @@ definition {
 				key_tab = "Live",
 				locator1 = "NavTab#ACTIVE_TAB_LINK");
 
-			AssertVisible(
-				key_imageName = "Document_1.jpg",
-				locator1 = "Fragment#FRAGMENT_SECTION_BACKGROUND_IMAGE");
+			ContentPages.viewFragmentBackgroundImage(image = "Document_1.jpg");
 
 			Click(
 				key_pageName = "Category Name",
@@ -355,9 +351,9 @@ definition {
 				key_tab = "Live",
 				locator1 = "NavTab#ACTIVE_TAB_LINK");
 
-			AssertTextEquals(
-				locator1 = "PageEditor#CONTENT_PAGE_TEXT_CONTENT",
-				value1 = "Category Name");
+			ContentPages.viewFragmentText(
+				fragmentName = "Content Display",
+				text = "Category Name");
 		}
 	}
 

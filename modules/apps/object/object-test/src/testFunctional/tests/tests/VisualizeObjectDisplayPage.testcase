@@ -51,14 +51,19 @@ definition {
 
 		ObjectAdmin.publishObjectViaAPI(objectName = "CustomObject");
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Object",
-			panel = "Control Panel",
-			portlet = "Custom Objects");
+		ObjectAdmin.addObjectBoleanFieldEntryViaUI(
+			objectName = "CustomObject",
+			value = "true");
 
-		ObjectAdmin.addObjectBoleanFieldEntryViaUI();
+		ObjectAdmin.addObjectBoleanFieldEntryViaUI(
+			objectName = "CustomObject",
+			value = "false");
 
-		ApplicationsMenu.gotoSite(site = "Liferay DXP");
+		ObjectAdmin.addObjectBoleanFieldEntryViaUI(
+			objectName = "CustomObject",
+			value = "false");
+
+		Navigator.openURL();
 
 		ContentPages.addPage(pageName = "Test Content Page Name");
 
@@ -92,9 +97,9 @@ definition {
 
 		PageEditor.publishPage();
 
-		ContentPagesNavigator.openEditContentPage(
-			pageName = "Test Content Page Name",
-			siteName = "Guest");
+		SitePages.gotoPageMenuItem(
+			menuItem = "View",
+			pageName = "Test Content Page Name");
 
 		PageEditor.assertTrueEntryIsPresent();
 
@@ -111,21 +116,137 @@ definition {
 	}
 
 	@description = "LPS-133867|LPS-135004 - Verify it is possible to set the pagination as Numeric"
-	@ignore = "Test Stub"
 	@priority = "4"
 	test CanSetPaginationNumeric {
+		ObjectAdmin.addObjectViaAPI(
+			labelName = "Custom Object",
+			objectName = "CustomObject",
+			pluralLabelName = "Custom Objects");
 
-		// TODO LPS-139041 CanSetPaginationNumeric pending implementation
+		ObjectAdmin.addObjectFieldViaAPI(
+			fieldLabelName = "Field",
+			fieldName = "customObjectField",
+			fieldType = "String",
+			isRequired = "false",
+			objectName = "CustomObject");
 
+		ObjectAdmin.publishObjectViaAPI(objectName = "CustomObject");
+
+		ObjectAdmin.addObjectSingleFieldEntryViaAPI(
+			fieldName = "text",
+			objectName = "CustomObject",
+			value = "Test text 1");
+
+		ObjectAdmin.addObjectSingleFieldEntryViaAPI(
+			fieldName = "text",
+			objectName = "CustomObject",
+			value = "Test text 2");
+
+		ObjectAdmin.addObjectSingleFieldEntryViaAPI(
+			fieldName = "text",
+			objectName = "CustomObject",
+			value = "Test text 3");
+
+		ContentPages.addPage(pageName = "Test Content Page Name");
+
+		PageEditor.addFragment(
+			collectionName = "Content Display",
+			fragmentName = "Collection Display");
+
+		PageEditor.editCollectionDisplay(
+			fragmentName = "Collection Display",
+			infoListProviderName = "Custom Objects");
+
+		PageEditor.gotoTab(tabName = "Fragments and Widgets");
+
+		VisualizeObjectCollectionDisplay.addFieldForCollectionDisplay(fragmentName = "Heading");
+
+		VisualizeObjectCollectionDisplay.openHeading();
+
+		VisualizeObjectCollectionDisplay.addFieldInsideCollectionDisplay(
+			fragmentName = "Heading",
+			label = "Expand Collection Display");
+
+		PageEditor.clickCollectionDisplay();
+
+		PageEditor.selectGerenicField(
+			fieldLabel = "Pagination",
+			option = "Numeric");
+
+		PageEditor.publishPage();
+
+		ContentPagesNavigator.openEditContentPage(
+			pageName = "Test Content Page Name",
+			siteName = "Guest");
+
+		PageEditor.assertPaginationNumericTypeIsDisplayed(pageNumberList = "1");
 	}
 
 	@description = "LPS-133867|LPS-135004 - Verify it is possible to set the pagination as Simple"
-	@ignore = "Test Stub"
 	@priority = "4"
 	test CanSetPaginationSimple {
+		ObjectAdmin.addObjectViaAPI(
+			labelName = "Custom Object",
+			objectName = "CustomObject",
+			pluralLabelName = "Custom Objects");
 
-		// TODO LPS-139042 CanSetPaginationSimple pending implementation
+		ObjectAdmin.addObjectFieldViaAPI(
+			fieldLabelName = "Field",
+			fieldName = "customObjectField",
+			fieldType = "String",
+			isRequired = "false",
+			objectName = "CustomObject");
 
+		ObjectAdmin.publishObjectViaAPI(objectName = "CustomObject");
+
+		ObjectAdmin.addObjectSingleFieldEntryViaAPI(
+			fieldName = "text",
+			objectName = "CustomObject",
+			value = "Test text 1");
+
+		ObjectAdmin.addObjectSingleFieldEntryViaAPI(
+			fieldName = "text",
+			objectName = "CustomObject",
+			value = "Test text 2");
+
+		ObjectAdmin.addObjectSingleFieldEntryViaAPI(
+			fieldName = "text",
+			objectName = "CustomObject",
+			value = "Test text 3");
+
+		ContentPages.addPage(pageName = "Test Content Page Name");
+
+		PageEditor.addFragment(
+			collectionName = "Content Display",
+			fragmentName = "Collection Display");
+
+		PageEditor.editCollectionDisplay(
+			fragmentName = "Collection Display",
+			infoListProviderName = "Custom Objects");
+
+		PageEditor.gotoTab(tabName = "Fragments and Widgets");
+
+		VisualizeObjectCollectionDisplay.addFieldForCollectionDisplay(fragmentName = "Heading");
+
+		VisualizeObjectCollectionDisplay.openHeading();
+
+		VisualizeObjectCollectionDisplay.addFieldInsideCollectionDisplay(
+			fragmentName = "Heading",
+			label = "Expand Collection Display");
+
+		PageEditor.clickCollectionDisplay();
+
+		PageEditor.selectGerenicField(
+			fieldLabel = "Pagination",
+			option = "Simple");
+
+		PageEditor.publishPage();
+
+		ContentPagesNavigator.openEditContentPage(
+			pageName = "Test Content Page Name",
+			siteName = "Guest");
+
+		PageEditor.assertPaginationSimpleTypeIsDisplayed();
 	}
 
 	@description = "LPS-133867|LPS-135004 - Verify it is possible to display a specific entry of Big Decimal type for a specific Object"
@@ -262,11 +383,9 @@ definition {
 
 		PageEditor.clickPublish();
 
-		var siteName = TestCase.getSiteName(siteName = "${siteName}");
-
-		Navigator.gotoSitePage(
-			pageName = "Test Content Page Name",
-			siteName = "${siteName}");
+		SitePages.gotoPageMenuItem(
+			menuItem = "View",
+			pageName = "Test Content Page Name");
 
 		VisualizeObjectDisplayPage.assertDisplayEntry(entry = "2021-01-01");
 	}
@@ -489,13 +608,60 @@ definition {
 	}
 
 	@description = "LPS-137105 - Verify if the Object entries are rendered when previewing it"
-	@ignore = "Test Stub"
 	@priority = "5"
 	test ObjectEntriesAreRendered {
 		property portal.acceptance = "true";
 
-		// TODO LPS-137101 ObjectEntriesAreRendered pending implementation
+		ObjectAdmin.openObjectAdmin();
 
+		ObjectAdmin.addNewObject(
+			fieldLabelName = "Custom Object",
+			pluralLabelName = "Custom Objects");
+
+		ObjectAdmin.saveCustomObject();
+
+		ObjectPortlet.selectCustomObject(label = "Custom Object");
+
+		ObjectAdmin.goToFieldsTab();
+
+		ObjectAdmin.addObjectFieldViaUI(
+			fieldLabel = "Field",
+			fieldType = "String");
+
+		ObjectAdmin.openObjectAdmin();
+
+		ObjectPortlet.selectCustomObject(label = "Custom Object");
+
+		CreateObject.selectPanelCategoryKey(panelCategoryKey = "Control Panel > Object");
+
+		CreateObject.saveObject();
+
+		ObjectAdmin.publishObjectViaAPI(objectName = "CustomObject");
+
+		ObjectAdmin.goToCustomObject(objectName = "CustomObject");
+
+		ObjectPortlet.addSingleFieldEntryViaUI(entry = "Test Entry");
+
+		Navigator.openURL();
+
+		DisplayPageTemplatesAdmin.openDisplayPagesAdmin(siteURLKey = "guest");
+
+		DisplayPageTemplatesAdmin.addDisplayPage(
+			contentType = "Custom Object",
+			displayPageName = "Blank Display Page",
+			subtype = "Custom Object");
+
+		PageEditor.addFragment(
+			collectionName = "Basic Components",
+			fragmentName = "Heading");
+
+		VisualizeObjectCollectionDisplay.openHeading();
+
+		VisualizeObjectCollectionDisplay.mapFragment(fieldLabel = "Field");
+
+		PageEditor.selectItemToPreviewWithObject(objectLabel = "Custom Object");
+
+		VisualizeObjectDisplayPage.assertDisplayEntry(entry = "Test Entry");
 	}
 
 	@description = "LPS-137106 - Verify if it is possible to link a Mapped URL with the Objects Page Template"
@@ -536,20 +702,9 @@ definition {
 			collectionName = "Basic Components",
 			fragmentName = "Image");
 
-		DoubleClick(
-			key_fragmentName = "Image",
-			locator1 = "Fragment#FRAGMENT_BODY");
-
-		Navigator.gotoNavTab(navTab = "Page Elements");
-
 		PageEditorMapping.gotoEditableFieldMapping(
 			fragmentName = "Image",
 			id = "image-square");
-
-		Select(
-			key_fieldLabel = "Source Selection",
-			locator1 = "Select#GENERIC_SELECT_FIELD",
-			value1 = "Mapping");
 
 		VisualizeObjectDisplayPage.addItem(
 			frameTitle = "Select",

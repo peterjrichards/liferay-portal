@@ -122,6 +122,18 @@ public class COREntryRelLocalServiceImpl
 	}
 
 	@Override
+	public void deleteCOREntryRels(String className, long corEntryId)
+		throws PortalException {
+
+		List<COREntryRel> corEntryRels = corEntryRelPersistence.findByC_C(
+			classNameLocalService.getClassNameId(className), corEntryId);
+
+		for (COREntryRel corEntryRel : corEntryRels) {
+			corEntryRelLocalService.deleteCOREntryRel(corEntryRel);
+		}
+	}
+
+	@Override
 	public COREntryRel fetchCOREntryRel(
 		String className, long classPK, long corEntryId) {
 
@@ -154,7 +166,7 @@ public class COREntryRelLocalServiceImpl
 		return dslQueryCount(
 			_getGroupByStep(
 				DSLQueryFactoryUtil.countDistinct(
-					COREntryRelTable.INSTANCE.COREntryId),
+					COREntryRelTable.INSTANCE.COREntryRelId),
 				AccountEntryTable.INSTANCE,
 				AccountEntryTable.INSTANCE.accountEntryId.eq(
 					COREntryRelTable.INSTANCE.classPK),
@@ -186,7 +198,7 @@ public class COREntryRelLocalServiceImpl
 		return dslQueryCount(
 			_getGroupByStep(
 				DSLQueryFactoryUtil.countDistinct(
-					COREntryRelTable.INSTANCE.COREntryId),
+					COREntryRelTable.INSTANCE.COREntryRelId),
 				AccountGroupTable.INSTANCE,
 				AccountGroupTable.INSTANCE.accountGroupId.eq(
 					COREntryRelTable.INSTANCE.classPK),
@@ -218,7 +230,7 @@ public class COREntryRelLocalServiceImpl
 		return dslQueryCount(
 			_getGroupByStep(
 				DSLQueryFactoryUtil.countDistinct(
-					COREntryRelTable.INSTANCE.COREntryId),
+					COREntryRelTable.INSTANCE.COREntryRelId),
 				CommerceChannelTable.INSTANCE,
 				CommerceChannelTable.INSTANCE.commerceChannelId.eq(
 					COREntryRelTable.INSTANCE.classPK),
@@ -250,7 +262,7 @@ public class COREntryRelLocalServiceImpl
 		return dslQueryCount(
 			_getGroupByStep(
 				DSLQueryFactoryUtil.countDistinct(
-					COREntryRelTable.INSTANCE.COREntryId),
+					COREntryRelTable.INSTANCE.COREntryRelId),
 				CommerceOrderTypeTable.INSTANCE,
 				CommerceOrderTypeTable.INSTANCE.commerceOrderTypeId.eq(
 					COREntryRelTable.INSTANCE.classPK),
@@ -300,25 +312,24 @@ public class COREntryRelLocalServiceImpl
 		);
 
 		return joinStep.where(
-			() -> {
-				Predicate predicate = COREntryRelTable.INSTANCE.COREntryId.eq(
-					corEntryId
-				).and(
-					COREntryRelTable.INSTANCE.classNameId.eq(
-						classNameLocalService.getClassNameId(className))
-				);
-
-				if (Validator.isNotNull(keywords)) {
-					predicate = predicate.and(
-						Predicate.withParentheses(
+			() -> COREntryRelTable.INSTANCE.COREntryId.eq(
+				corEntryId
+			).and(
+				COREntryRelTable.INSTANCE.classNameId.eq(
+					classNameLocalService.getClassNameId(className))
+			).and(
+				() -> {
+					if (Validator.isNotNull(keywords)) {
+						return Predicate.withParentheses(
 							_customSQL.getKeywordsPredicate(
 								DSLFunctionFactoryUtil.lower(
 									keywordsPredicateExpression),
-								_customSQL.keywords(keywords, true))));
-				}
+								_customSQL.keywords(keywords, true)));
+					}
 
-				return predicate;
-			});
+					return null;
+				}
+			));
 	}
 
 	@Reference

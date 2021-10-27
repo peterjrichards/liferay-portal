@@ -14,6 +14,8 @@
 
 package com.liferay.search.experiences.internal.blueprint.search.request.enhancer;
 
+import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
@@ -29,25 +31,26 @@ import com.liferay.portal.search.internal.geolocation.GeoBuildersImpl;
 import com.liferay.portal.search.internal.highlight.FieldConfigBuilderFactoryImpl;
 import com.liferay.portal.search.internal.highlight.HighlightBuilderFactoryImpl;
 import com.liferay.portal.search.internal.query.QueriesImpl;
+import com.liferay.portal.search.internal.rescore.RescoreBuilderFactoryImpl;
 import com.liferay.portal.search.internal.script.ScriptsImpl;
 import com.liferay.portal.search.internal.searcher.SearchRequestBuilderFactoryImpl;
 import com.liferay.portal.search.internal.sort.SortsImpl;
+import com.liferay.portal.search.query.TermQuery;
 import com.liferay.portal.search.query.WrapperQuery;
+import com.liferay.portal.search.rescore.Rescore;
 import com.liferay.portal.search.searcher.SearchRequest;
 import com.liferay.portal.search.searcher.SearchRequestBuilderFactory;
 import com.liferay.portal.search.sort.Sort;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 import com.liferay.search.experiences.internal.blueprint.parameter.SXPParameterDataCreator;
 import com.liferay.search.experiences.rest.dto.v1_0.AggregationConfiguration;
-import com.liferay.search.experiences.rest.dto.v1_0.Clause;
 import com.liferay.search.experiences.rest.dto.v1_0.Configuration;
 import com.liferay.search.experiences.rest.dto.v1_0.Highlight;
 import com.liferay.search.experiences.rest.dto.v1_0.HighlightField;
 import com.liferay.search.experiences.rest.dto.v1_0.Parameter;
-import com.liferay.search.experiences.rest.dto.v1_0.QueryConfiguration;
-import com.liferay.search.experiences.rest.dto.v1_0.QueryEntry;
 import com.liferay.search.experiences.rest.dto.v1_0.SXPBlueprint;
 import com.liferay.search.experiences.rest.dto.v1_0.SortConfiguration;
+import com.liferay.search.experiences.rest.dto.v1_0.util.ConfigurationUtil;
 import com.liferay.search.experiences.rest.dto.v1_0.util.SXPBlueprintUtil;
 
 import java.io.InputStream;
@@ -76,13 +79,12 @@ public class SXPBlueprintSearchRequestEnhancerImplTest {
 
 		Configuration configuration = sxpBlueprint.getConfiguration();
 
+		String json = _read();
+
 		configuration.setAggregationConfiguration(
 			new AggregationConfiguration() {
 				{
-					aggs = JSONFactoryUtil.createJSONObject(
-						_read(
-							"SXPBlueprintSearchRequestEnhancerImplTest." +
-								"testAggregationConfiguration.json"));
+					aggs = JSONFactoryUtil.createJSONObject(json);
 				}
 			});
 
@@ -171,45 +173,62 @@ public class SXPBlueprintSearchRequestEnhancerImplTest {
 	public void testQueryConfiguration() throws Exception {
 		SXPBlueprint sxpBlueprint = _createSXPBlueprint();
 
-		Configuration configuration = sxpBlueprint.getConfiguration();
-
-		configuration.setQueryConfiguration(
-			new QueryConfiguration() {
-				{
-					queryEntries = new QueryEntry[] {
-						new QueryEntry() {
-							{
-								clauses = new Clause[] {
-									new Clause() {
-										{
-											occur = "must_not";
-											query = JSONUtil.put(
-												"term",
-												JSONUtil.put("status", 0));
-										}
-									}
-								};
-								enabled = true;
-							}
-						}
-					};
-				}
-			});
+		sxpBlueprint.setConfiguration(
+			ConfigurationUtil.toConfiguration(_read()));
 
 		SearchRequest searchRequest = _toSearchRequest(sxpBlueprint);
 
-		List<ComplexQueryPart> complexQueryParts =
+		List<ComplexQueryPart> complexQueryParts1 =
 			searchRequest.getComplexQueryParts();
 
-		ComplexQueryPart complexQueryPart = complexQueryParts.get(0);
+		ComplexQueryPart complexQueryPart1 = complexQueryParts1.get(0);
 
-		Assert.assertEquals("must_not", complexQueryPart.getOccur());
+		Assert.assertEquals("must", complexQueryPart1.getOccur());
 
-		WrapperQuery wrapperQuery = (WrapperQuery)complexQueryPart.getQuery();
+		TermQuery termQuery1 = (TermQuery)complexQueryPart1.getQuery();
+
+		Assert.assertEquals("version", termQuery1.getField());
+		Assert.assertEquals("7.4", termQuery1.getValue());
+		Assert.assertEquals(Float.valueOf(142857), termQuery1.getBoost());
+
+		ComplexQueryPart complexQueryPart2 = complexQueryParts1.get(1);
+
+		Assert.assertEquals("should", complexQueryPart2.getOccur());
+
+		WrapperQuery wrapperQuery1 = (WrapperQuery)complexQueryPart2.getQuery();
 
 		Assert.assertEquals(
-			_formatJSON(JSONUtil.put("term", JSONUtil.put("status", 0))),
-			_formatJSON(new String(wrapperQuery.getSource())));
+			_formatJSON(JSONUtil.put("match", JSONUtil.put("ranking", 5))),
+			_formatJSON(new String(wrapperQuery1.getSource())));
+
+		List<ComplexQueryPart> complexQueryParts2 =
+			searchRequest.getPostFilterComplexQueryParts();
+
+		ComplexQueryPart complexQueryPart3 = complexQueryParts2.get(0);
+
+		Assert.assertEquals("must_not", complexQueryPart3.getOccur());
+
+		TermQuery termQuery2 = (TermQuery)complexQueryPart3.getQuery();
+
+		Assert.assertEquals("status", termQuery2.getField());
+		Assert.assertEquals(0, termQuery2.getValue());
+
+		List<Rescore> rescores = searchRequest.getRescores();
+
+		Rescore rescore = rescores.get(0);
+
+		WrapperQuery wrapperQuery2 = (WrapperQuery)rescore.getQuery();
+
+		Assert.assertEquals(
+			_formatJSON(
+				JSONUtil.put("exists", JSONUtil.put("field", "priority"))),
+			_formatJSON(new String(wrapperQuery2.getSource())));
+
+		Assert.assertEquals(Float.valueOf(2.3F), rescore.getQueryWeight());
+		Assert.assertEquals(
+			Float.valueOf(0.7F), rescore.getRescoreQueryWeight());
+		Assert.assertEquals(Rescore.ScoreMode.MULTIPLY, rescore.getScoreMode());
+		Assert.assertEquals(Integer.valueOf(6), rescore.getWindowSize());
 
 		_assert(sxpBlueprint);
 	}
@@ -220,13 +239,12 @@ public class SXPBlueprintSearchRequestEnhancerImplTest {
 
 		Configuration configuration = sxpBlueprint.getConfiguration();
 
+		String json = _read();
+
 		configuration.setSortConfiguration(
 			new SortConfiguration() {
 				{
-					sorts = JSONFactoryUtil.createJSONArray(
-						_read(
-							"SXPBlueprintSearchRequestEnhancerImplTest." +
-								"testSortConfiguration.json"));
+					sorts = JSONFactoryUtil.createJSONArray(json);
 				}
 			});
 
@@ -259,17 +277,19 @@ public class SXPBlueprintSearchRequestEnhancerImplTest {
 			JSONFactoryUtil.createJSONObject(String.valueOf(object)));
 	}
 
-	private String _read(String resourceName) {
+	private String _read() throws Exception {
 		Class<?> clazz = getClass();
 
+		Thread currentThread = Thread.currentThread();
+
+		StackTraceElement[] stackTraceElements = currentThread.getStackTrace();
+
 		try (InputStream inputStream = clazz.getResourceAsStream(
-				resourceName)) {
+				StringBundler.concat(
+					"dependencies/", clazz.getSimpleName(), StringPool.PERIOD,
+					stackTraceElements[2].getMethodName(), ".json"))) {
 
 			return StringUtil.read(inputStream);
-		}
-		catch (Exception exception) {
-			throw new RuntimeException(
-				"Unable to load resource: " + resourceName, exception);
 		}
 	}
 
@@ -300,6 +320,9 @@ public class SXPBlueprintSearchRequestEnhancerImplTest {
 		ReflectionTestUtil.setFieldValue(
 			sxpBlueprintSearchRequestEnhancerImpl, "_queries",
 			new QueriesImpl());
+		ReflectionTestUtil.setFieldValue(
+			sxpBlueprintSearchRequestEnhancerImpl, "_rescoreBuilderFactory",
+			new RescoreBuilderFactoryImpl());
 		ReflectionTestUtil.setFieldValue(
 			sxpBlueprintSearchRequestEnhancerImpl, "_scripts",
 			new ScriptsImpl());

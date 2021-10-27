@@ -60,6 +60,7 @@ import com.liferay.expando.kernel.service.ExpandoRowLocalService;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -67,6 +68,7 @@ import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
@@ -89,8 +91,10 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.kernel.service.WorkflowInstanceLinkLocalService;
 import com.liferay.portal.kernel.settings.GroupServiceSettingsLocator;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StackTraceUtil;
@@ -101,6 +105,9 @@ import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.kernel.workflow.WorkflowTask;
 import com.liferay.portal.kernel.workflow.WorkflowTaskManager;
 import com.liferay.portal.spring.extender.service.ServiceReference;
+import com.liferay.portal.vulcan.dto.converter.DTOConverter;
+import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
+import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 
 import java.io.Serializable;
 
@@ -114,7 +121,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -434,6 +440,7 @@ public class CommerceOrderLocalServiceImpl
 
 	@Indexable(type = IndexableType.DELETE)
 	@Override
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
 	public CommerceOrder deleteCommerceOrder(CommerceOrder commerceOrder)
 		throws PortalException {
 
@@ -1556,9 +1563,7 @@ public class CommerceOrderLocalServiceImpl
 
 		// Messaging
 
-		sendPaymentStatusMessage(
-			commerceOrder.getCommerceOrderId(),
-			commerceOrder.getPaymentStatus(), previousPaymentStatus);
+		sendPaymentStatusMessage(commerceOrder, previousPaymentStatus);
 
 		return commerceOrder;
 	}
@@ -1582,9 +1587,7 @@ public class CommerceOrderLocalServiceImpl
 
 		// Messaging
 
-		sendPaymentStatusMessage(
-			commerceOrder.getCommerceOrderId(),
-			commerceOrder.getPaymentStatus(), previousPaymentStatus);
+		sendPaymentStatusMessage(commerceOrder, previousPaymentStatus);
 
 		return commerceOrder;
 	}
@@ -1899,30 +1902,41 @@ public class CommerceOrderLocalServiceImpl
 	}
 
 	protected void sendPaymentStatusMessage(
-		long commerceOrderId, int paymentStatus, int previousPaymentStatus) {
+		CommerceOrder commerceOrder, int previousPaymentStatus) {
 
 		TransactionCommitCallbackUtil.registerCallback(
-			new Callable<Void>() {
+			() -> {
+				Message message = new Message();
 
-				@Override
-				public Void call() throws Exception {
-					Message message = new Message();
+				message.setPayload(
+					JSONUtil.put(
+						"commerceOrder",
+						() -> {
+							DTOConverter<?, ?> dtoConverter =
+								_dtoConverterRegistry.getDTOConverter(
+									CommerceOrder.class.getName());
 
-					message.setPayload(
-						JSONUtil.put(
-							"commerceOrderId", commerceOrderId
-						).put(
-							"paymentStatus", paymentStatus
-						).put(
-							"previousPaymentStatus", previousPaymentStatus
-						));
+							Object object = dtoConverter.toDTO(
+								new DefaultDTOConverterContext(
+									_dtoConverterRegistry,
+									commerceOrder.getCommerceOrderId(),
+									LocaleUtil.getSiteDefault(), null, null));
 
-					MessageBusUtil.sendMessage(
-						DestinationNames.COMMERCE_PAYMENT_STATUS, message);
+							return JSONFactoryUtil.createJSONObject(
+								object.toString());
+						}
+					).put(
+						"commerceOrderId", commerceOrder.getCommerceOrderId()
+					).put(
+						"paymentStatus", commerceOrder.getPaymentStatus()
+					).put(
+						"previousPaymentStatus", previousPaymentStatus
+					));
 
-					return null;
-				}
+				MessageBusUtil.sendMessage(
+					DestinationNames.COMMERCE_PAYMENT_STATUS, message);
 
+				return null;
 			});
 	}
 
@@ -2332,6 +2346,9 @@ public class CommerceOrderLocalServiceImpl
 
 	@ServiceReference(type = ConfigurationProvider.class)
 	private ConfigurationProvider _configurationProvider;
+
+	@ServiceReference(type = DTOConverterRegistry.class)
+	private DTOConverterRegistry _dtoConverterRegistry;
 
 	@ServiceReference(type = ExpandoRowLocalService.class)
 	private ExpandoRowLocalService _expandoRowLocalService;

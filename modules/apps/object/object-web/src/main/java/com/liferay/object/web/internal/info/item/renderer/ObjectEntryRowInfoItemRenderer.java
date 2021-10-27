@@ -16,6 +16,8 @@ package com.liferay.object.web.internal.info.item.renderer;
 
 import com.liferay.asset.display.page.portlet.AssetDisplayPageFriendlyURLProvider;
 import com.liferay.info.item.renderer.InfoItemRenderer;
+import com.liferay.list.type.model.ListTypeEntry;
+import com.liferay.list.type.service.ListTypeEntryLocalService;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.ObjectField;
 import com.liferay.object.service.ObjectDefinitionLocalService;
@@ -25,7 +27,9 @@ import com.liferay.object.web.internal.constants.ObjectWebKeys;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
 
@@ -35,6 +39,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,6 +57,7 @@ public class ObjectEntryRowInfoItemRenderer
 
 	public ObjectEntryRowInfoItemRenderer(
 		AssetDisplayPageFriendlyURLProvider assetDisplayPageFriendlyURLProvider,
+		ListTypeEntryLocalService listTypeEntryLocalService,
 		ObjectDefinitionLocalService objectDefinitionLocalService,
 		ObjectEntryLocalService objectEntryLocalService,
 		ObjectFieldLocalService objectFieldLocalService,
@@ -59,6 +65,7 @@ public class ObjectEntryRowInfoItemRenderer
 
 		_assetDisplayPageFriendlyURLProvider =
 			assetDisplayPageFriendlyURLProvider;
+		_listTypeEntryLocalService = listTypeEntryLocalService;
 		_objectDefinitionLocalService = objectDefinitionLocalService;
 		_objectEntryLocalService = objectEntryLocalService;
 		_objectFieldLocalService = objectFieldLocalService;
@@ -110,29 +117,70 @@ public class ObjectEntryRowInfoItemRenderer
 		Stream<Map.Entry<String, Serializable>> entriesStream =
 			entries.stream();
 
-		List<String> objectFieldNames = ListUtil.toList(
+		List<ObjectField> objectFields =
 			_objectFieldLocalService.getObjectFields(
-				objectEntry.getObjectDefinitionId()),
-			ObjectField::getName);
+				objectEntry.getObjectDefinitionId());
+
+		Stream<ObjectField> objectFieldsStream = objectFields.stream();
+
+		Map<String, ObjectField> objectFieldsMap = objectFieldsStream.collect(
+			Collectors.toMap(ObjectField::getName, Function.identity()));
 
 		return entriesStream.filter(
-			entry -> objectFieldNames.contains(entry.getKey())
+			entry -> objectFieldsMap.containsKey(entry.getKey())
 		).sorted(
 			Map.Entry.comparingByKey()
 		).collect(
 			Collectors.toMap(
 				Map.Entry::getKey,
-				entry -> Optional.ofNullable(
-					entry.getValue()
-				).orElse(
-					StringPool.BLANK
-				),
+				entry -> {
+					ObjectField objectField = objectFieldsMap.get(
+						entry.getKey());
+
+					if (objectField.getListTypeDefinitionId() != 0) {
+						ServiceContext serviceContext =
+							ServiceContextThreadLocal.getServiceContext();
+
+						ListTypeEntry listTypeEntry =
+							_listTypeEntryLocalService.fetchListTypeEntry(
+								objectField.getListTypeDefinitionId(),
+								(String)entry.getValue());
+
+						return listTypeEntry.getName(
+							serviceContext.getLocale());
+					}
+					else if (Validator.isNull(
+								objectField.getRelationshipType())) {
+
+						return Optional.ofNullable(
+							entry.getValue()
+						).orElse(
+							StringPool.BLANK
+						);
+					}
+
+					ObjectEntry relatedObjectEntry =
+						_objectEntryLocalService.fetchObjectEntry(
+							(Long)values.get(objectField.getName()));
+
+					if (relatedObjectEntry == null) {
+						return StringPool.BLANK;
+					}
+
+					try {
+						return relatedObjectEntry.getTitleValue();
+					}
+					catch (PortalException portalException) {
+						throw new RuntimeException(portalException);
+					}
+				},
 				(oldValue, newValue) -> oldValue, LinkedHashMap::new)
 		);
 	}
 
 	private final AssetDisplayPageFriendlyURLProvider
 		_assetDisplayPageFriendlyURLProvider;
+	private final ListTypeEntryLocalService _listTypeEntryLocalService;
 	private final ObjectDefinitionLocalService _objectDefinitionLocalService;
 	private final ObjectEntryLocalService _objectEntryLocalService;
 	private final ObjectFieldLocalService _objectFieldLocalService;

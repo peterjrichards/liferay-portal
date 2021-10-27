@@ -150,7 +150,7 @@ public class OrderDTOConverter implements DTOConverter<CommerceOrder, Order> {
 					commerceShippingMethod);
 				shippingOption = commerceOrder.getShippingOptionName();
 				transactionId = commerceOrder.getTransactionId();
-				workflowStatusInfo = _getWorkflowStatusInfo(
+				workflowStatusInfo = _toStatus(
 					commerceOrder.getStatus(), commerceOrderWorkflowStatusLabel,
 					commerceOrderWorkflowStatusLabelI18n);
 			}
@@ -274,19 +274,6 @@ public class OrderDTOConverter implements DTOConverter<CommerceOrder, Order> {
 		}
 
 		return commerceShippingMethod.getEngineKey();
-	}
-
-	private Status _getWorkflowStatusInfo(
-		int orderStatus, String commerceOrderWorkflowStatusLabel,
-		String commerceOrderWorkflowStatusLabelI18n) {
-
-		return new Status() {
-			{
-				code = orderStatus;
-				label = commerceOrderWorkflowStatusLabel;
-				label_i18n = commerceOrderWorkflowStatusLabelI18n;
-			}
-		};
 	}
 
 	private void _setOrderShipping(
@@ -543,6 +530,19 @@ public class OrderDTOConverter implements DTOConverter<CommerceOrder, Order> {
 					commerceOrder.
 						getTotalDiscountPercentageLevel4WithTaxAmount()));
 		}
+	}
+
+	private Status _toStatus(
+		int orderStatus, String commerceOrderWorkflowStatusLabel,
+		String commerceOrderWorkflowStatusLabelI18n) {
+
+		return new Status() {
+			{
+				code = orderStatus;
+				label = commerceOrderWorkflowStatusLabel;
+				label_i18n = commerceOrderWorkflowStatusLabelI18n;
+			}
+		};
 	}
 
 	@Reference

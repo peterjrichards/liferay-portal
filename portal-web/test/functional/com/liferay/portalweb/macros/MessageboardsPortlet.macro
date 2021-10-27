@@ -31,12 +31,8 @@ definition {
 		PortletEntry.save();
 	}
 
-	macro configureMessageAddedEmailCP {
-		Navigator.openURL();
-
-		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
-			portlet = "Message Boards");
+	macro configureMessageAddedEmail {
+		MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "${siteURLKey}");
 
 		Click(locator1 = "Portlet#OPTIONS_ICON");
 
@@ -90,12 +86,8 @@ definition {
 		PortletEntry.save();
 	}
 
-	macro configureMessageUpdatedEmailCP {
-		Navigator.openURL();
-
-		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
-			portlet = "Message Boards");
+	macro configureMessageUpdatedEmail {
+		MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "${siteURLKey}");
 
 		Click(locator1 = "Portlet#OPTIONS_ICON");
 
@@ -205,10 +197,7 @@ definition {
 	}
 
 	macro viewBannedUserCP {
-		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
-			portlet = "Message Boards",
-			site = "${site}");
+		MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "${siteURLKey}");
 
 		AssertClick(
 			locator1 = "MessageBoards#NAVIGATION_BANNED_USERS",
@@ -242,11 +231,7 @@ definition {
 	}
 
 	macro viewDefaultEmailFromCP {
-		Navigator.openURL();
-
-		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
-			portlet = "Message Boards");
+		MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "${siteURLKey}");
 
 		Click(locator1 = "Portlet#OPTIONS_ICON");
 

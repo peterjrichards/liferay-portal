@@ -15,6 +15,7 @@
 package com.liferay.portlet.documentlibrary.service.impl;
 
 import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.document.library.kernel.exception.DuplicateFileEntryException;
 import com.liferay.document.library.kernel.exception.DuplicateFileEntryExternalReferenceCodeException;
 import com.liferay.document.library.kernel.exception.DuplicateFolderNameException;
@@ -43,6 +44,7 @@ import com.liferay.document.library.kernel.service.DLFolderLocalService;
 import com.liferay.document.library.kernel.service.persistence.DLFileEntryMetadataPersistence;
 import com.liferay.document.library.kernel.service.persistence.DLFileVersionPersistence;
 import com.liferay.document.library.kernel.service.persistence.DLFolderPersistence;
+import com.liferay.document.library.kernel.store.DLStoreRequest;
 import com.liferay.document.library.kernel.store.DLStoreUtil;
 import com.liferay.document.library.kernel.util.DL;
 import com.liferay.document.library.kernel.util.DLAppHelperThreadLocal;
@@ -352,15 +354,23 @@ public class DLFileEntryLocalServiceImpl
 
 		// File
 
+		DLStoreRequest dlStoreRequest = DLStoreRequest.builder(
+			user.getCompanyId(), dlFileEntry.getDataRepositoryId(), name
+		).className(
+			dlFileEntry.getModelClassName()
+		).classPK(
+			dlFileEntry.getFileEntryId()
+		).size(
+			dlFileEntry.getSize()
+		).sourceFileName(
+			dlFileEntry.getFileName()
+		).build();
+
 		if (file != null) {
-			DLStoreUtil.addFile(
-				user.getCompanyId(), dlFileEntry.getDataRepositoryId(), name,
-				false, file);
+			DLStoreUtil.addFile(dlStoreRequest, file);
 		}
 		else {
-			DLStoreUtil.addFile(
-				user.getCompanyId(), dlFileEntry.getDataRepositoryId(), name,
-				false, inputStream);
+			DLStoreUtil.addFile(dlStoreRequest, inputStream);
 		}
 
 		return dlFileEntry;
@@ -2482,7 +2492,7 @@ public class DLFileEntryLocalServiceImpl
 		_dlFileEntryMetadataLocalService.deleteFileVersionFileEntryMetadata(
 			dlFileVersion.getFileVersionId());
 
-		assetEntryLocalService.deleteEntry(
+		_assetEntryLocalService.deleteEntry(
 			DLFileEntryConstants.getClassName(), dlFileVersion.getPrimaryKey());
 
 		DLStoreUtil.deleteFile(
@@ -3554,12 +3564,12 @@ public class DLFileEntryLocalServiceImpl
 		// Asset
 
 		AssetEntry latestDLFileVersionAssetEntry =
-			assetEntryLocalService.fetchEntry(
+			_assetEntryLocalService.fetchEntry(
 				DLFileEntryConstants.getClassName(),
 				latestDLFileVersion.getPrimaryKey());
 
 		if (latestDLFileVersionAssetEntry != null) {
-			assetEntryLocalService.updateEntry(
+			_assetEntryLocalService.updateEntry(
 				lastDLFileVersion.getUserId(), lastDLFileVersion.getGroupId(),
 				DLFileEntryConstants.getClassName(),
 				lastDLFileVersion.getPrimaryKey(),
@@ -3637,6 +3647,9 @@ public class DLFileEntryLocalServiceImpl
 		ServiceProxyFactory.newServiceTrackedInstance(
 			ViewCountManager.class, DLFileEntryLocalServiceImpl.class,
 			"_viewCountManager", false, true);
+
+	@BeanReference(type = AssetEntryLocalService.class)
+	private AssetEntryLocalService _assetEntryLocalService;
 
 	@BeanReference(type = ClassNameLocalService.class)
 	private ClassNameLocalService _classNameLocalService;

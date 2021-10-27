@@ -17,7 +17,7 @@
 	</tr>
 	<tr>
 		<td>ARROW_DOWN_ICON</td>
-		<td>//button[contains(@class,'dropdown-toggle btn btn-monospaced btn-outline-borderless btn-outline-secondary')]</td>
+		<td>//div[contains(@class,'dropdown ml-auto')]//button[contains(@class,'dropdown-toggle')]</td>
 		<td></td>
 	</tr>
 	<tr>
@@ -33,6 +33,11 @@
 	<tr>
 		<td>COLUMN_SEARCH_FIELD</td>
 		<td>//div[contains(@class,'dropdown-menu show')]//input[contains(@class,'form-control input-group-inset input-group-inset-after')]</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>DUPLICATED_ENTRY_VALUE</td>
+		<td>(//div[contains(@class,'dnd-tbody')]//div[contains(text(),'${key_entry}')])[2]</td>
 		<td></td>
 	</tr>
 	<tr>
@@ -56,6 +61,21 @@
 		<td></td>
 	</tr>
 	<tr>
+		<td>FIELD_ENTRY_COLUMN</td>
+		<td>//div[contains(@class,'dnd-th')]//button[contains(@class,'btn-sortin')][contains(text(),'${key_fieldLabelName}')]</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>FIELD_LABEL_NAME</td>
+		<td>//label[contains(text(),'${key_fieldLabelName}')]</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>GENERIC_ENTRY_COLUMN</td>
+		<td>//div[contains(@class,'dnd-th')][contains(text(),'${key_fieldLabelName}')]</td>
+		<td></td>
+	</tr>
+	<tr>
 		<td>DELETE_ENTRY_BUTTON</td>
 		<td>//div[contains(@class,'show')]//button[contains(.,'Delete')]</td>
 		<td></td>
@@ -76,6 +96,16 @@
 		<td></td>
 	</tr>
 	<tr>
+		<td>SEARCH_RELATIONSHIP_ENTRY</td>
+		<td>//input[contains(@placeholder,'Search')]</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>SEARCH_RESULT_RELATIONSHIP_ENTRY</td>
+		<td>//button[contains(@class,'dropdown-item')]//span[contains(text(),'${key_entry}')]</td>
+		<td></td>
+	</tr>
+	<tr>
 		<td>SELECT_CUSTOM_OBJECT</td>
 		<td>//div[(@class='table-list-title') and contains (.,'${key_label}')]</td>
 		<td></td>
@@ -84,7 +114,27 @@
 	<td>SORT_FIELD</td>
 	<td>//button[@class='btn-sorting inline-item text-nowrap text-truncate-inline btn btn-sm btn-unstyled' and contains(text(), '${key_sortFieldName}')]</td>
 	<td></td>
-</tr>
+	</tr>
+	<tr>
+		<td>VIEW_ENTRY_BUTTON</td>
+		<td>//div[contains(@class,'show')]//a[contains(.,'View')]</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>VIEW_ENTRY_DETAILS_LABEL</td>
+		<td>//span[(@class='custom-control-label-text') and contains(.,'${key_entryLabel}')] |//label[contains(@class,'ddm-label') and contains(text(),'${key_entryLabel}')]</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>VIEW_ENTRY_DETAILS_VALUE</td>
+		<td>//input[contains(@value, '${key_entryValue}')]</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>ADD_OBJECT_ENTRY</td>
+		<td>//input[@type = 'text']</td>
+		<td></td>
+	</tr>
 </tbody>
 </table>
 </body>

@@ -74,7 +74,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -236,17 +236,10 @@ definition {
 
 		ACUtils.launchDXP();
 
-		task ("Sign in as new user") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "userea@liferay.com",
-				userLoginFullName = "userfn userln");
-		}
-
-		Navigator.gotoSitePage(
+		ACUtils.navigateToSitePageWithUser(
+			emailList = "userea@liferay.com",
 			pageName = "AC Page",
 			siteName = "Site Name");
-
-		Pause(locator1 = "5000");
 
 		ACUtils.launchAC();
 
@@ -273,7 +266,7 @@ definition {
 		}
 
 		task ("View the site page") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -335,25 +328,18 @@ definition {
 		// AC Refactor: data doesn't appear on time
 		// AC Refactor ticket: LRAC-8951
 
+		var interactions = "1,2,3,4,5,6";
+
 		task ("Get site assigned property name") {
 			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
 		}
 
 		task ("Repeatly view the site page as new user 6 times") {
-			var n = "0";
-
-			while ("${n}" != "6") {
-				var n = ${n} + 1;
-
-				User.logoutAndLoginPG(
-					userLoginEmailAddress = "userea@liferay.com",
-					userLoginFullName = "userfn userln");
-
-				Navigator.gotoSitePage(
+			for (var current : list "${interactions}") {
+				ACUtils.navigateToSitePageWithUser(
+					emailList = "userea@liferay.com",
 					pageName = "AC Page",
 					siteName = "Site Name");
-
-				Pause(locator1 = "5000");
 
 				UserBar.signOut();
 
@@ -422,20 +408,15 @@ definition {
 			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
 		}
 
-		task ("Sign in as new user") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "userea@liferay.com",
-				userLoginFullName = "userfn userln");
-		}
-
-		task ("View the site page") {
-			Navigator.gotoSitePage(
+		task ("View the site page with new user") {
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "userea@liferay.com",
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
-		task ("Wait for sending requests") {
-			Pause(locator1 = "5000");
+		task ("Close Sessions") {
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Switch to new property in AC") {
@@ -464,20 +445,15 @@ definition {
 			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
 		}
 
-		task ("Sign in as new user") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "userea@liferay.com",
-				userLoginFullName = "userfn userln");
-		}
-
-		task ("View the site page") {
-			Navigator.gotoSitePage(
+		task ("View the site page with new user") {
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "userea@liferay.com",
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
-		task ("Wait for sending requests") {
-			Pause(locator1 = "5000");
+		task ("Close Sessions") {
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Switch to new property in AC") {
@@ -522,20 +498,15 @@ definition {
 			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
 		}
 
-		task ("Sign in as new user") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "userea@liferay.com",
-				userLoginFullName = "userfn userln");
-		}
-
-		task ("View the site page") {
-			Navigator.gotoSitePage(
+		task ("View the site page with new user") {
+			ACUtils.navigateToSitePageWithUser(
+				emailList = "userea@liferay.com",
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
 
-		task ("Wait for sending requests") {
-			Pause(locator1 = "5000");
+		task ("Close Sessions") {
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Switch to new property in AC") {

@@ -1,18 +1,20 @@
 @component-name = "portal-wcm"
 definition {
 
-	property osgi.module.configuration.file.names = "com.liferay.template.web.internal.configuration.FFTemplateConfiguration.config";
-	property osgi.module.configurations = "informationTemplatesEnabled=B&quot;true&quot;";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Content and Application Templates";
 
 	setUp {
-		TestCase.setUpPortalInstance();
+		task ("Set up instance and sign in") {
+			TestCase.setUpPortalInstance();
 
-		User.firstLoginPG();
+			User.firstLoginPG();
+		}
 
-		JSONGroup.addGroup(groupName = "Test Site Name");
+		task ("Add a site") {
+			JSONGroup.addGroup(groupName = "Test Site Name");
+		}
 	}
 
 	tearDown {
@@ -32,14 +34,14 @@ definition {
 	@priority = "5"
 	@uitest
 	test AddInformationTemplate {
+		property portal.acceptance = "true";
+
 		task ("Navigate to the Information Templates admin") {
 			ApplicationsMenu.gotoSite(site = "Test Site Name");
 
 			ProductMenu.gotoPortlet(
 				category = "Design",
 				portlet = "Templates");
-
-			Navigator.gotoNavTab(navTab = "Information Templates");
 		}
 
 		task ("Add an information template for Web Content Article and Basic Web Content") {
@@ -318,6 +320,8 @@ definition {
 	@priority = "5"
 	@uitest
 	test EditInformationTemplate {
+		property portal.acceptance = "true";
+
 		task ("Add an information template for Category") {
 			InformationTemplates.openInformationTemplatesAdmin(siteURLKey = "test-site-name");
 
@@ -390,6 +394,8 @@ definition {
 	@description = "This is a use case for LPS-137569. The page creator could use information template in Content Display."
 	@priority = "5"
 	test MapToContentDisplay {
+		property portal.acceptance = "true";
+
 		task ("Add a web content") {
 			JSONWebcontent.addWebContent(
 				content = "Web Content Content",
@@ -526,12 +532,11 @@ definition {
 		}
 
 		task ("View the title and content of web content are shown") {
-			for (var text : list "Title,Content") {
-				AssertTextEquals.assertPartialText(
-					key_fragmentName = "Content Display",
-					locator1 = "Fragment#FRAGMENT_BODY",
-					value1 = "Web Content ${text}");
-			}
+			AssertTextEquals(
+				index = "1",
+				key_fragmentName = "Content Display",
+				locator1 = "Fragment#FRAGMENT_CONTENT",
+				value1 = "Web Content Title Web Content Content");
 		}
 
 		task ("Select the blogs entry and information template in Content Display") {
@@ -544,8 +549,9 @@ definition {
 
 		task ("View the title and description of blogs are shown") {
 			AssertTextEquals(
+				index = "1",
 				key_fragmentName = "Content Display",
-				locator1 = "Fragment#FRAGMENT_BODY",
+				locator1 = "Fragment#FRAGMENT_CONTENT",
 				value1 = "Blogs Entry Title Blogs Entry Description");
 		}
 
@@ -559,8 +565,9 @@ definition {
 
 		task ("View the title and author name of documents are shown") {
 			AssertTextEquals(
+				index = "1",
 				key_fragmentName = "Content Display",
-				locator1 = "Fragment#FRAGMENT_BODY",
+				locator1 = "Fragment#FRAGMENT_CONTENT",
 				value1 = "Document Title Test Test");
 		}
 
@@ -574,8 +581,9 @@ definition {
 
 		task ("View the category and vocabulary names are shown") {
 			AssertTextEquals(
+				index = "1",
 				key_fragmentName = "Content Display",
-				locator1 = "Fragment#FRAGMENT_BODY",
+				locator1 = "Fragment#FRAGMENT_CONTENT",
 				value1 = "Category Name Vocabulary Name");
 		}
 	}
@@ -583,6 +591,8 @@ definition {
 	@description = "This is a use case for LPS-137569. The page creator could use information template in Collection Display."
 	@priority = "5"
 	test MapToEditableFieldInCollectionDisplay {
+		property portal.acceptance = "true";
+
 		task ("Add a web content") {
 			JSONWebcontent.addWebContent(
 				content = "Web Content Content",
@@ -701,12 +711,10 @@ definition {
 		}
 
 		task ("View the title and content of web content are shown") {
-			for (var text : list "Title,Content") {
-				AssertTextEquals.assertPartialText(
-					key_fragmentName = "button",
-					locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-					value1 = "Web Content ${text}");
-			}
+			PageEditor.viewFragmentEditableText(
+				editableText = "Web Content Title Web Content Content",
+				fragmentName = "Button",
+				id = "link");
 		}
 
 		task ("Select the manual collection in Collection Display") {
@@ -723,10 +731,10 @@ definition {
 		}
 
 		task ("View the title and description of blogs entry are shown") {
-			AssertTextEquals(
-				key_fragmentName = "button",
-				locator1 = "Fragment#FRAGMENT_BASIC_COMPONENT",
-				value1 = "Blogs Entry Title Blogs Entry Description");
+			PageEditor.viewFragmentEditableText(
+				editableText = "Blogs Entry Title Blogs Entry Description",
+				fragmentName = "Button",
+				id = "link");
 		}
 	}
 

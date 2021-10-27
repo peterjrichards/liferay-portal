@@ -16,8 +16,13 @@ package com.liferay.commerce.order.content.web.internal.portlet;
 
 import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.constants.CommercePortletKeys;
+import com.liferay.commerce.constants.CommerceWebKeys;
 import com.liferay.commerce.model.CommerceOrder;
+import com.liferay.commerce.order.CommerceOrderHttpHelper;
+import com.liferay.commerce.order.CommerceOrderValidatorRegistry;
+import com.liferay.commerce.order.CommerceOrderValidatorResult;
 import com.liferay.commerce.order.content.web.internal.display.context.CommerceOrderContentDisplayContext;
+import com.liferay.commerce.order.importer.type.CommerceOrderImporterTypeRegistry;
 import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelService;
 import com.liferay.commerce.percentage.PercentageFormatter;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
@@ -35,15 +40,21 @@ import com.liferay.portal.kernel.messaging.proxy.ProxyModeThreadLocalCloseable;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.io.IOException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.Portlet;
 import javax.portlet.PortletException;
+import javax.portlet.PortletRequest;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -102,6 +113,7 @@ public class CommerceOpenOrderContentPortlet extends MVCPortlet {
 				commerceOrderContentDisplayContext =
 					new CommerceOrderContentDisplayContext(
 						_commerceAddressService, _commerceChannelLocalService,
+						_commerceOrderImporterTypeRegistry,
 						_commerceOrderNoteService,
 						_commerceOrderPriceCalculation, _commerceOrderService,
 						_commerceOrderTypeService,
@@ -110,6 +122,28 @@ public class CommerceOpenOrderContentPortlet extends MVCPortlet {
 						_portal.getHttpServletRequest(renderRequest),
 						_modelResourcePermission, _percentageFormatter,
 						_portletResourcePermission);
+
+			CommerceOrder commerceOrder = getCommerceOrder(renderRequest);
+
+			if (commerceOrder != null) {
+				List<String> errorMessages = new ArrayList<>();
+
+				List<CommerceOrderValidatorResult>
+					commerceOrderValidatorResults =
+						_commerceOrderValidatorRegistry.validate(
+							renderRequest.getLocale(), commerceOrder);
+
+				for (CommerceOrderValidatorResult commerceOrderValidatorResult :
+						commerceOrderValidatorResults) {
+
+					errorMessages.add(
+						commerceOrderValidatorResult.getLocalizedMessage());
+				}
+
+				renderRequest.setAttribute(
+					CommerceWebKeys.COMMERCE_ORDER_ERROR_MESSAGES,
+					errorMessages);
+			}
 
 			renderRequest.setAttribute(
 				WebKeys.PORTLET_DISPLAY_CONTEXT,
@@ -122,6 +156,26 @@ public class CommerceOpenOrderContentPortlet extends MVCPortlet {
 		super.render(renderRequest, renderResponse);
 	}
 
+	protected CommerceOrder getCommerceOrder(PortletRequest portletRequest)
+		throws PortalException {
+
+		String commerceOrderUuid = ParamUtil.getString(
+			portletRequest, "commerceOrderUuid");
+
+		if (Validator.isNotNull(commerceOrderUuid)) {
+			long groupId =
+				_commerceChannelLocalService.
+					getCommerceChannelGroupIdBySiteGroupId(
+						_portal.getScopeGroupId(portletRequest));
+
+			return _commerceOrderService.getCommerceOrderByUuidAndGroupId(
+				commerceOrderUuid, groupId);
+		}
+
+		return _commerceOrderHttpHelper.getCurrentCommerceOrder(
+			_portal.getHttpServletRequest(portletRequest));
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		CommerceOpenOrderContentPortlet.class);
 
@@ -130,6 +184,13 @@ public class CommerceOpenOrderContentPortlet extends MVCPortlet {
 
 	@Reference
 	private CommerceChannelLocalService _commerceChannelLocalService;
+
+	@Reference
+	private CommerceOrderHttpHelper _commerceOrderHttpHelper;
+
+	@Reference
+	private CommerceOrderImporterTypeRegistry
+		_commerceOrderImporterTypeRegistry;
 
 	@Reference
 	private CommerceOrderNoteService _commerceOrderNoteService;
@@ -142,6 +203,9 @@ public class CommerceOpenOrderContentPortlet extends MVCPortlet {
 
 	@Reference
 	private CommerceOrderTypeService _commerceOrderTypeService;
+
+	@Reference
+	private CommerceOrderValidatorRegistry _commerceOrderValidatorRegistry;
 
 	@Reference
 	private CommercePaymentMethodGroupRelService

@@ -23,6 +23,7 @@ import com.liferay.portal.search.geolocation.GeoBuilders;
 import com.liferay.portal.search.highlight.FieldConfigBuilderFactory;
 import com.liferay.portal.search.highlight.HighlightBuilderFactory;
 import com.liferay.portal.search.query.Queries;
+import com.liferay.portal.search.rescore.RescoreBuilderFactory;
 import com.liferay.portal.search.script.Scripts;
 import com.liferay.portal.search.searcher.SearchRequestBuilder;
 import com.liferay.portal.search.significance.SignificanceHeuristics;
@@ -93,7 +94,8 @@ public class SXPBlueprintSearchRequestEnhancerImpl
 			new GeneralSXPSearchRequestBodyContributor(),
 			new HighlightSXPSearchRequestBodyContributor(highlightConverter),
 			new QuerySXPSearchRequestBodyContributor(
-				_complexQueryPartBuilderFactory, _queries),
+				_complexQueryPartBuilderFactory, queryConverter,
+				_rescoreBuilderFactory),
 			new SuggestSXPSearchRequestBodyContributor(),
 			new SortSXPSearchRequestBodyContributor(
 				_geoBuilders, queryConverter, scriptConverter, _sorts));
@@ -116,20 +118,37 @@ public class SXPBlueprintSearchRequestEnhancerImpl
 			return;
 		}
 
+		RuntimeException runtimeException = new RuntimeException();
+
 		for (SXPSearchRequestBodyContributor sxpSearchRequestBodyContributor :
 				_sxpSearchRequestBodyContributors) {
 
-			if (!ArrayUtil.contains(
+			if (ArrayUtil.contains(
 					names, sxpSearchRequestBodyContributor.getName())) {
 
-				sxpSearchRequestBodyContributor.contribute(
-					searchRequestBuilder, sxpBlueprint);
+				continue;
 			}
+
+			try {
+				sxpSearchRequestBodyContributor.contribute(
+					searchRequestBuilder, sxpBlueprint, sxpParameterData);
+			}
+			catch (Exception exception) {
+				runtimeException.addSuppressed(exception);
+			}
+		}
+
+		if (ArrayUtil.isNotEmpty(runtimeException.getSuppressed())) {
+			throw runtimeException;
 		}
 	}
 
 	private void _enhance(
 		SearchRequestBuilder searchRequestBuilder, SXPBlueprint sxpBlueprint) {
+
+		if (sxpBlueprint.getConfiguration() == null) {
+			return;
+		}
 
 		SXPParameterData sxpParameterData = _sxpParameterDataCreator.create(
 			searchRequestBuilder.withSearchContextGet(
@@ -209,6 +228,9 @@ public class SXPBlueprintSearchRequestEnhancerImpl
 
 	@Reference
 	private Queries _queries;
+
+	@Reference
+	private RescoreBuilderFactory _rescoreBuilderFactory;
 
 	@Reference
 	private Scripts _scripts;

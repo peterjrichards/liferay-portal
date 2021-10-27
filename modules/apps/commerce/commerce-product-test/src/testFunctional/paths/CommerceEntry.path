@@ -540,6 +540,16 @@
 	<td>//input[@id="_com_liferay_commerce_product_definitions_web_internal_portlet_CPDefinitionsPortlet_fileEntryId"]</td>
 	<td></td>
 </tr>
+<tr>
+	<td>COMMERCE_SEARCH_RESULTS_TEMPLATE_MENU_ITEM</td>
+	<td>xpath=((//div | //li)[contains(@class,'open') or contains(@class,'show')]//*[normalize-space(text())="Search Results Template"])[2]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ENTRY_MENU_DROPDOWN_BUTTON</td>
+	<td>//a[contains(.,'${key_entryName}')]/../../..//button[contains(@class, 'dropdown-toggle') and contains(@class, 'btn-unstyled') and contains(@class, 'component-action')]</td>
+	<td></td>
+</tr>
 <!--CATALOGS-->
 <tr>
 	<td>CATALOGS_FORM</td>

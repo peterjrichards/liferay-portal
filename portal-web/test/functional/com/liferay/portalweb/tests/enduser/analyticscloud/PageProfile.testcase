@@ -35,15 +35,6 @@ definition {
 		ACUtils.tearDownAC();
 	}
 
-	@description = "Feature ID: Legacy | Automation ID: LRAC-8113 | Test Summary: Assert clicking a blog in the blogs list navigates to the blogs overview page"
-	@ignore = "true"
-	@priority = "5"
-	test CanNavigatesToBlogsOverviewPage {
-
-		// TODO LRAC-8113 CanNavigatesToBlogsOverviewPage pending implementation
-
-	}
-
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8112 | Test Summary: Assert clicking on a page in the pages lists navigates to the page profile"
 	@priority = "5"
 	test ClickOnPageInPagesListsNavigatesToPageProfile {
@@ -57,17 +48,15 @@ definition {
 		}
 
 		task ("View the blog") {
-			Navigator.gotoSitePage(
+			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
-
-			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 		}
 
 		task ("Close sessions") {
-			ACUtils.closeAllSessions();
-
-			Pause(locator1 = "30000");
+			ACUtils.closeAllSessionsAndWait();
 		}
 
 		task ("Navigate to AC workspace") {

@@ -108,14 +108,21 @@ public class CTDocumentServlet extends HttpServlet {
 
 		long ctCollectionId = ctCollection.getCtCollectionId();
 
-		if (ctCollection.getStatus() == WorkflowConstants.STATUS_APPROVED) {
-			if (CTConstants.TYPE_BEFORE.equals(type)) {
-				ctCollectionId = CTConstants.CT_COLLECTION_ID_PRODUCTION;
-			}
-			else {
-				ctCollectionId = _ctEntryLocalService.getCTRowCTCollectionId(
-					ctEntry);
-			}
+		if (CTConstants.TYPE_AFTER.equals(type) &&
+			(ctCollection.getStatus() == WorkflowConstants.STATUS_APPROVED)) {
+
+			ctCollectionId = _ctEntryLocalService.getCTRowCTCollectionId(
+				ctEntry);
+		}
+		else if (CTConstants.TYPE_BEFORE.equals(type) &&
+				 (ctCollection.getStatus() !=
+					 WorkflowConstants.STATUS_APPROVED)) {
+
+			ctCollectionId = CTConstants.CT_COLLECTION_ID_PRODUCTION;
+		}
+		else if (CTConstants.TYPE_LATEST.equals(type)) {
+			ctCollectionId = _ctDisplayRendererRegistry.getCtCollectionId(
+				ctCollection, ctEntry);
 		}
 
 		CTSQLModeThreadLocal.CTSQLMode ctSQLMode =
@@ -128,6 +135,47 @@ public class CTDocumentServlet extends HttpServlet {
 		if (ctModel == null) {
 			throw new NoSuchModelException(
 				"ctEntryId = " + ctEntry.getCtEntryId());
+		}
+
+		if (CTConstants.TYPE_LATEST.equals(type)) {
+			if (ctEntry.getChangeType() ==
+					CTConstants.CT_CHANGE_TYPE_DELETION) {
+
+				ctCollectionId = ctCollection.getCtCollectionId();
+
+				if (ctCollection.getStatus() ==
+						WorkflowConstants.STATUS_APPROVED) {
+
+					ctCollectionId =
+						_ctEntryLocalService.getCTRowCTCollectionId(ctEntry);
+				}
+
+				ctSQLMode = CTSQLModeThreadLocal.CTSQLMode.DEFAULT;
+			}
+			else {
+				ctCollectionId = CTConstants.CT_COLLECTION_ID_PRODUCTION;
+
+				if (ctCollection.getStatus() ==
+						WorkflowConstants.STATUS_APPROVED) {
+
+					ctCollectionId = ctEntry.getCtCollectionId();
+				}
+
+				ctSQLMode = _ctDisplayRendererRegistry.getCTSQLMode(
+					ctCollectionId, ctEntry);
+			}
+
+			try (SafeCloseable safeCloseable1 =
+					CTSQLModeThreadLocal.setCTSQLModeWithSafeCloseable(
+						ctSQLMode);
+				SafeCloseable safeCloseable2 =
+					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
+						ctCollectionId)) {
+
+				ctModel = ctDisplayRenderer.fetchLatestVersionedModel(ctModel);
+
+				return ctDisplayRenderer.getDownloadInputStream(ctModel, key);
+			}
 		}
 
 		try (SafeCloseable safeCloseable1 =

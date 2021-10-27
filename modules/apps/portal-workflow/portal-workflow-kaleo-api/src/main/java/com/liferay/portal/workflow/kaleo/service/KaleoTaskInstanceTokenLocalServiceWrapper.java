@@ -773,6 +773,7 @@ public class KaleoTaskInstanceTokenLocalServiceWrapper
 					Long[] assigneeClassPKs, java.util.Date dueDateGT,
 					java.util.Date dueDateLT, Boolean completed,
 					Long kaleoDefinitionId, Long[] kaleoInstanceIds,
+					boolean searchByActiveWorkflowHandlers,
 					Boolean searchByUserRoles, boolean andOperator, int start,
 					int end,
 					com.liferay.portal.kernel.util.OrderByComparator
@@ -787,8 +788,8 @@ public class KaleoTaskInstanceTokenLocalServiceWrapper
 				assetTitle, taskNames, assetTypes, assetPrimaryKeys,
 				assigneeClassName, assigneeClassPKs, dueDateGT, dueDateLT,
 				completed, kaleoDefinitionId, kaleoInstanceIds,
-				searchByUserRoles, andOperator, start, end, orderByComparator,
-				serviceContext);
+				searchByActiveWorkflowHandlers, searchByUserRoles, andOperator,
+				start, end, orderByComparator, serviceContext);
 	}
 
 	@Override
